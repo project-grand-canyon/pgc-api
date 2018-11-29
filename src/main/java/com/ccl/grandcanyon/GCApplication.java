@@ -15,7 +15,7 @@ public class GCApplication extends ResourceConfig {
 
     register(Callers.class);
     register(JacksonJsonProvider.class);
-    register(SQLExceptionMapper.class);
+    register(JSONExceptionMapper.class);
   }
 
 }

@@ -21,26 +21,22 @@ import java.util.List;
 public class Callers {
 
   private static final String SQL_SELECT_ALL = "SELECT * FROM callers";
-  private static final String SQL_CREATE_CALLER;
+  private static final String SQL_CREATE_CALLER =
+      "INSERT INTO callers (" + Caller.FIRST_NAME +
+          ", " +
+          Caller.LAST_NAME +
+          ", " +
+          Caller.CONTACT_METHOD +
+          ", " +
+          Caller.PHONE +
+          ", " +
+          Caller.EMAIL +
+          ", " +
+          Caller.DISTRICT_ID +
+          ", " +
+          Caller.ZIPCODE +
+          ") VALUES (?, ?, ?, ?, ?, ?, ?)";
 
-  static {
-    StringBuilder s = new StringBuilder("INSERT INTO callers (");
-    s.append(Caller.FIRST_NAME);
-    s.append(", ");
-    s.append(Caller.LAST_NAME);
-    s.append(", ");
-    s.append(Caller.CONTACT_METHOD);
-    s.append(", ");
-    s.append(Caller.PHONE);
-    s.append(", ");
-    s.append(Caller.EMAIL);
-    s.append(", ");
-    s.append(Caller.DISTRICT_ID);
-    s.append(", ");
-    s.append(Caller.ZIPCODE);
-    s.append(") VALUES (?, ?, ?, ?, ?, ?, ?)");
-    SQL_CREATE_CALLER = s.toString();
-  }
 
   @Context
   ServletContext context;
@@ -92,24 +88,34 @@ public class Callers {
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  public Response getCallers() {
+  public Response getCallers() throws SQLException {
 
-    Response response;
     List<Caller> callers = new ArrayList<>();
-    try {
-      Connection conn = SQLHelper.getInstance().getConnection();
-      ResultSet rs = conn.createStatement().executeQuery("SELECT * FROM callers");
-      while (rs.next()) {
-        callers.add(new Caller(rs));
-      }
-      response = Response.ok(callers, MediaType.APPLICATION_JSON_TYPE).build();
-    }
-    catch (SQLException e) {
-      response = Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
-          e.getMessage()).build();
-    }
 
-    return response;
+    Connection conn = SQLHelper.getInstance().getConnection();
+    ResultSet rs = conn.createStatement().executeQuery(SQL_SELECT_ALL);
+    while (rs.next()) {
+      callers.add(new Caller(rs));
+    }
+    return Response.ok(callers, MediaType.APPLICATION_JSON_TYPE).build();
   }
 
+  @GET
+  @Path("{callerId}")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response getById(@PathParam("callerId") String callerId) throws SQLException {
+
+    Connection conn = SQLHelper.getInstance().getConnection();
+
+    StringBuilder whereClause = new StringBuilder(" WHERE caller_id = '");
+    whereClause.append(callerId);
+    whereClause.append("'");
+    ResultSet rs = conn.prepareStatement(SQL_SELECT_ALL + whereClause).executeQuery();
+    if (!rs.next()) {
+      throw new NotFoundException("No caller found with ID '" + callerId + "'");
+    }
+    return Response.ok(new Caller(rs)).build();
+  }
 }
+
+
