@@ -20,26 +20,30 @@ import java.util.List;
 @Path("/callers")
 public class Callers {
 
-  private static final String SQL_SELECT_ALL = "SELECT * FROM callers";
+  private static final String SQL_SELECT_CALLER = "SELECT * FROM callers";
+
   private static final String SQL_CREATE_CALLER =
-      "INSERT INTO callers (" + Caller.FIRST_NAME +
-          ", " +
-          Caller.LAST_NAME +
-          ", " +
-          Caller.CONTACT_METHOD +
-          ", " +
-          Caller.PHONE +
-          ", " +
-          Caller.EMAIL +
-          ", " +
-          Caller.DISTRICT_ID +
-          ", " +
+      "INSERT INTO callers (" +
+          Caller.FIRST_NAME + ", " +
+          Caller.LAST_NAME + ", " +
+          Caller.CONTACT_METHOD + ", " +
+          Caller.PHONE + ", " +
+          Caller.EMAIL + ", " +
+          Caller.DISTRICT_ID + ", " +
           Caller.ZIPCODE +
           ") VALUES (?, ?, ?, ?, ?, ?, ?)";
 
+  private static final String SQL_UPDATE_CALLER =
+      "UPDATE callers SET " +
+          Caller.FIRST_NAME + " = ?, " +
+          Caller.LAST_NAME + " = ?, " +
+          Caller.CONTACT_METHOD + " = ?, " +
+          Caller.PHONE + " = ?, " +
+          Caller.EMAIL + " = ?, " +
+          Caller.DISTRICT_ID + " = ?, " +
+          Caller.ZIPCODE + " = ? " +
+          "WHERE " + Caller.CALLER_ID + " = ?";
 
-  @Context
-  ServletContext context;
 
   @Context
   UriInfo uriInfo;
@@ -50,72 +54,117 @@ public class Callers {
   public Response createCaller(Caller caller) throws SQLException {
 
     Connection conn = SQLHelper.getInstance().getConnection();
-    PreparedStatement statement = conn.prepareStatement(SQL_CREATE_CALLER);
-    statement.setString(1, caller.getFirstName());
-    statement.setString(2, caller.getLastName());
-    statement.setString(3, caller.getContactMethod().name());
-    statement.setString(4, caller.getPhone());
-    statement.setString(5, caller.getEmail());
-    statement.setInt(6, caller.getDistrictId());
-    statement.setString(7, caller.getZipCode());
-    int result = statement.executeUpdate();
-    if (result != 1) {
-      // "shouldn't happen"
-      throw new ServerErrorException("Insert did not create a new row",
-          Response.Status.INTERNAL_SERVER_ERROR);
+    try {
+      PreparedStatement insertStatement = conn.prepareStatement(SQL_CREATE_CALLER);
+      insertStatement.setString(1, caller.getFirstName());
+      insertStatement.setString(2, caller.getLastName());
+      insertStatement.setString(3, caller.getContactMethod().name());
+      insertStatement.setString(4, caller.getPhone());
+      insertStatement.setString(5, caller.getEmail());
+      insertStatement.setInt(6, caller.getDistrictId());
+      insertStatement.setString(7, caller.getZipCode());
+      insertStatement.executeUpdate();
+
+      // fetch the new Caller and return to client
+      String queryOnColumn;
+      String queryOnValue;
+      if (caller.getContactMethod() == ContactMethod.email) {
+        queryOnColumn = Caller.EMAIL;
+        queryOnValue = caller.getEmail();
+      }
+      else {
+        queryOnColumn = Caller.PHONE;
+        queryOnValue = caller.getPhone();
+      }
+
+      String whereClause = " WHERE " + Caller.CONTACT_METHOD + " = ? AND " + queryOnColumn + " = ?";
+      PreparedStatement fetchStatement = conn.prepareStatement(SQL_SELECT_CALLER + whereClause);
+      fetchStatement.setString(1, caller.getContactMethod().name());
+      fetchStatement.setString(2, queryOnValue);
+
+      ResultSet rs = fetchStatement.executeQuery();
+      rs.first();
+      Caller newCaller = new Caller(rs);
+      URI location = uriInfo.getAbsolutePathBuilder().path(Integer.toString(newCaller.getCallerId())).build();
+      return Response.created(location).entity(newCaller).build();
+    }
+    finally {
+      conn.close();
+    }
+  }
+
+  @PUT
+  @Path("{callerId}")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response updateCaller(
+      @PathParam("callerId") int callerId,
+      Caller caller)
+      throws SQLException {
+
+    Connection conn = SQLHelper.getInstance().getConnection();
+    try {
+      PreparedStatement statement = conn.prepareStatement(SQL_UPDATE_CALLER);
+      statement.setString(1, caller.getFirstName());
+      statement.setString(2, caller.getLastName());
+      statement.setString(3, caller.getContactMethod().name());
+      statement.setString(4, caller.getPhone());
+      statement.setString(5, caller.getEmail());
+      statement.setInt(6, caller.getDistrictId());
+      statement.setString(7, caller.getZipCode());
+      statement.setInt(8, callerId);
+      statement.executeUpdate();
+
+      // no need to re-fetch the object
+      return Response.ok(caller).build();
+    }
+    finally {
+      conn.close();
     }
 
-    // fetch the new Caller and return to client
-    StringBuilder whereClause = new StringBuilder(" WHERE contact_method = '");
-    whereClause.append(caller.getContactMethod().name());
-    whereClause.append("' AND ");
-    if (caller.getContactMethod() == ContactMethod.email) {
-      whereClause.append("email = '");
-      whereClause.append(caller.getEmail());
-    }
-    else {
-      whereClause.append("phone = '");
-      whereClause.append(caller.getPhone());
-    }
-    whereClause.append("'");
 
-    ResultSet rs = conn.prepareStatement(SQL_SELECT_ALL + whereClause).executeQuery();
-    rs.first();
-    Caller newCaller = new Caller(rs);
-    URI location = uriInfo.getAbsolutePathBuilder().path(Integer.toString(newCaller.getCallerId())).build();
-    return Response.created(location).entity(new Caller(rs)).build();
   }
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   public Response getCallers() throws SQLException {
 
-    List<Caller> callers = new ArrayList<>();
-
     Connection conn = SQLHelper.getInstance().getConnection();
-    ResultSet rs = conn.createStatement().executeQuery(SQL_SELECT_ALL);
-    while (rs.next()) {
-      callers.add(new Caller(rs));
+    try {
+      List<Caller> callers = new ArrayList<>();
+      ResultSet rs = conn.createStatement().executeQuery(SQL_SELECT_CALLER);
+      while (rs.next()) {
+        callers.add(new Caller(rs));
+      }
+      return Response.ok(callers).build();
     }
-    return Response.ok(callers, MediaType.APPLICATION_JSON_TYPE).build();
+    finally {
+      conn.close();
+    }
   }
 
   @GET
   @Path("{callerId}")
   @Produces(MediaType.APPLICATION_JSON)
-  public Response getById(@PathParam("callerId") String callerId) throws SQLException {
+  public Response getById(@PathParam("callerId") int callerId)
+      throws SQLException {
 
     Connection conn = SQLHelper.getInstance().getConnection();
-
-    StringBuilder whereClause = new StringBuilder(" WHERE caller_id = '");
-    whereClause.append(callerId);
-    whereClause.append("'");
-    ResultSet rs = conn.prepareStatement(SQL_SELECT_ALL + whereClause).executeQuery();
-    if (!rs.next()) {
-      throw new NotFoundException("No caller found with ID '" + callerId + "'");
+    try {
+      String whereClause = " WHERE " + Caller.CALLER_ID + " = ?";
+      PreparedStatement statement = conn.prepareStatement(SQL_SELECT_CALLER + whereClause);
+      statement.setInt(1, callerId);
+      ResultSet rs = statement.executeQuery();
+      if (!rs.next()) {
+        throw new NotFoundException("No caller found with ID '" + callerId + "'");
+      }
+      return Response.ok(new Caller(rs)).build();
     }
-    return Response.ok(new Caller(rs)).build();
+    finally {
+      conn.close();
+    }
   }
+
 }
 
 

@@ -1,6 +1,17 @@
 package com.ccl.grandcanyon.types;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 public class District {
+
+  // District table column names
+  public static final String DISTRICT_ID = "district_id";
+  public static final String STATE = "state";
+  public static final String DISTRICT_NUMBER = "district_number";
+  public static final String REPRESENTATIVE = "representative";
+  public static final String INFO = "info";
+
 
   private int districtId;
   private String state;
@@ -8,6 +19,20 @@ public class District {
   private String representative;
   private String info;
 
+  /**
+   * Create District object from SQL result set
+   * @param rs
+   * @throws SQLException
+   */
+  public District(ResultSet rs) throws SQLException {
+    this.districtId = rs.getInt(DISTRICT_ID);
+    this.state = rs.getString(STATE);
+    this.number = rs.getInt(DISTRICT_NUMBER);
+    this.representative = rs.getString(REPRESENTATIVE);
+    this.info = rs.getString(INFO);
+  }
+
+  // default, for JSON
   public District() {
   }
 

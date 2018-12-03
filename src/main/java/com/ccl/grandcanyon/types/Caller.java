@@ -32,6 +32,11 @@ public class Caller {
   private Timestamp created;
   private Timestamp lastModified;
 
+  /**
+   * Create caller object from SQL result set
+   * @param rs
+   * @throws SQLException
+   */
   public Caller(ResultSet rs) throws SQLException {
     callerId = rs.getInt(CALLER_ID);
     firstName = rs.getString(FIRST_NAME);

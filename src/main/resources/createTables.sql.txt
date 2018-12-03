@@ -1,8 +1,11 @@
+// For now, this is just a record of commands used to create the database tables
+
 CREATE TABLE districts (district_id INT NOT NULL AUTO_INCREMENT,
 state VARCHAR(2) NOT NULL,
 district_number INT NOT NULL,
 representative VARCHAR(128),
 info VARCHAR(512),
+UNIQUE (state, district_number),
 PRIMARY KEY (district_id) )
 
 CREATE TABLE callers (caller_id INT NOT NULL AUTO_INCREMENT,
