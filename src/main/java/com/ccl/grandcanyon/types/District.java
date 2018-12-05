@@ -2,8 +2,9 @@ package com.ccl.grandcanyon.types;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 
-public class District {
+public class District extends GCBase {
 
   // District table column names
   public static final String DISTRICT_ID = "district_id";
@@ -25,6 +26,7 @@ public class District {
    * @throws SQLException
    */
   public District(ResultSet rs) throws SQLException {
+    super(rs);
     this.districtId = rs.getInt(DISTRICT_ID);
     this.state = rs.getString(STATE);
     this.number = rs.getInt(DISTRICT_NUMBER);

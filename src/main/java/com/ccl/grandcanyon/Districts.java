@@ -90,8 +90,7 @@ public class Districts {
       statement.setInt(5, districtId);
       statement.executeUpdate();
 
-      // no need to re-fetch the district
-      return Response.ok(district).build();
+      return Response.ok(retrieveById(conn, districtId)).build();
     }
     finally {
       conn.close();
@@ -126,18 +125,28 @@ public class Districts {
 
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
-      String whereClause = " WHERE " + District.DISTRICT_ID + " = ?";
-      PreparedStatement statement = conn.prepareStatement(SQL_SELECT_DISTRICT + whereClause);
-      statement.setInt(1, districtId);
-      ResultSet rs = statement.executeQuery();
-      if (!rs.next()) {
-        throw new NotFoundException("No district found with ID '" + districtId + "'");
-      }
-      return Response.ok(new District(rs)).build();
+      return Response.ok(retrieveById(conn, districtId)).build();
     }
     finally {
       conn.close();
     }
   }
+
+
+  private District retrieveById(
+      Connection conn,
+      int districtId)
+      throws SQLException {
+
+    String whereClause = " WHERE " + District.DISTRICT_ID + " = ?";
+    PreparedStatement statement = conn.prepareStatement(SQL_SELECT_DISTRICT + whereClause);
+    statement.setInt(1, districtId);
+    ResultSet rs = statement.executeQuery();
+    if (!rs.next()) {
+      throw new NotFoundException("No district found with ID '" + districtId + "'");
+    }
+    return new District(rs);
+  }
+
 
 }

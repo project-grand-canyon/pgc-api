@@ -115,8 +115,7 @@ public class Callers {
       statement.setInt(8, callerId);
       statement.executeUpdate();
 
-      // no need to re-fetch the object
-      return Response.ok(caller).build();
+      return Response.ok(retrieveById(conn, callerId)).build();
     }
     finally {
       conn.close();
@@ -151,19 +150,29 @@ public class Callers {
 
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
-      String whereClause = " WHERE " + Caller.CALLER_ID + " = ?";
-      PreparedStatement statement = conn.prepareStatement(SQL_SELECT_CALLER + whereClause);
-      statement.setInt(1, callerId);
-      ResultSet rs = statement.executeQuery();
-      if (!rs.next()) {
-        throw new NotFoundException("No caller found with ID '" + callerId + "'");
-      }
-      return Response.ok(new Caller(rs)).build();
+      return Response.ok(retrieveById(conn, callerId)).build();
     }
     finally {
       conn.close();
     }
   }
+
+
+  private Caller retrieveById(
+      Connection conn,
+      int callerId)
+      throws SQLException {
+
+    String whereClause = " WHERE " + Caller.CALLER_ID + " = ?";
+    PreparedStatement statement = conn.prepareStatement(SQL_SELECT_CALLER + whereClause);
+    statement.setInt(1, callerId);
+    ResultSet rs = statement.executeQuery();
+    if (!rs.next()) {
+      throw new NotFoundException("No caller found with ID '" + callerId + "'");
+    }
+    return new Caller(rs);
+  }
+
 
 }
 

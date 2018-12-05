@@ -7,7 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 
-public class Caller {
+public class Caller extends GCBase {
 
   // Caller table column names
   public static final String CALLER_ID = "caller_id";
@@ -18,8 +18,6 @@ public class Caller {
   public static final String EMAIL = "email";
   public static final String DISTRICT_ID = "district_id";
   public static final String ZIPCODE = "zipcode";
-  public static final String CREATED = "created";
-  public static final String LAST_MODIFIED = "last_modified";
 
   private int callerId;
   private String firstName;
@@ -29,8 +27,7 @@ public class Caller {
   private String email;
   private int districtId;
   private String zipCode;
-  private Timestamp created;
-  private Timestamp lastModified;
+
 
   /**
    * Create caller object from SQL result set
@@ -38,6 +35,7 @@ public class Caller {
    * @throws SQLException
    */
   public Caller(ResultSet rs) throws SQLException {
+    super(rs);
     callerId = rs.getInt(CALLER_ID);
     firstName = rs.getString(FIRST_NAME);
     lastName = rs.getString(LAST_NAME);
@@ -46,8 +44,6 @@ public class Caller {
     email = rs.getString(EMAIL);
     districtId = rs.getInt(DISTRICT_ID);
     zipCode = rs.getString(ZIPCODE);
-    created = rs.getTimestamp(CREATED);
-    lastModified = rs.getTimestamp(LAST_MODIFIED);
   }
 
   // default, for JSON
@@ -117,13 +113,4 @@ public class Caller {
     this.zipCode = zipCode;
   }
 
-  @JsonSerialize(using = TimestampSerializer.class)
-  public Timestamp getCreated() {
-    return created;
-  }
-
-  @JsonSerialize(using = TimestampSerializer.class)
-  public Timestamp getLastModified() {
-    return lastModified;
-  }
 }

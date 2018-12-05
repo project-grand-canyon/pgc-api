@@ -2,15 +2,28 @@ package com.ccl.grandcanyon.types;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 
-public class TalkingPoint {
+public class TalkingPoint extends GCBase {
+
+  // Talking Points table column names
+  public static final String TALKING_POINT_ID = "talking_point_id";
+  public static final String CONTENT = "content";
+  public static final String THEME_ID = "theme_id";
 
   private int talkingPointId;
   private int themeId;
   private String content;
-  private Timestamp created;
-  private Timestamp lastModified;
+
+
+  public TalkingPoint(ResultSet rs) throws SQLException  {
+    super(rs);
+    this.talkingPointId = rs.getInt(TALKING_POINT_ID);
+    this.content = rs.getString(CONTENT);
+    this.themeId = rs.getInt(THEME_ID);
+  }
 
   public TalkingPoint() {}
 
@@ -36,17 +49,6 @@ public class TalkingPoint {
 
   public void setContent(String content) {
     this.content = content;
-  }
-
-  @JsonSerialize(using = TimestampSerializer.class)
-  public Timestamp getCreated() {
-    return created;
-  }
-
-
-  @JsonSerialize(using = TimestampSerializer.class)
-  public Timestamp getLastModified() {
-    return lastModified;
   }
 
 }

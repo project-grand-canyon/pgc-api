@@ -5,6 +5,8 @@ state VARCHAR(2) NOT NULL,
 district_number INT NOT NULL,
 representative VARCHAR(128),
 info VARCHAR(512),
+created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+last_modified DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 UNIQUE (state, district_number),
 PRIMARY KEY (district_id) )
 
@@ -25,6 +27,9 @@ FOREIGN KEY (district_id) REFERENCES districts (district_id)  )
 
 CREATE TABLE themes (theme_id INT NOT NULL AUTO_INCREMENT,
 theme_name VARCHAR(128) NOT NULL,
+UNIQUE (theme_name),
+created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+last_modified DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 PRIMARY KEY (theme_id) )
 
 CREATE TABLE talking_points (talking_point_id INT NOT NULL AUTO_INCREMENT,
