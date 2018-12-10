@@ -8,10 +8,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +27,10 @@ public class Themes {
           Theme.THEME_NAME + " = ? " +
           "WHERE " + Theme.THEME_ID + " = ?";
 
+  private static final String SQL_DELETE_THEME =
+      "DELETE FROM themes " +
+          "WHERE " + Theme.THEME_ID + " = ?";
+
   @Context
   UriInfo uriInfo;
 
@@ -42,17 +43,23 @@ public class Themes {
 
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
-      PreparedStatement insertStatement = conn.prepareStatement(SQL_CREATE_THEME);
+      PreparedStatement insertStatement = conn.prepareStatement(SQL_CREATE_THEME,
+          Statement.RETURN_GENERATED_KEYS);
       insertStatement.setString(1, theme.getName());
       insertStatement.executeUpdate();
 
       // fetch the new Theme object and return to client
-      String whereClause = " WHERE " + Theme.THEME_NAME + " = ?";
-      PreparedStatement fetchStatement = conn.prepareStatement(SQL_SELECT_THEME + whereClause);
-      fetchStatement.setString(1, theme.getName());
-      ResultSet rs = fetchStatement.executeQuery();
-      rs.first();
-      Theme newTheme = new Theme(rs);
+      int themeId;
+      ResultSet rs = insertStatement.getGeneratedKeys();
+      if (rs.next()) {
+        themeId = rs.getInt(1);
+        rs.close();
+      }
+      else {
+        throw new SQLException("Create of Theme failed, no ID obtained.");
+      }
+
+      Theme newTheme = retrieveById(conn, themeId);
       URI location = uriInfo.getAbsolutePathBuilder().path(Integer.toString(newTheme.getThemeId())).build();
       return Response.created(location).entity(newTheme).build();
     }
@@ -113,6 +120,25 @@ public class Themes {
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
       return Response.ok(retrieveById(conn, themeId)).build();
+    }
+    finally {
+      conn.close();
+    }
+  }
+
+
+  @DELETE
+  @Path("{themeId}")
+  public Response deleteTheme(
+      @PathParam("themeId") int themeId)
+      throws SQLException {
+
+    Connection conn = SQLHelper.getInstance().getConnection();
+    try {
+      PreparedStatement delete = conn.prepareStatement(SQL_DELETE_THEME);
+      delete.setInt(1, themeId);
+      delete.executeUpdate();
+      return Response.noContent().build();
     }
     finally {
       conn.close();

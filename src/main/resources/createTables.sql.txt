@@ -35,8 +35,19 @@ PRIMARY KEY (theme_id) )
 CREATE TABLE talking_points (talking_point_id INT NOT NULL AUTO_INCREMENT,
 content VARCHAR(512) NOT NULL,
 theme_id INT NOT NULL,
+enabled BOOL NOT NULL,
+scope ENUM ('national', 'state', 'district') NOT NULL,
 created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 last_modified DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 PRIMARY KEY (talking_point_id),
 FOREIGN KEY (theme_id) REFERENCES themes (theme_id) )
+
+CREATE TABLE talking_points_scopes (
+    talking_point_id INT NOT NULL,
+    district_id INT,
+    state VARCHAR(2),
+    FOREIGN KEY (talking_point_id) REFERENCES talking_points (talking_point_id) ON DELETE CASCADE,
+    FOREIGN KEY (district_id) REFERENCES districts (district_id),
+    CHECK ((district_id IS NULL AND state IS NOT NULL) OR
+           (district_id is NOT NULL AND state is NULL)))
 

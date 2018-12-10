@@ -1,19 +1,14 @@
 package com.ccl.grandcanyon;
 
 import com.ccl.grandcanyon.types.Caller;
-import com.ccl.grandcanyon.types.ContactMethod;
 
-import javax.servlet.ServletContext;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,6 +39,9 @@ public class Callers {
           Caller.ZIPCODE + " = ? " +
           "WHERE " + Caller.CALLER_ID + " = ?";
 
+  private static final String SQL_DELETE_CALLER =
+      "DELETE from callers " +
+          "WHERE " + Caller.CALLER_ID + " = ?";
 
   @Context
   UriInfo uriInfo;
@@ -55,7 +53,8 @@ public class Callers {
 
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
-      PreparedStatement insertStatement = conn.prepareStatement(SQL_CREATE_CALLER);
+      PreparedStatement insertStatement = conn.prepareStatement(SQL_CREATE_CALLER,
+          Statement.RETURN_GENERATED_KEYS);
       insertStatement.setString(1, caller.getFirstName());
       insertStatement.setString(2, caller.getLastName());
       insertStatement.setString(3, caller.getContactMethod().name());
@@ -66,26 +65,18 @@ public class Callers {
       insertStatement.executeUpdate();
 
       // fetch the new Caller and return to client
-      String queryOnColumn;
-      String queryOnValue;
-      if (caller.getContactMethod() == ContactMethod.email) {
-        queryOnColumn = Caller.EMAIL;
-        queryOnValue = caller.getEmail();
+      int callerId;
+      ResultSet rs = insertStatement.getGeneratedKeys();
+      if (rs.next()) {
+        callerId = rs.getInt(1);
+        rs.close();
       }
       else {
-        queryOnColumn = Caller.PHONE;
-        queryOnValue = caller.getPhone();
+        throw new SQLException("Create of Caller failed, no ID obtained.");
       }
 
-      String whereClause = " WHERE " + Caller.CONTACT_METHOD + " = ? AND " + queryOnColumn + " = ?";
-      PreparedStatement fetchStatement = conn.prepareStatement(SQL_SELECT_CALLER + whereClause);
-      fetchStatement.setString(1, caller.getContactMethod().name());
-      fetchStatement.setString(2, queryOnValue);
-
-      ResultSet rs = fetchStatement.executeQuery();
-      rs.first();
-      Caller newCaller = new Caller(rs);
-      URI location = uriInfo.getAbsolutePathBuilder().path(Integer.toString(newCaller.getCallerId())).build();
+      Caller newCaller = retrieveById(conn, callerId);
+      URI location = uriInfo.getAbsolutePathBuilder().path(Integer.toString(callerId)).build();
       return Response.created(location).entity(newCaller).build();
     }
     finally {
@@ -156,6 +147,25 @@ public class Callers {
       conn.close();
     }
   }
+
+  @DELETE
+  @Path("{callerId}")
+  public Response deleteCaller(
+      @PathParam("callerId") int callerId)
+      throws SQLException {
+
+    Connection conn = SQLHelper.getInstance().getConnection();
+    try {
+      PreparedStatement delete = conn.prepareStatement(SQL_DELETE_CALLER);
+      delete.setInt(1, callerId);
+      delete.executeUpdate();
+      return Response.noContent().build();
+    }
+    finally {
+      conn.close();
+    }
+  }
+
 
 
   private Caller retrieveById(
