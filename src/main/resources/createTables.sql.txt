@@ -51,3 +51,29 @@ CREATE TABLE talking_points_scopes (
     CHECK ((district_id IS NULL AND state IS NOT NULL) OR
            (district_id is NOT NULL AND state is NULL)))
 
+CREATE TABLE addresses (address_id INT NOT NULL AUTO_INCREMENT,
+address_line1 VARCHAR(120) NOT NULL,
+address_line2 VARCHAR(120),
+city VARCHAR(100) NOT NULL,
+state VARCHAR(2) NOT NULL,
+country CHAR(2) NOT NULL,
+zipcode VARCHAR(10),
+PRIMARY KEY (address_id) )
+
+CREATE TABLE district_offices (district_office_id INT NOT NULL AUTO_INCREMENT,
+district_id INT NOT NULL,
+phone VARCHAR(50) NOT NULL,
+address_line1 VARCHAR(120) NOT NULL,
+address_line2 VARCHAR(120),
+city VARCHAR(100) NOT NULL,
+state VARCHAR(2) NOT NULL,
+country CHAR(2) NOT NULL,
+zipcode VARCHAR(10),
+email VARCHAR(100),
+opens_at TIME,
+closes_at TIME,
+created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+last_modified DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+PRIMARY KEY (district_office_id) )
+
+

@@ -17,6 +17,7 @@ public class GCApplication extends ResourceConfig {
     register(Districts.class);
     register(Themes.class);
     register(TalkingPoints.class);
+    register(DistrictOffices.class);
     register(JacksonJsonProvider.class);
     register(JSONExceptionMapper.class);
   }
