@@ -64,6 +64,8 @@ public class DistrictOffices {
   @Produces(MediaType.APPLICATION_JSON)
   public Response createOffice(DistrictOffice office) throws SQLException {
 
+    // todo: ensure admin is for district
+
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
       PreparedStatement insertStatement = conn.prepareStatement(SQL_CREATE_DISTRICT_OFFICE,
@@ -85,6 +87,7 @@ public class DistrictOffices {
       ResultSet rs = insertStatement.getGeneratedKeys();
       if (rs.next()) {
         districtOfficeId = rs.getInt(1);
+        rs.close();
       }
       else {
         throw new SQLException("Create of District Office failed, no ID obtained.");
@@ -109,6 +112,8 @@ public class DistrictOffices {
       @PathParam("officeId") int officeId,
       DistrictOffice office)
       throws SQLException {
+
+    // todo: ensure admin is for district
 
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
@@ -174,6 +179,8 @@ public class DistrictOffices {
   @Path("{officeId}")
   public Response deleteOffice(@PathParam("officeId") int officeId)
       throws SQLException {
+
+    // todo: ensure admin is for district
 
     Connection conn = SQLHelper.getInstance().getConnection();
     try {

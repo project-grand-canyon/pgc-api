@@ -66,10 +66,13 @@ public class TalkingPoints {
   @Produces(MediaType.APPLICATION_JSON)
   public Response createTalkingPoint(TalkingPoint talkingPoint) throws SQLException {
 
+    // todo: check admin privilege against districts, states
+
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
       // wrap multiple inserts in a transaction
       conn.setAutoCommit(false);
+
       PreparedStatement insert = conn.prepareStatement(SQL_CREATE_TALKING_POINT,
           Statement.RETURN_GENERATED_KEYS);
       insert.setString(1, talkingPoint.getContent());
@@ -116,10 +119,13 @@ public class TalkingPoints {
       TalkingPoint talkingPoint)
       throws SQLException {
 
+    // todo: check admin privilege against districts, states
+
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
       // use transaction
       conn.setAutoCommit(false);
+
       PreparedStatement update = conn.prepareStatement(SQL_UPDATE_TALKING_POINT);
       update.setString(1, talkingPoint.getContent());
       update.setBoolean(2, talkingPoint.isEnabled());
@@ -191,6 +197,8 @@ public class TalkingPoints {
   public Response deleteTalkingPoint(
       @PathParam("talkingPointId") int talkingPointId)
       throws SQLException {
+
+    // todo: check admin privilege against districts, states
 
     Connection conn = SQLHelper.getInstance().getConnection();
     try {

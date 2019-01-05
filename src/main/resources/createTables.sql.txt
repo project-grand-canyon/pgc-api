@@ -76,4 +76,23 @@ created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 last_modified DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 PRIMARY KEY (district_office_id) )
 
+CREATE TABLE calls ( caller_id INT, district_id INT NOT NULL,
+talking_point_id INT, created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+FOREIGN KEY (caller_id) REFERENCES callers (caller_id),
+FOREIGN KEY (district_id) REFERENCES districts (district_id) )
+
+CREATE TABLE admins ( admin_id INT NOT NULL AUTO_INCREMENT,
+user_name VARCHAR(20) NOT NULL,
+token VARCHAR(100) NOT NULL,
+is_root BOOL default FALSE,
+created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+last_modified DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+PRIMARY KEY (admin_id),
+FOREIGN KEY (district_id) REFERENCES districts (district_id),
+UNIQUE (user_name) )
+
+CREATE TABLE admins_districts (admin_id INT NOT NULL, district_id INT NOT NULL,
+FOREIGN KEY (admin_id) REFERENCES admins (admin_id) ON DELETE CASCADE,
+FOREIGN KEY (district_id) REFERENCES districts (district_id) ON DELETE CASCADE )
+
 

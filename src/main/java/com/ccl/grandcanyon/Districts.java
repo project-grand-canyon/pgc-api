@@ -2,6 +2,7 @@ package com.ccl.grandcanyon;
 
 import com.ccl.grandcanyon.types.District;
 
+import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -44,6 +45,7 @@ public class Districts {
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
+  @RolesAllowed(GCAuth.SUPER_ADMIN_ROLE)
   public Response createDistrict(District district) throws SQLException {
 
     Connection conn = SQLHelper.getInstance().getConnection();
@@ -85,6 +87,8 @@ public class Districts {
       @PathParam("districtId") int districtId,
       District district)
       throws SQLException {
+
+    // todo: ensure admin is for district
 
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
@@ -144,6 +148,8 @@ public class Districts {
   public Response deleteDistrict(
       @PathParam("districtId") int districtID)
       throws SQLException {
+
+    // todo: ensure admin is for district
 
     Connection conn = SQLHelper.getInstance().getConnection();
     try {

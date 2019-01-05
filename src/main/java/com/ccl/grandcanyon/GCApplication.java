@@ -13,11 +13,16 @@ public class GCApplication extends ResourceConfig {
 
   public GCApplication() {
 
+    register(BasicAuthFilter.class);
+
     register(Callers.class);
     register(Districts.class);
     register(Themes.class);
     register(TalkingPoints.class);
     register(DistrictOffices.class);
+    register(Calls.class);
+    register(Admins.class);
+
     register(JacksonJsonProvider.class);
     register(JSONExceptionMapper.class);
   }

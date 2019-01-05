@@ -2,6 +2,7 @@ package com.ccl.grandcanyon;
 
 import com.ccl.grandcanyon.types.Caller;
 
+import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -12,6 +13,10 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+
+/**
+ * Management of Grand Canyon callers.
+ */
 @Path("/callers")
 public class Callers {
 
@@ -49,6 +54,7 @@ public class Callers {
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
+  @RolesAllowed(GCAuth.ANONYMOUS)
   public Response createCaller(Caller caller) throws SQLException {
 
     Connection conn = SQLHelper.getInstance().getConnection();
@@ -88,10 +94,13 @@ public class Callers {
   @Path("{callerId}")
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
+  @RolesAllowed(GCAuth.ANONYMOUS)
   public Response updateCaller(
       @PathParam("callerId") int callerId,
       Caller caller)
       throws SQLException {
+
+    // todo: verify identity of caller
 
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
@@ -136,8 +145,11 @@ public class Callers {
   @GET
   @Path("{callerId}")
   @Produces(MediaType.APPLICATION_JSON)
+  @RolesAllowed(GCAuth.ANONYMOUS)
   public Response getById(@PathParam("callerId") int callerId)
       throws SQLException {
+
+    // todo: verify identity of caller
 
     Connection conn = SQLHelper.getInstance().getConnection();
     try {

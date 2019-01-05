@@ -19,16 +19,18 @@ public class JSONExceptionMapper implements ExceptionMapper<Exception> {
   @Override
   public Response toResponse(Exception ex) {
 
-    int status;
+    Response.ResponseBuilder builder;
     if (ex instanceof WebApplicationException) {
-      status = ((WebApplicationException)ex).getResponse().getStatus();
+      builder = Response.fromResponse(((WebApplicationException)ex).getResponse());
     }
     else if (ex instanceof SQLNonTransientException) {
-      status = Response.Status.BAD_REQUEST.getStatusCode();
+      builder = Response.status(Response.Status.BAD_REQUEST);
     }
     else {
-      status = Response.Status.INTERNAL_SERVER_ERROR.getStatusCode();
+      builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
     }
+
+    // add JSON response body
     String json;
     try {
       json = mapper.writeValueAsString(new ErrorInfo(ex.getMessage()));
@@ -36,7 +38,7 @@ public class JSONExceptionMapper implements ExceptionMapper<Exception> {
     catch (JsonProcessingException e) {
       json = "{\"message\":\"Unexpected error formatting exception: " + e.getMessage() + "\"}";
     }
-    return Response.status(status).entity(json).type(MediaType.APPLICATION_JSON_TYPE).build();
+    return builder.entity(json).type(MediaType.APPLICATION_JSON_TYPE).build();
   }
 
   class ErrorInfo {
