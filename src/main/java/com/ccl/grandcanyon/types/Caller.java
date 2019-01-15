@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Caller extends GCBase {
 
@@ -18,15 +20,17 @@ public class Caller extends GCBase {
   public static final String EMAIL = "email";
   public static final String DISTRICT_ID = "district_id";
   public static final String ZIPCODE = "zipcode";
+  public static final String PAUSED = "paused";
 
   private int callerId;
   private String firstName;
   private String lastName;
-  private ContactMethod contactMethod;
+  private List<ContactMethod> contactMethods;
   private String phone;
   private String email;
   private int districtId;
   private String zipCode;
+  private boolean paused;
 
 
   /**
@@ -39,11 +43,20 @@ public class Caller extends GCBase {
     callerId = rs.getInt(CALLER_ID);
     firstName = rs.getString(FIRST_NAME);
     lastName = rs.getString(LAST_NAME);
-    contactMethod = ContactMethod.valueOf(rs.getString(CONTACT_METHOD));
     phone = rs.getString(PHONE);
     email = rs.getString(EMAIL);
     districtId = rs.getInt(DISTRICT_ID);
     zipCode = rs.getString(ZIPCODE);
+    paused = rs.getBoolean(PAUSED);
+    this.contactMethods = new ArrayList<>();
+    do {
+      String cm = rs.getString(CONTACT_METHOD);
+      if (cm != null) {
+        contactMethods.add(ContactMethod.valueOf(cm));
+      }
+    } while (rs.next() && rs.getInt(CALLER_ID) == this.callerId);
+    // undo the last result set row since it doesn't belong to this admin
+    rs.previous();
   }
 
   // default, for JSON
@@ -73,12 +86,12 @@ public class Caller extends GCBase {
     this.lastName = lastName;
   }
 
-  public ContactMethod getContactMethod() {
-    return contactMethod;
+  public List<ContactMethod> getContactMethods() {
+    return contactMethods;
   }
 
-  public void setContactMethod(ContactMethod contactMethod) {
-    this.contactMethod = contactMethod;
+  public void setContactMethods(List<ContactMethod> contactMethods) {
+    this.contactMethods = contactMethods;
   }
 
   public String getPhone() {
@@ -113,4 +126,11 @@ public class Caller extends GCBase {
     this.zipCode = zipCode;
   }
 
+  public boolean isPaused() {
+    return paused;
+  }
+
+  public void setPaused(boolean paused) {
+    this.paused = paused;
+  }
 }

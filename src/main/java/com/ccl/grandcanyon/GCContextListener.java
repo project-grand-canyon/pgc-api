@@ -14,8 +14,13 @@ import java.util.Properties;
 @WebListener
 public class GCContextListener implements ServletContextListener {
 
+  // configuration property names
   final static String sqlUrl = "sqlUrl";
   final static String sqlPoolSize = "sqlPoolSize";
+
+  final static String reminderServiceInterval = "reminderServiceInterval";
+  final static String reminderInterval = "reminderInterval";
+  final static String secondReminderInterval = "secondReminderInterval";
 
 
   @Override
@@ -44,6 +49,11 @@ public class GCContextListener implements ServletContextListener {
     config.setMaximumPoolSize(Integer.parseInt(properties.getProperty(sqlPoolSize)));
     SQLHelper.init(new HikariDataSource(config));
 
+    ReminderService.init(
+        Integer.parseInt(properties.getProperty(reminderServiceInterval, "60")),
+        Integer.parseInt(properties.getProperty(reminderInterval, "30")),
+        Integer.parseInt(properties.getProperty(secondReminderInterval, "4")));
+
     Runtime.getRuntime().addShutdownHook(new Thread() {
       public void run() {
         SQLHelper sqlHelper = SQLHelper.getInstance();
@@ -60,6 +70,11 @@ public class GCContextListener implements ServletContextListener {
     SQLHelper sqlHelper = SQLHelper.getInstance();
     if (sqlHelper != null) {
       sqlHelper.tearDown();
+    }
+
+    ReminderService reminderService = ReminderService.getInstance();
+    if (reminderService != null) {
+      reminderService.tearDown();
     }
 
   }

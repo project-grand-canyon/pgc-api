@@ -1,6 +1,7 @@
 package com.ccl.grandcanyon;
 
 import com.ccl.grandcanyon.types.Caller;
+import com.ccl.grandcanyon.types.ContactMethod;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
@@ -20,28 +21,39 @@ import java.util.List;
 @Path("/callers")
 public class Callers {
 
-  private static final String SQL_SELECT_CALLER = "SELECT * FROM callers";
+  private static final String SQL_SELECT_CALLER =
+      "SELECT c.*, ccm.contact_method FROM callers c " +
+      "LEFT JOIN callers_contact_methods AS ccm ON c.caller_id = ccm.caller_id";
 
   private static final String SQL_CREATE_CALLER =
       "INSERT INTO callers (" +
           Caller.FIRST_NAME + ", " +
           Caller.LAST_NAME + ", " +
-          Caller.CONTACT_METHOD + ", " +
           Caller.PHONE + ", " +
           Caller.EMAIL + ", " +
           Caller.DISTRICT_ID + ", " +
-          Caller.ZIPCODE +
+          Caller.ZIPCODE + ", " +
+          Caller.PAUSED +
           ") VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+  private static final String SQL_INSERT_CALLER_CONTACT_METHODS =
+      "INSERT INTO callers_contact_methods (" +
+          Caller.CALLER_ID + ", " +
+          Caller.CONTACT_METHOD + ") VALUES ";
 
   private static final String SQL_UPDATE_CALLER =
       "UPDATE callers SET " +
           Caller.FIRST_NAME + " = ?, " +
           Caller.LAST_NAME + " = ?, " +
-          Caller.CONTACT_METHOD + " = ?, " +
           Caller.PHONE + " = ?, " +
           Caller.EMAIL + " = ?, " +
           Caller.DISTRICT_ID + " = ?, " +
-          Caller.ZIPCODE + " = ? " +
+          Caller.ZIPCODE + " = ?, " +
+          Caller.PAUSED + " = ? " +
+          "WHERE " + Caller.CALLER_ID + " = ?";
+
+  private static final String SQL_DELETE_CALLER_CONTACT_METHODS =
+      "DELETE from callers_contact_methods " +
           "WHERE " + Caller.CALLER_ID + " = ?";
 
   private static final String SQL_DELETE_CALLER =
@@ -59,15 +71,19 @@ public class Callers {
 
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
+      // use transaction
+      conn.setAutoCommit(false);
+
       PreparedStatement insertStatement = conn.prepareStatement(SQL_CREATE_CALLER,
           Statement.RETURN_GENERATED_KEYS);
-      insertStatement.setString(1, caller.getFirstName());
-      insertStatement.setString(2, caller.getLastName());
-      insertStatement.setString(3, caller.getContactMethod().name());
-      insertStatement.setString(4, caller.getPhone());
-      insertStatement.setString(5, caller.getEmail());
-      insertStatement.setInt(6, caller.getDistrictId());
-      insertStatement.setString(7, caller.getZipCode());
+      int idx = 1;
+      insertStatement.setString(idx++, caller.getFirstName());
+      insertStatement.setString(idx++, caller.getLastName());
+      insertStatement.setString(idx++, caller.getPhone());
+      insertStatement.setString(idx++, caller.getEmail());
+      insertStatement.setInt(idx++, caller.getDistrictId());
+      insertStatement.setString(idx++, caller.getZipCode());
+      insertStatement.setBoolean(idx++, caller.isPaused());
       insertStatement.executeUpdate();
 
       // fetch the new Caller and return to client
@@ -81,11 +97,19 @@ public class Callers {
         throw new SQLException("Create of Caller failed, no ID obtained.");
       }
 
+      insertContactMethods(conn, callerId, caller);
       Caller newCaller = retrieveById(conn, callerId);
+      conn.commit();
+
       URI location = uriInfo.getAbsolutePathBuilder().path(Integer.toString(callerId)).build();
       return Response.created(location).entity(newCaller).build();
     }
+    catch (SQLException e) {
+      conn.rollback();
+      throw e;
+    }
     finally {
+      conn.setAutoCommit(true);
       conn.close();
     }
   }
@@ -104,20 +128,32 @@ public class Callers {
 
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
+      // use transaction
+      conn.setAutoCommit(false);
+
       PreparedStatement statement = conn.prepareStatement(SQL_UPDATE_CALLER);
-      statement.setString(1, caller.getFirstName());
-      statement.setString(2, caller.getLastName());
-      statement.setString(3, caller.getContactMethod().name());
-      statement.setString(4, caller.getPhone());
-      statement.setString(5, caller.getEmail());
-      statement.setInt(6, caller.getDistrictId());
-      statement.setString(7, caller.getZipCode());
-      statement.setInt(8, callerId);
+      int idx = 1;
+      statement.setString(idx++, caller.getFirstName());
+      statement.setString(idx++, caller.getLastName());
+      statement.setString(idx++, caller.getPhone());
+      statement.setString(idx++, caller.getEmail());
+      statement.setInt(idx++, caller.getDistrictId());
+      statement.setString(idx++, caller.getZipCode());
+      statement.setBoolean(idx++, caller.isPaused());
+      statement.setInt(idx++, callerId);
       statement.executeUpdate();
 
+      deleteContactMethods(conn, callerId);
+      insertContactMethods(conn, callerId, caller);
+      conn.commit();
       return Response.ok(retrieveById(conn, callerId)).build();
     }
+    catch (SQLException e) {
+      conn.rollback();
+      throw e;
+    }
     finally {
+      conn.setAutoCommit(true);
       conn.close();
     }
 
@@ -128,18 +164,7 @@ public class Callers {
   @Produces(MediaType.APPLICATION_JSON)
   public Response getCallers() throws SQLException {
 
-    Connection conn = SQLHelper.getInstance().getConnection();
-    try {
-      List<Caller> callers = new ArrayList<>();
-      ResultSet rs = conn.createStatement().executeQuery(SQL_SELECT_CALLER);
-      while (rs.next()) {
-        callers.add(new Caller(rs));
-      }
-      return Response.ok(callers).build();
-    }
-    finally {
-      conn.close();
-    }
+    return Response.ok(getAllCallers()).build();
   }
 
   @GET
@@ -178,6 +203,22 @@ public class Callers {
     }
   }
 
+  public static List<Caller> getAllCallers() throws SQLException {
+
+    Connection conn = SQLHelper.getInstance().getConnection();
+    try {
+      List<Caller> callers = new ArrayList<>();
+      ResultSet rs = conn.createStatement().executeQuery(SQL_SELECT_CALLER);
+      while (rs.next()) {
+        callers.add(new Caller(rs));
+      }
+      return callers;
+    }
+    finally {
+      conn.close();
+    }
+
+  }
 
 
   private Caller retrieveById(
@@ -185,7 +226,7 @@ public class Callers {
       int callerId)
       throws SQLException {
 
-    String whereClause = " WHERE " + Caller.CALLER_ID + " = ?";
+    String whereClause = " WHERE c." + Caller.CALLER_ID + " = ?";
     PreparedStatement statement = conn.prepareStatement(SQL_SELECT_CALLER + whereClause);
     statement.setInt(1, callerId);
     ResultSet rs = statement.executeQuery();
@@ -193,6 +234,36 @@ public class Callers {
       throw new NotFoundException("No caller found with ID '" + callerId + "'");
     }
     return new Caller(rs);
+  }
+
+
+  private void insertContactMethods(
+      Connection conn,
+      int callerId,
+      Caller caller) throws SQLException {
+
+    if (!caller.getContactMethods().isEmpty()) {
+      StringBuilder cmInsert = new StringBuilder(SQL_INSERT_CALLER_CONTACT_METHODS);
+      for (ContactMethod contactMethod : caller.getContactMethods()) {
+        cmInsert.append("(").
+            append(callerId).
+            append(",'").
+            append(contactMethod.name()).
+            append("'),");
+      }
+      cmInsert.deleteCharAt(cmInsert.length()-1);
+      conn.createStatement().executeUpdate(cmInsert.toString());
+    }
+  }
+
+
+  private void deleteContactMethods(
+      Connection conn,
+      int callerId) throws SQLException {
+
+    PreparedStatement delete = conn.prepareStatement(SQL_DELETE_CALLER_CONTACT_METHODS);
+    delete.setInt(1, callerId);
+    delete.executeUpdate();
   }
 
 
