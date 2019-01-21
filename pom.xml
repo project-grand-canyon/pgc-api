@@ -107,6 +107,11 @@
       <artifactId>HikariCP</artifactId>
       <version>3.1.0</version>
     </dependency>
+    <dependency>
+      <groupId>com.nimbusds</groupId>
+      <artifactId>nimbus-jose-jwt</artifactId>
+      <version>6.5.1</version>
+    </dependency>
     <!-- [END gae_flex_mysql_dependencies] -->
   </dependencies>
   <build>

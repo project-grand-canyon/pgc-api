@@ -1,5 +1,6 @@
 package com.ccl.grandcanyon;
 
+import com.ccl.grandcanyon.auth.AuthenticationService;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -21,6 +22,9 @@ public class GCContextListener implements ServletContextListener {
   final static String reminderServiceInterval = "reminderServiceInterval";
   final static String reminderInterval = "reminderInterval";
   final static String secondReminderInterval = "secondReminderInterval";
+
+  final static String jwtLifetime = "jwtLifetime";
+  final static String jwtRefreshInterval = "jwtRefreshInterval";
 
 
   @Override
@@ -54,6 +58,10 @@ public class GCContextListener implements ServletContextListener {
         Integer.parseInt(properties.getProperty(reminderInterval, "30")),
         Integer.parseInt(properties.getProperty(secondReminderInterval, "4")));
 
+    AuthenticationService.init(
+        Integer.parseInt(properties.getProperty(jwtLifetime, "240")),
+        Integer.parseInt(properties.getProperty(jwtRefreshInterval, "60")));
+
     Runtime.getRuntime().addShutdownHook(new Thread() {
       public void run() {
         SQLHelper sqlHelper = SQLHelper.getInstance();
@@ -75,6 +83,11 @@ public class GCContextListener implements ServletContextListener {
     ReminderService reminderService = ReminderService.getInstance();
     if (reminderService != null) {
       reminderService.tearDown();
+    }
+
+    AuthenticationService authService = AuthenticationService.getInstance();
+    if (authService != null) {
+      authService.tearDown();
     }
 
   }

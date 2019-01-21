@@ -1,5 +1,6 @@
 package com.ccl.grandcanyon;
 
+import com.ccl.grandcanyon.auth.PasswordUtil;
 import com.ccl.grandcanyon.types.Admin;
 
 import javax.annotation.security.RolesAllowed;

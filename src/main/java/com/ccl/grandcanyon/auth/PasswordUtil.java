@@ -1,4 +1,4 @@
-package com.ccl.grandcanyon;
+package com.ccl.grandcanyon.auth;
 
 
 // acknowledgement: most of this borrowed from com/baeldung/passwordhashing/PBKDF2Hasher.java (github)

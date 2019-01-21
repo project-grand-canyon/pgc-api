@@ -1,5 +1,6 @@
 package com.ccl.grandcanyon;
 
+import com.ccl.grandcanyon.auth.AuthFilter;
 import org.glassfish.jersey.server.ResourceConfig;
 
 import javax.ws.rs.ApplicationPath;
@@ -13,7 +14,7 @@ public class GCApplication extends ResourceConfig {
 
   public GCApplication() {
 
-    register(BasicAuthFilter.class);
+    register(AuthFilter.class);
 
     register(Callers.class);
     register(Districts.class);
@@ -22,6 +23,7 @@ public class GCApplication extends ResourceConfig {
     register(DistrictOffices.class);
     register(Calls.class);
     register(Admins.class);
+    register(Login.class);
 
     register(JacksonJsonProvider.class);
     register(JSONExceptionMapper.class);

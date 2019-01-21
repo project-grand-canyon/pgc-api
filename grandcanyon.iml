@@ -57,7 +57,6 @@
     <orderEntry type="library" name="Maven: com.github.jnr:jnr-ffi:2.1.4" level="project" />
     <orderEntry type="library" name="Maven: com.github.jnr:jffi:1.2.15" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Maven: com.github.jnr:jffi:native:1.2.15" level="project" />
-    <orderEntry type="library" name="Maven: org.ow2.asm:asm:5.0.3" level="project" />
     <orderEntry type="library" name="Maven: org.ow2.asm:asm-commons:5.0.3" level="project" />
     <orderEntry type="library" name="Maven: org.ow2.asm:asm-analysis:5.0.3" level="project" />
     <orderEntry type="library" name="Maven: org.ow2.asm:asm-tree:5.0.3" level="project" />
@@ -115,5 +114,10 @@
     <orderEntry type="library" name="Maven: javax.validation:validation-api:1.1.0.Final" level="project" />
     <orderEntry type="library" name="Maven: com.zaxxer:HikariCP:3.1.0" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.25" level="project" />
+    <orderEntry type="library" name="Maven: com.nimbusds:nimbus-jose-jwt:6.5.1" level="project" />
+    <orderEntry type="library" name="Maven: com.github.stephenc.jcip:jcip-annotations:1.0-1" level="project" />
+    <orderEntry type="library" name="Maven: net.minidev:json-smart:2.3" level="project" />
+    <orderEntry type="library" name="Maven: net.minidev:accessors-smart:1.2" level="project" />
+    <orderEntry type="library" name="Maven: org.ow2.asm:asm:5.0.4" level="project" />
   </component>
 </module>

@@ -1,5 +1,6 @@
-package com.ccl.grandcanyon;
+package com.ccl.grandcanyon.auth;
 
+import com.ccl.grandcanyon.GCAuth;
 import com.ccl.grandcanyon.types.Admin;
 import org.apache.http.HttpHeaders;
 
@@ -10,14 +11,13 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.*;
 
-public class BasicAuthFilter implements ContainerRequestFilter {
+public class AuthFilter implements ContainerRequestFilter {
 
   private final static String BASIC_PREFIX = "basic";
+  private final static String BEARER_PREFIX = "bearer";
 
   // default role required is basic Admin
   private final static List<String> defaultRoles =
@@ -39,6 +39,7 @@ public class BasicAuthFilter implements ContainerRequestFilter {
 
     String authHeader = context.getHeaderString(HttpHeaders.AUTHORIZATION);
     if (authHeader != null) {
+      Admin admin = null;
       if (authHeader.toLowerCase().startsWith(BASIC_PREFIX)) {
         String credentials = authHeader.substring(BASIC_PREFIX.length()).trim();
         byte[] decodedCredentials = Base64.getDecoder().decode(credentials);
@@ -46,29 +47,11 @@ public class BasicAuthFilter implements ContainerRequestFilter {
 
         String userName = parts[0];
         String password = parts[1];
-        Admin admin;
-
-        try {
-          admin = Admins.getAdminByName(userName);
-        }
-        catch (SQLException e) {
-          context.abortWith(Response.status(
-              Response.Status.INTERNAL_SERVER_ERROR).
-              entity(e.getMessage()).build());
-          return;
-        }
-
-        if (admin == null ||
-            !PasswordUtil.check(password.toCharArray(), admin.getToken())) {
-          throw new NotAuthorizedException("Invalid Credentials",
-              WWW_AUTHENTICATE_CHALLENGE);
-        }
-
-        if (!admin.isRoot() && roles.contains(GCAuth.SUPER_ADMIN_ROLE)) {
-          throw new ForbiddenException("Operation requires super-admin privilege.");
-        }
-
-        context.setProperty(GCAuth.CURRENT_PRINCIPAL, admin);
+        admin = AuthenticationService.getInstance().authenticate(userName, password);
+      }
+      else if (authHeader.toLowerCase().startsWith(BEARER_PREFIX)) {
+        String token = authHeader.substring(BEARER_PREFIX.length()).trim();
+        admin = AuthenticationService.getInstance().validateToken(token);
       }
       else {
         // unsupported auth header type
@@ -76,6 +59,11 @@ public class BasicAuthFilter implements ContainerRequestFilter {
             "Unsupported Authorization Header type: '" + authHeader + "'",
             WWW_AUTHENTICATE_CHALLENGE);
       }
+
+      if (!admin.isRoot() && roles.contains(GCAuth.SUPER_ADMIN_ROLE)) {
+        throw new ForbiddenException("Operation requires super-admin privilege.");
+      }
+      context.setProperty(GCAuth.CURRENT_PRINCIPAL, admin);
     }
 
     else {
