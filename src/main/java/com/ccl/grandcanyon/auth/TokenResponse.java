@@ -1,5 +1,8 @@
 package com.ccl.grandcanyon.auth;
 
+/**
+ * JSON content of a token response to a login request.
+ */
 public class TokenResponse {
 
   private String accessToken;

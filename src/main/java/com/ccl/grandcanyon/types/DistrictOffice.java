@@ -1,10 +1,9 @@
 package com.ccl.grandcanyon.types;
 
-import jnr.x86asm.OP;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
+
 
 public class DistrictOffice extends GCBase {
 

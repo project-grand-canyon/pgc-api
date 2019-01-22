@@ -22,17 +22,24 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.logging.Logger;
 
+/**
+ * Singleton service responsible for administrator authentication.
+ */
 public class AuthenticationService {
 
-  private static int refreshIntervalMinutes;
+  // the lifetime of an issued JWT access token
   private static int jwtLifetimeMinutes;
-  private static AuthenticationService instance;
 
+  // if an access token is presented within this interval before
+  // the token's expiration, a new token is issued and returned with the
+  // response.
+  private static int refreshIntervalMinutes;
+
+  private static AuthenticationService instance;
 
   private JWSSigner signer;
   private JWSVerifier verifier;
   private JWSVerifier previousVerifier;
-
   private SecretKeys keys;
 
   private static final Logger logger = Logger.getLogger(AuthenticationService.class.getName());
@@ -54,6 +61,9 @@ public class AuthenticationService {
   }
 
 
+  /**
+   * return the singleton Authentication Service instance.
+   */
   public static AuthenticationService getInstance() {
     return instance;
   }
@@ -61,6 +71,9 @@ public class AuthenticationService {
 
   private AuthenticationService() throws JOSEException {
 
+    // if secret keys were saved at last shutdown of the web service, retrieve
+    // those keys use them if they are still valid. This allows existing access
+    // tokens to still be accepted after a restart of the web service.
     File savedStateFile = new File(SAVED_STATE_FILE);
     if (savedStateFile.exists()) {
       try {
@@ -126,7 +139,7 @@ public class AuthenticationService {
       updateKeys();
 
       JWTClaimsSet.Builder builder = new JWTClaimsSet.Builder().subject(admin.getUserName());
-      builder.issuer(uriInfo.getAbsolutePath().toString());
+      builder.issuer(uriInfo.getAbsolutePath().getHost());
       LocalDateTime currentTime = LocalDateTime.now();
       builder.issueTime(toDate(currentTime));
       builder.expirationTime(toDate(currentTime.plusMinutes(jwtLifetimeMinutes)));
@@ -145,6 +158,14 @@ public class AuthenticationService {
     }
   }
 
+  /**
+   * Validate a JWT access token.
+   * @param token the token value
+   * @return the Admin user represented by the token
+   * @throws ForbiddenException if the token is not valid
+   * @throws ServerErrorException if an internal error occurs while inspecting
+   * the token.
+   */
   public Admin validateToken(String token) {
 
     SignedJWT signedJWT;
@@ -188,10 +209,34 @@ public class AuthenticationService {
   }
 
 
+  /**
+   * Return true if the specified token should be refreshed.
+   * @param token JWT access token
+   * @return true if the token expiration is within the JWT refresh interval
+   */
+  public boolean shouldRefresh(String token) {
+    SignedJWT signedJWT;
+    JWTClaimsSet claimsSet;
+    try {
+      signedJWT = SignedJWT.parse(token);
+      claimsSet = signedJWT.getJWTClaimsSet();
+
+      LocalDateTime expireTime = toLocalDateTime(claimsSet.getExpirationTime());
+      return expireTime.minusMinutes(refreshIntervalMinutes).isBefore(LocalDateTime.now());
+    }
+    catch (ParseException e) {
+      logger.warning("JWT Refresh internval not honored due to error: " + e.getMessage());
+      return false;
+    }
+  }
+
+
   public void tearDown() {
 
     try {
       if (keys != null) {
+        // save the in-use secret keys to a file so that they may continue to be used
+        // at next service restart.
         ObjectOutputStream savedStateOut = new ObjectOutputStream(
             new FileOutputStream(SAVED_STATE_FILE));
         savedStateOut.writeObject(keys);
@@ -204,6 +249,12 @@ public class AuthenticationService {
   }
 
 
+  // Rotate keys periodically.  If jwtLifetimeMinutes is "N", then:
+  //
+  // A key is used for generating tokens for N minutes.
+
+  // A key can continue to be used for verification for N mintues after the
+  // key is no longer used for generating tokens.
   private void updateKeys() throws JOSEException {
 
     if (keys.getCurrent() == null ||
@@ -239,7 +290,15 @@ public class AuthenticationService {
   }
 
 
-  static class SecretKeys implements Serializable {
+  private LocalDateTime toLocalDateTime(Date date) {
+    return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+  }
+
+
+  /**
+   * Object used for saving secret keys to the saved state file.
+   */
+  private static class SecretKeys implements Serializable {
     private HashKey current;
     private HashKey previous;
 
@@ -261,7 +320,7 @@ public class AuthenticationService {
   }
 
 
-  static class HashKey implements Serializable {
+  private static class HashKey implements Serializable {
 
     private byte[] value;
     private LocalDateTime lastTokenGenTime;

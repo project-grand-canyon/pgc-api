@@ -14,10 +14,10 @@ import javax.ws.rs.core.Context;
 import java.io.IOException;
 import java.util.*;
 
-public class AuthFilter implements ContainerRequestFilter {
+import static com.ccl.grandcanyon.GCAuth.BEARER_PREFIX;
+import static com.ccl.grandcanyon.GCAuth.BASIC_PREFIX;
 
-  private final static String BASIC_PREFIX = "basic";
-  private final static String BEARER_PREFIX = "bearer";
+public class AuthFilter implements ContainerRequestFilter {
 
   // default role required is basic Admin
   private final static List<String> defaultRoles =
@@ -41,6 +41,7 @@ public class AuthFilter implements ContainerRequestFilter {
     if (authHeader != null) {
       Admin admin = null;
       if (authHeader.toLowerCase().startsWith(BASIC_PREFIX)) {
+        // client using Basic Auth
         String credentials = authHeader.substring(BASIC_PREFIX.length()).trim();
         byte[] decodedCredentials = Base64.getDecoder().decode(credentials);
         String[] parts = new String(decodedCredentials).split(":", 2);
@@ -50,6 +51,7 @@ public class AuthFilter implements ContainerRequestFilter {
         admin = AuthenticationService.getInstance().authenticate(userName, password);
       }
       else if (authHeader.toLowerCase().startsWith(BEARER_PREFIX)) {
+        // client using JWT token issued from login method
         String token = authHeader.substring(BEARER_PREFIX.length()).trim();
         admin = AuthenticationService.getInstance().validateToken(token);
       }
@@ -67,7 +69,7 @@ public class AuthFilter implements ContainerRequestFilter {
     }
 
     else {
-      // no auth header
+      // no auth header, which is OK only if the method allows anonymous access
       if (!roles.contains(GCAuth.ANONYMOUS)) {
         throw new NotAuthorizedException("Authentication Required",
             WWW_AUTHENTICATE_CHALLENGE);

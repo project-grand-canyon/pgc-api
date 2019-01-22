@@ -16,4 +16,8 @@ public abstract class GCAuth
   // "role" for operations that can be invoked without authentication
   public static final String ANONYMOUS = "Anonymous";
 
+  // Supported authorization header types
+  public final static String BASIC_PREFIX = "basic";
+  public final static String BEARER_PREFIX = "bearer";
+
 }

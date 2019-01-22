@@ -1,5 +1,6 @@
 package com.ccl.grandcanyon.types;
 
+
 public class Address {
 
   private String addressLine1;

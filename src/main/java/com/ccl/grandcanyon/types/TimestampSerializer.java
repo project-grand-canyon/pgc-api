@@ -9,6 +9,9 @@ import java.sql.Timestamp;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * JSON serializer for SQL timestamps.
+ */
 public class TimestampSerializer extends JsonSerializer<Timestamp> {
 
   private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");

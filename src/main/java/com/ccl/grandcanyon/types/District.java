@@ -4,6 +4,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 
+/**
+ * Class representing a congressional district or senate seat.
+ */
 public class District extends GCBase {
 
   // District table column names

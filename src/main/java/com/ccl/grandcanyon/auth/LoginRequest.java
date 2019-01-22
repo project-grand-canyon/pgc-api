@@ -1,6 +1,9 @@
 package com.ccl.grandcanyon.auth;
 
 
+/**
+ * JSON login request bean.
+ */
 public class LoginRequest {
 
   private String userName;

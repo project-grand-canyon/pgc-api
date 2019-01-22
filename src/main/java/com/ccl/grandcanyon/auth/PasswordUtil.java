@@ -13,6 +13,9 @@ import java.util.Arrays;
 import java.util.Base64;
 
 
+/**
+ * utilities for hashing and checking passwords
+ */
 public class PasswordUtil {
 
   private static final int ITERATIONS = 1 << 16;
