@@ -13,52 +13,75 @@ import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import java.io.*;
 import java.security.SecureRandom;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.logging.Logger;
 
 public class AuthenticationService {
 
-  private int refreshIntervalMinutes;
-  private int jwtLifetime;
+  private static int refreshIntervalMinutes;
+  private static int jwtLifetimeMinutes;
   private static AuthenticationService instance;
 
-  // note that a new HMAC secret is generated each time the service is
-  // restarted, which means that all existing tokens are invalidated
-  // on restart.
+
   private JWSSigner signer;
   private JWSVerifier verifier;
+  private JWSVerifier previousVerifier;
+
+  private SecretKeys keys;
+
+  private static final Logger logger = Logger.getLogger(AuthenticationService.class.getName());
 
   private static final String WWW_AUTHENTICATE_CHALLENGE =
       "Basic realm=\"GrandCanyon\"";
 
+  private static final String SAVED_STATE_FILE = "saved_state";
 
-  public static void init(int lifetime, int refreshInterval) {
+
+  public static void init(
+      int lifetime,
+      int refreshInterval) throws JOSEException {
 
     assert(instance == null);
-    instance = new AuthenticationService(lifetime, refreshInterval);
+    jwtLifetimeMinutes = lifetime;
+    refreshIntervalMinutes = refreshInterval;
+    instance = new AuthenticationService();
   }
+
 
   public static AuthenticationService getInstance() {
     return instance;
   }
 
-  private AuthenticationService(int lifetime, int refreshInterval) {
-    this.jwtLifetime = lifetime;
-    this.refreshIntervalMinutes = refreshInterval;
 
+  private AuthenticationService() throws JOSEException {
 
-    byte[] secret = new byte[32];
-    new SecureRandom().nextBytes(secret);
-    try {
-      this.signer = new MACSigner(secret);
-      this.verifier = new MACVerifier(secret);
+    File savedStateFile = new File(SAVED_STATE_FILE);
+    if (savedStateFile.exists()) {
+      try {
+        ObjectInputStream savedStateIn = new ObjectInputStream(
+            new FileInputStream(savedStateFile));
+        keys = (SecretKeys)savedStateIn.readObject();
+        savedStateIn.close();
+      }
+      catch (Exception e) {
+        logger.warning("Error reading saved state, generating new JWT keys. " +
+            "Previously issued access tokens will not be accepted. " +
+            "Exception message: " + e.getMessage() );
+      }
     }
-    catch (JOSEException e) {
-      // todo: log error or shut down
+
+    if (keys == null) {
+      keys = new SecretKeys();
+    }
+    updateKeys();
+    if (this.signer == null) {
+      installKeys();
     }
   }
 
@@ -100,18 +123,20 @@ public class AuthenticationService {
   public TokenResponse generateToken(Admin admin, UriInfo uriInfo) {
 
     try {
+      updateKeys();
+
       JWTClaimsSet.Builder builder = new JWTClaimsSet.Builder().subject(admin.getUserName());
       builder.issuer(uriInfo.getAbsolutePath().toString());
       LocalDateTime currentTime = LocalDateTime.now();
       builder.issueTime(toDate(currentTime));
-      builder.expirationTime(toDate(currentTime.plusMinutes(jwtLifetime)));
+      builder.expirationTime(toDate(currentTime.plusMinutes(jwtLifetimeMinutes)));
 
       SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), builder.build());
 
       signedJWT.sign(signer);
       TokenResponse tokenResponse = new TokenResponse();
       tokenResponse.setAccessToken(signedJWT.serialize());
-      tokenResponse.setExpiresIn(jwtLifetime*60);
+      tokenResponse.setExpiresIn(jwtLifetimeMinutes *60);
       return tokenResponse;
     }
     catch (JOSEException e) {
@@ -132,9 +157,15 @@ public class AuthenticationService {
       throw new ForbiddenException("Invalid access token", e);
     }
 
+    if (claimsSet.getExpirationTime().before(new Date())) {
+      throw new ForbiddenException("Invalid token: expired");
+    }
+
     try {
       if (!signedJWT.verify(verifier)) {
-        throw new ForbiddenException("Invalid access token signature");
+        if (previousVerifier == null || !signedJWT.verify(previousVerifier)) {
+          throw new ForbiddenException("Invalid access token signature");
+        }
       }
     }
     catch (JOSEException e) {
@@ -152,18 +183,109 @@ public class AuthenticationService {
     if (admin == null) {
       throw new ForbiddenException("Invalid token: unknown subject");
     }
-    if (claimsSet.getExpirationTime().before(new Date())) {
-      throw new ForbiddenException("Invalid token: expired");
-    }
+
     return admin;
   }
 
 
   public void tearDown() {
 
+    try {
+      if (keys != null) {
+        ObjectOutputStream savedStateOut = new ObjectOutputStream(
+            new FileOutputStream(SAVED_STATE_FILE));
+        savedStateOut.writeObject(keys);
+        savedStateOut.close();
+      }
+    }
+    catch (IOException e) {
+      logger.warning("Failed to save state: " + e.getMessage());
+    }
   }
+
+
+  private void updateKeys() throws JOSEException {
+
+    if (keys.getCurrent() == null ||
+        keys.getCurrent().getLastTokenGenTime().isBefore(LocalDateTime.now())) {
+      HashKey previousKey = keys.getCurrent();
+      byte[] newKey = new byte[32];
+      new SecureRandom().nextBytes(newKey);
+      keys.setCurrent(new HashKey(newKey));
+
+      if (previousKey != null &&
+          previousKey.getLastTokenVerifyTime().isAfter(LocalDateTime.now())) {
+        keys.setPrevious(previousKey);
+      }
+
+      installKeys();
+    }
+  }
+
+
+  private void installKeys() throws JOSEException {
+
+    this.signer = new MACSigner(keys.getCurrent().getValue());
+    this.verifier = new MACVerifier(keys.getCurrent().getValue());
+    if (keys.getPrevious() != null) {
+      this.previousVerifier = new MACVerifier(keys.getPrevious().getValue());
+    }
+
+  }
+
 
   private Date toDate(LocalDateTime dateTime) {
     return Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant());
   }
+
+
+  static class SecretKeys implements Serializable {
+    private HashKey current;
+    private HashKey previous;
+
+    public HashKey getCurrent() {
+      return current;
+    }
+
+    public void setCurrent(HashKey current) {
+      this.current = current;
+    }
+
+    public HashKey getPrevious() {
+      return previous;
+    }
+
+    public void setPrevious(HashKey previous) {
+      this.previous = previous;
+    }
+  }
+
+
+  static class HashKey implements Serializable {
+
+    private byte[] value;
+    private LocalDateTime lastTokenGenTime;
+    private LocalDateTime lastTokenVerifyTime;
+
+    public HashKey(byte[] value) {
+      this.value = value;
+      this.lastTokenGenTime = LocalDateTime.now().plusMinutes(jwtLifetimeMinutes);
+      this.lastTokenVerifyTime = this.lastTokenGenTime.plusMinutes(jwtLifetimeMinutes);
+    }
+
+    public byte[] getValue() {
+      return value;
+    }
+
+    public LocalDateTime getLastTokenGenTime() {
+      return lastTokenGenTime;
+    }
+
+    public LocalDateTime getLastTokenVerifyTime() {
+      return lastTokenVerifyTime;
+    }
+
+  }
+
+
 }

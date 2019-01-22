@@ -1,6 +1,7 @@
 package com.ccl.grandcanyon;
 
 import com.ccl.grandcanyon.auth.AuthenticationService;
+import com.nimbusds.jose.JOSEException;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -38,19 +39,18 @@ public class GCContextListener implements ServletContextListener {
           "/WEB-INF/classes/config.properties"));
     }
     catch (IOException e) {
-      servletContext.log("Initialization failed: failed to load config.properties", e);
-      return;
+      throw new RuntimeException(
+          "Initialization failed: failed to load config.properties", e);
     }
 
-    if (!(properties.containsKey(sqlPoolSize)) || !properties.containsKey(sqlUrl)) {
-      servletContext.log(
+    if (!properties.containsKey(sqlUrl)) {
+      throw new RuntimeException(
           "Initialization failed: config.properties missing one or more required properties");
-      return;
     }
     url = properties.getProperty(sqlUrl);
     HikariConfig config = new HikariConfig();
     config.setJdbcUrl(url);
-    config.setMaximumPoolSize(Integer.parseInt(properties.getProperty(sqlPoolSize)));
+    config.setMaximumPoolSize(Integer.parseInt(properties.getProperty(sqlPoolSize, "3")));
     SQLHelper.init(new HikariDataSource(config));
 
     ReminderService.init(
@@ -58,9 +58,15 @@ public class GCContextListener implements ServletContextListener {
         Integer.parseInt(properties.getProperty(reminderInterval, "30")),
         Integer.parseInt(properties.getProperty(secondReminderInterval, "4")));
 
-    AuthenticationService.init(
-        Integer.parseInt(properties.getProperty(jwtLifetime, "240")),
-        Integer.parseInt(properties.getProperty(jwtRefreshInterval, "60")));
+    try {
+      AuthenticationService.init(
+          Integer.parseInt(properties.getProperty(jwtLifetime, "240")),
+          Integer.parseInt(properties.getProperty(jwtRefreshInterval, "60")));
+    }
+    catch (JOSEException e) {
+      throw new RuntimeException(
+          "Initialization failed: failed to initialize Authentication Service", e);
+    }
 
     Runtime.getRuntime().addShutdownHook(new Thread() {
       public void run() {
