@@ -16,14 +16,19 @@ public class Admin extends GCBase {
   // SQL column names
   public static final String ADMIN_ID = "admin_id";
   public static final String USER_NAME = "user_name";
+  public static final String EMAIL = "email";
   public static final String IS_ROOT = "is_root";
   public static final String TOKEN = "token";
   public static final String DISTRICT_ID = "district_id";
+  public static final String LOGIN_ENABLED = "login_enabled";
+
 
   private int adminId;
   private String userName;
+  private String email;
   private List<Integer> districts;
   private boolean isRoot;
+  private boolean loginEnabled;
 
   @JsonInclude(JsonInclude.Include.NON_NULL)
   private String password;
@@ -33,12 +38,15 @@ public class Admin extends GCBase {
 
   public Admin() {}
 
+
   public Admin(ResultSet rs) throws SQLException {
     super(rs);
     this.adminId = rs.getInt(ADMIN_ID);
     this.userName = rs.getString(USER_NAME);
+    this.email = rs.getString(EMAIL);
     this.isRoot = rs.getBoolean(IS_ROOT);
     this.token = rs.getString(TOKEN);
+    this.loginEnabled = rs.getBoolean(LOGIN_ENABLED);
     this.password = null;  // always
     this.districts = new ArrayList<>();
     do {
@@ -66,6 +74,14 @@ public class Admin extends GCBase {
 
   public void setUserName(String userName) {
     this.userName = userName;
+  }
+
+  public String getEmail() {
+    return email;
+  }
+
+  public void setEmail(String email) {
+    this.email = email;
   }
 
   public List<Integer> getDistricts() {
@@ -99,4 +115,13 @@ public class Admin extends GCBase {
   public void setToken(String token) {
     this.token = token;
   }
+
+  public boolean isLoginEnabled() {
+    return loginEnabled;
+  }
+
+  public void setLoginEnabled(boolean loginEnabled) {
+    this.loginEnabled = loginEnabled;
+  }
+
 }

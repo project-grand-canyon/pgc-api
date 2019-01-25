@@ -27,8 +27,10 @@ public class Admins {
       "INSERT INTO admins (" +
           Admin.USER_NAME + ", " +
           Admin.IS_ROOT + ", " +
-          Admin.TOKEN +
-          ") VALUES (?, ?, ?)";
+          Admin.TOKEN + ", " +
+          Admin.EMAIL + ", " +
+          Admin.LOGIN_ENABLED +
+          ") VALUES (?, ?, ?, ?, ?)";
 
   private static final String SQL_INSERT_ADMIN_DISTRICTS =
       "INSERT INTO admins_districts (" +
@@ -39,13 +41,17 @@ public class Admins {
       "UPDATE admins SET " +
           Admin.USER_NAME + " = ?, " +
           Admin.IS_ROOT + " = ?, " +
-          Admin.TOKEN + " = ? " +
+          Admin.TOKEN + " = ?, " +
+          Admin.EMAIL + " = ?, " +
+          Admin.LOGIN_ENABLED + " = ? " +
           "WHERE " + Admin.ADMIN_ID + " = ?";
 
   private static final String SQL_UPDATE_ADMIN_EXCEPT_PASSWORD =
       "UPDATE admins SET " +
           Admin.USER_NAME + " = ?, " +
-          Admin.IS_ROOT + " = ? " +
+          Admin.IS_ROOT + " = ?, " +
+          Admin.EMAIL + " = ?, " +
+          Admin.LOGIN_ENABLED + " = ? " +
           "WHERE " + Admin.ADMIN_ID + " = ?";
 
   private static final String SQL_DELETE_ADMIN_DISTRICTS =
@@ -67,11 +73,19 @@ public class Admins {
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
-  @RolesAllowed(GCAuth.SUPER_ADMIN_ROLE)
+  @RolesAllowed(GCAuth.ANONYMOUS)
   public Response createAdmin(Admin admin) throws SQLException {
 
+    if (admin.isLoginEnabled()) {
+      // creating an active Admin requires the super-admin role
+      Admin activeUser = (Admin)requestContext.getProperty(GCAuth.CURRENT_PRINCIPAL);
+      if (activeUser == null || !activeUser.isRoot()) {
+        throw new ForbiddenException("Operation requires super-admin privilege.");
+      }
+    }
+
     if (admin.getPassword() == null) {
-      throw new BadRequestException("Admin user must have password.");
+      throw new BadRequestException("Admin users must have a password.");
     }
 
     // todo: password requirements?
@@ -86,6 +100,8 @@ public class Admins {
       insert.setString(1, admin.getUserName());
       insert.setBoolean(2, admin.isRoot());
       insert.setString(3, token);
+      insert.setString(4, admin.getEmail());
+      insert.setBoolean(5, admin.isLoginEnabled());
       insert.executeUpdate();
 
       // return new Admin object
@@ -139,6 +155,8 @@ public class Admins {
 
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
+
+      Admin previousValue = retrieveById(conn, adminId);
       // use transaction
       conn.setAutoCommit(false);
 
@@ -149,6 +167,8 @@ public class Admins {
       if (token != null) {
         update.setString(pos++, token);
       }
+      update.setString(pos++, admin.getEmail());
+      update.setBoolean(pos++, admin.isLoginEnabled());
       update.setInt(pos++, adminId);
       update.executeUpdate();
 

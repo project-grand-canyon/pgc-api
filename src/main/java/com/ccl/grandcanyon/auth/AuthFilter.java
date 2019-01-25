@@ -39,8 +39,9 @@ public class AuthFilter implements ContainerRequestFilter {
 
     String authHeader = context.getHeaderString(HttpHeaders.AUTHORIZATION);
     if (authHeader != null) {
-      Admin admin = null;
+      Admin admin;
       if (authHeader.toLowerCase().startsWith(BASIC_PREFIX)) {
+
         // client using Basic Auth
         String credentials = authHeader.substring(BASIC_PREFIX.length()).trim();
         byte[] decodedCredentials = Base64.getDecoder().decode(credentials);
@@ -51,6 +52,7 @@ public class AuthFilter implements ContainerRequestFilter {
         admin = AuthenticationService.getInstance().authenticate(userName, password);
       }
       else if (authHeader.toLowerCase().startsWith(BEARER_PREFIX)) {
+
         // client using JWT token issued from login method
         String token = authHeader.substring(BEARER_PREFIX.length()).trim();
         admin = AuthenticationService.getInstance().validateToken(token);
@@ -60,6 +62,10 @@ public class AuthFilter implements ContainerRequestFilter {
         throw new NotAuthorizedException(
             "Unsupported Authorization Header type: '" + authHeader + "'",
             WWW_AUTHENTICATE_CHALLENGE);
+      }
+
+      if (!admin.isLoginEnabled()) {
+        throw new ForbiddenException("Token bearer's account has been disabled.");
       }
 
       if (!admin.isRoot() && roles.contains(GCAuth.SUPER_ADMIN_ROLE)) {

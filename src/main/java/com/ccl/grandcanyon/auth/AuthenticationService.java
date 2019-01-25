@@ -81,6 +81,7 @@ public class AuthenticationService {
             new FileInputStream(savedStateFile));
         keys = (SecretKeys)savedStateIn.readObject();
         savedStateIn.close();
+        savedStateFile.delete();
       }
       catch (Exception e) {
         logger.warning("Error reading saved state, generating new JWT keys. " +
@@ -116,6 +117,11 @@ public class AuthenticationService {
     }
     catch (SQLException e) {
       throw new ServerErrorException(e.getMessage(), Response.Status.INTERNAL_SERVER_ERROR);
+    }
+
+    if (admin != null && !(admin.isLoginEnabled())) {
+      throw new NotAuthorizedException("Account not enabled for login",
+          WWW_AUTHENTICATE_CHALLENGE);
     }
 
     if (admin == null ||
@@ -222,7 +228,9 @@ public class AuthenticationService {
       claimsSet = signedJWT.getJWTClaimsSet();
 
       LocalDateTime expireTime = toLocalDateTime(claimsSet.getExpirationTime());
-      return expireTime.minusMinutes(refreshIntervalMinutes).isBefore(LocalDateTime.now());
+      LocalDateTime now = LocalDateTime.now();
+      return expireTime.minusMinutes(refreshIntervalMinutes).isBefore(now) &&
+          expireTime.isAfter(now);
     }
     catch (ParseException e) {
       logger.warning("JWT Refresh internval not honored due to error: " + e.getMessage());
