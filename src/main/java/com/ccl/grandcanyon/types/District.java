@@ -15,7 +15,7 @@ public class District extends GCBase {
   public static final String DISTRICT_NUMBER = "district_number";
   public static final String REP_FIRST_NAME = "rep_first_name";
   public static final String REP_LAST_NAME = "rep_last_name";
-
+  public static final String REP_IMAGE_URL = "rep_image_url";
   public static final String INFO = "info";
 
   private int districtId;
@@ -23,6 +23,7 @@ public class District extends GCBase {
   private int number;
   private String repFirstName;
   private String repLastName;
+  private String repImageUrl;
 
   private String info;
 
@@ -38,6 +39,7 @@ public class District extends GCBase {
     this.number = rs.getInt(DISTRICT_NUMBER);
     this.repFirstName = rs.getString(REP_FIRST_NAME);
     this.repLastName = rs.getString(REP_LAST_NAME);
+    this.repImageUrl = rs.getString(REP_IMAGE_URL);
     this.info = rs.getString(INFO);
   }
 
@@ -78,6 +80,14 @@ public class District extends GCBase {
 
   public void setRepLastName(String repLastName) {
     this.repLastName = repLastName;
+  }
+
+  public String getRepImageUrl() {
+    return repImageUrl;
+  }
+
+  public void setRepImageUrl(String repImageUrl) {
+    this.repImageUrl = repImageUrl;
   }
 
   public String getInfo() {

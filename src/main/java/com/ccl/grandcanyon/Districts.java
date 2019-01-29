@@ -28,8 +28,9 @@ public class Districts {
           District.DISTRICT_NUMBER + ", " +
           District.REP_FIRST_NAME + ", " +
           District.REP_LAST_NAME + ", " +
+          District.REP_IMAGE_URL + ", " +
           District.INFO +
-          ") VALUES (?, ?, ?, ?, ?)";
+          ") VALUES (?, ?, ?, ?, ?, ?)";
 
   private static final String SQL_UPDATE_DISTRICT =
       "UPDATE districts SET " +
@@ -37,6 +38,7 @@ public class Districts {
           District.DISTRICT_NUMBER + " = ?, " +
           District.REP_FIRST_NAME + " = ?, " +
           District.REP_LAST_NAME + " = ?, " +
+          District.REP_IMAGE_URL + " = ?, " +
           District.INFO + " = ? " +
           "WHERE " + District.DISTRICT_ID + " = ?";
 
@@ -79,6 +81,7 @@ public class Districts {
       insertStatement.setInt(idx++, district.getNumber());
       insertStatement.setString(idx++, district.getRepFirstName());
       insertStatement.setString(idx++, district.getRepLastName());
+      insertStatement.setString(idx++, district.getRepImageUrl());
       insertStatement.setString(idx++, district.getInfo());
       insertStatement.executeUpdate();
 
@@ -122,6 +125,7 @@ public class Districts {
       statement.setInt(idx++, district.getNumber());
       statement.setString(idx++, district.getRepFirstName());
       statement.setString(idx++, district.getRepLastName());
+      statement.setString(idx++, district.getRepImageUrl());
       statement.setString(idx++, district.getInfo());
       statement.setInt(idx++, districtId);
       statement.executeUpdate();
