@@ -140,14 +140,58 @@ public class Districts {
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  public Response getDistricts() throws SQLException {
+  public Response getDistricts(
+      @QueryParam("id") Integer id,
+      @QueryParam("number") Integer number,
+      @QueryParam("state") String state,
+      @QueryParam("hydrated") Boolean hydratedParam)
+      throws SQLException {
+
+    // check params
+    if (id != null && (state != null || number != null)) {
+      throw new BadRequestException("Cannot specify both id query parameter and state/number");
+    }
+    if ((number != null && state == null) || (state != null && number == null) ) {
+      throw new BadRequestException("Must specify both number and state parameter");
+    }
+
+    boolean hydrated = (hydratedParam != null) && hydratedParam;
+    if (hydrated && (id == null && state == null)) {
+      throw new BadRequestException("Hydrated parameter not supported when returning multiple results");
+    }
 
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
+
+      PreparedStatement statement;
+      StringBuilder query = new StringBuilder(SQL_SELECT_DISTRICT);
+      if (id != null) {
+        query.append(" WHERE " + District.DISTRICT_ID + " = ?");
+        statement = conn.prepareStatement(query.toString());
+        statement.setInt(1, id);
+      }
+      else if (state != null) {
+        query.append(" WHERE " + District.STATE + " = ?");
+        query.append(" AND " + District.DISTRICT_NUMBER + " = ?");
+        statement = conn.prepareStatement(query.toString());
+        statement.setString(1, state);
+        statement.setInt(2, number);
+      }
+      else {
+        statement = conn.prepareStatement(query.toString());
+      }
+      ResultSet rs = statement.executeQuery();
+
       List<District> districts = new ArrayList<>();
-      ResultSet rs = conn.createStatement().executeQuery(SQL_SELECT_DISTRICT);
-      while (rs.next()) {
-        districts.add(new District(rs));
+      if (hydrated) {
+        if (rs.next()) {
+          districts.add(getDistrictHydrated(conn, rs));
+        }
+      }
+      else {
+        while (rs.next()) {
+          districts.add(new District(rs));
+        }
       }
       return Response.ok(districts).build();
     }
@@ -285,33 +329,13 @@ public class Districts {
   @GET
   @Path("{districtId}/hydrated")
   @Produces(MediaType.APPLICATION_JSON)
-  public Response getScriptHydrated(@PathParam("districtId") int districtId)
+  public Response getDistrictHydrated(@PathParam("districtId") int districtId)
       throws SQLException {
 
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
-      ResultSet rs = getDistrictResultSet(conn, districtId);
-      DistrictHydrated district = new DistrictHydrated(rs);
-
-      List<Integer> orderedTalkingPointIds = getScriptTalkingPointIds(conn, districtId);
-      if (orderedTalkingPointIds.isEmpty()) {
-        district.setScript(Collections.emptyList());
-      }
-      else {
-        Map<Integer, TalkingPoint> tpMap = TalkingPoints.getSelectedTalkingPoints(
-            conn, orderedTalkingPointIds);
-        List<TalkingPoint> orderedTalkingPoints = new ArrayList<>();
-        for (int id : orderedTalkingPointIds) {
-          TalkingPoint tp = tpMap.get(id);
-          if (tp != null) {
-            orderedTalkingPoints.add(tp);
-          }
-        }
-        district.setScript(orderedTalkingPoints);
-      }
-
-      district.setOffices(DistrictOffices.getDistrictOffices(conn, districtId));
-      return Response.ok(district).build();
+      ResultSet rs = getResultSetForId(conn, districtId);
+      return Response.ok(getDistrictHydrated(conn, rs)).build();
     }
     finally {
       conn.close();
@@ -319,16 +343,48 @@ public class Districts {
   }
 
 
+  private DistrictHydrated getDistrictHydrated(
+      Connection conn,
+      ResultSet rs) throws SQLException {
+
+    DistrictHydrated district = new DistrictHydrated(rs);
+
+    List<Integer> orderedTalkingPointIds = getScriptTalkingPointIds(conn,
+        district.getDistrictId());
+
+    if (orderedTalkingPointIds.isEmpty()) {
+      district.setScript(Collections.emptyList());
+    }
+    else {
+      Map<Integer, TalkingPoint> tpMap = TalkingPoints.getSelectedTalkingPoints(
+          conn, orderedTalkingPointIds);
+      List<TalkingPoint> orderedTalkingPoints = new ArrayList<>();
+      for (int id : orderedTalkingPointIds) {
+        TalkingPoint tp = tpMap.get(id);
+        if (tp != null) {
+          orderedTalkingPoints.add(tp);
+        }
+      }
+      district.setScript(orderedTalkingPoints);
+    }
+
+    district.setOffices(DistrictOffices.getDistrictOffices(conn, district.getDistrictId()));
+    return district;
+  }
+
+
+
   private District retrieveDistrictById(
       Connection conn,
       int districtId)
       throws SQLException {
 
-    return new District(getDistrictResultSet(conn, districtId));
+    return new District(getResultSetForId(conn, districtId));
   }
 
 
-  private ResultSet getDistrictResultSet(
+
+  private ResultSet getResultSetForId(
       Connection conn,
       int districtId)
       throws SQLException {
@@ -342,6 +398,7 @@ public class Districts {
     }
     return rs;
   }
+
 
 
   private List<Integer> getScriptTalkingPointIds(
