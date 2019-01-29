@@ -3,7 +3,8 @@
 CREATE TABLE districts (district_id INT NOT NULL AUTO_INCREMENT,
 state VARCHAR(2) NOT NULL,
 district_number INT NOT NULL,
-representative VARCHAR(128),
+rep_first_name VARCHAR(50),
+rep_last_name VARCHAR(50),
 info VARCHAR(512),
 created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 last_modified DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -100,5 +101,12 @@ UNIQUE (user_name) )
 CREATE TABLE admins_districts (admin_id INT NOT NULL, district_id INT NOT NULL,
 FOREIGN KEY (admin_id) REFERENCES admins (admin_id) ON DELETE CASCADE,
 FOREIGN KEY (district_id) REFERENCES districts (district_id) ON DELETE CASCADE )
+
+CREATE TABLE district_scripts
+(district_id INT NOT NULL, talking_point_id INT NOT NULL, position INT NOT NULL,
+FOREIGN KEY (district_id) REFERENCES districts (district_id) ON DELETE CASCADE,
+FOREIGN KEY (talking_point_id) REFERENCES talking_points (talking_point_id) ON DELETE CASCADE,
+UNIQUE (district_id, talking_point_id),
+UNIQUE (district_id, position))
 
 

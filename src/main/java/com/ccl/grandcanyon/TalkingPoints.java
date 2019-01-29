@@ -11,7 +11,9 @@ import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Path("/talkingpoints")
 public class TalkingPoints {
@@ -210,6 +212,32 @@ public class TalkingPoints {
     finally {
       conn.close();
     }
+  }
+
+
+  public static Map<Integer, TalkingPoint> getSelectedTalkingPoints(
+      Connection conn,
+      List<Integer> talkingPointIds)
+      throws SQLException {
+
+    Map<Integer, TalkingPoint> map = new HashMap<>();
+    StringBuilder query = new StringBuilder(SQL_SELECT_TALKING_POINT).
+        append(" WHERE tp.").
+        append(TalkingPoint.TALKING_POINT_ID).
+        append(" IN (");
+
+    for (Integer id : talkingPointIds) {
+      query.append(id).append(",");
+    }
+    query.deleteCharAt(query.length()-1);
+    query.append(") ORDER BY tp.").
+        append(TalkingPoint.TALKING_POINT_ID);
+    ResultSet rs = conn.createStatement().executeQuery(query.toString());
+    while (rs.next()) {
+      TalkingPoint tp = new TalkingPoint(rs);
+      map.put(tp.getTalkingPointId(), tp);
+    }
+    return map;
   }
 
 

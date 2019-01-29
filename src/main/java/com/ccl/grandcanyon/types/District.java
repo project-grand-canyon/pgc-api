@@ -13,14 +13,17 @@ public class District extends GCBase {
   public static final String DISTRICT_ID = "district_id";
   public static final String STATE = "state";
   public static final String DISTRICT_NUMBER = "district_number";
-  public static final String REPRESENTATIVE = "representative";
-  public static final String INFO = "info";
+  public static final String REP_FIRST_NAME = "rep_first_name";
+  public static final String REP_LAST_NAME = "rep_last_name";
 
+  public static final String INFO = "info";
 
   private int districtId;
   private String state;
   private int number;
-  private String representative;
+  private String repFirstName;
+  private String repLastName;
+
   private String info;
 
   /**
@@ -33,7 +36,8 @@ public class District extends GCBase {
     this.districtId = rs.getInt(DISTRICT_ID);
     this.state = rs.getString(STATE);
     this.number = rs.getInt(DISTRICT_NUMBER);
-    this.representative = rs.getString(REPRESENTATIVE);
+    this.repFirstName = rs.getString(REP_FIRST_NAME);
+    this.repLastName = rs.getString(REP_LAST_NAME);
     this.info = rs.getString(INFO);
   }
 
@@ -59,12 +63,23 @@ public class District extends GCBase {
   public void setNumber(int number) {
     this.number = number;
   }
-  public String getRepresentative() {
-    return representative;
+
+  public String getRepFirstName() {
+    return repFirstName;
   }
-  public void setRepresentative(String representative) {
-    this.representative = representative;
+
+  public void setRepFirstName(String repFirstName) {
+    this.repFirstName = repFirstName;
   }
+
+  public String getRepLastName() {
+    return repLastName;
+  }
+
+  public void setRepLastName(String repLastName) {
+    this.repLastName = repLastName;
+  }
+
   public String getInfo() {
     return info;
   }

@@ -14,11 +14,11 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Path("/districtoffices")
+@Path("/districts/{districtId}/offices")
 public class DistrictOffices {
 
   private static final String SQL_SELECT_DISTRICT_OFFICE =
-      "SELECT * from district_offices";
+      "SELECT * from district_offices WHERE " + DistrictOffice.DISTRICT_ID + " = ?";
 
   private static final String SQL_CREATE_DISTRICT_OFFICE =
       "INSERT INTO district_offices (" +
@@ -37,7 +37,6 @@ public class DistrictOffices {
 
   private static final String SQL_UPDATE_DISTRICT_OFFICE =
       "UPDATE district_offices SET " +
-          DistrictOffice.DISTRICT_ID + " = ?, " +
           DistrictOffice.ADDRESS_LINE1 + " = ?, " +
           DistrictOffice.ADDRESS_LINE2 + " = ?, " +
           DistrictOffice.CITY + " = ?, " +
@@ -48,11 +47,13 @@ public class DistrictOffices {
           DistrictOffice.EMAIL + " = ?, " +
           DistrictOffice.OPENS_AT + " = ?, " +
           DistrictOffice.CLOSES_AT + " = ? " +
-          "WHERE " + DistrictOffice.DISTRICT_OFFICE_ID + " = ?";
+          "WHERE " + DistrictOffice.DISTRICT_ID + " = ? AND " +
+          DistrictOffice.DISTRICT_OFFICE_ID + " = ?";
 
   private static final String SQL_DELETE_DISTRICT_OFFICE =
       "DELETE from district_offices " +
-          "WHERE " + DistrictOffice.DISTRICT_OFFICE_ID + " = ?";
+          "WHERE " + DistrictOffice.DISTRICT_ID + " = ? AND " +
+          DistrictOffice.DISTRICT_OFFICE_ID + " = ?";
 
 
   @Context
@@ -62,7 +63,9 @@ public class DistrictOffices {
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
-  public Response createOffice(DistrictOffice office) throws SQLException {
+  public Response createOffice(
+      @PathParam("districtId") int districtId,
+      DistrictOffice office) throws SQLException {
 
     // todo: ensure admin is for district
 
@@ -70,7 +73,7 @@ public class DistrictOffices {
     try {
       PreparedStatement insertStatement = conn.prepareStatement(SQL_CREATE_DISTRICT_OFFICE,
           Statement.RETURN_GENERATED_KEYS);
-      insertStatement.setInt(1, office.getDistrictId());
+      insertStatement.setInt(1, districtId);
       insertStatement.setString(2, office.getAddress().getAddressLine1());
       insertStatement.setString(3, office.getAddress().getAddressLine2());
       insertStatement.setString(4, office.getAddress().getCity());
@@ -93,7 +96,7 @@ public class DistrictOffices {
         throw new SQLException("Create of District Office failed, no ID obtained.");
       }
 
-      DistrictOffice newOffice = retrieveById(conn, districtOfficeId);
+      DistrictOffice newOffice = retrieveById(conn, districtId, districtOfficeId);
       URI location = uriInfo.getAbsolutePathBuilder().path(Integer.toString(
           newOffice.getDistrictOfficeId())).build();
       return Response.created(location).entity(newOffice).build();
@@ -109,6 +112,7 @@ public class DistrictOffices {
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
   public Response updateOffice(
+      @PathParam("districtId") int districtId,
       @PathParam("officeId") int officeId,
       DistrictOffice office)
       throws SQLException {
@@ -118,21 +122,22 @@ public class DistrictOffices {
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
       PreparedStatement update = conn.prepareStatement(SQL_UPDATE_DISTRICT_OFFICE);
-      update.setInt(1, office.getDistrictId());
-      update.setString(2, office.getAddress().getAddressLine1());
-      update.setString(3, office.getAddress().getAddressLine2());
-      update.setString(4, office.getAddress().getCity());
-      update.setString(5, office.getAddress().getState());
-      update.setString(6, office.getAddress().getCountry());
-      update.setString(7, office.getAddress().getZipCode());
-      update.setString(8, office.getPhone());
-      update.setString(9, office.getEmail());
-      update.setTime(10, office.getOpensAt());
-      update.setTime(11, office.getClosesAt());
-      update.setInt(12, officeId);
+      int idx = 1;
+      update.setString(idx++, office.getAddress().getAddressLine1());
+      update.setString(idx++, office.getAddress().getAddressLine2());
+      update.setString(idx++, office.getAddress().getCity());
+      update.setString(idx++, office.getAddress().getState());
+      update.setString(idx++, office.getAddress().getCountry());
+      update.setString(idx++, office.getAddress().getZipCode());
+      update.setString(idx++, office.getPhone());
+      update.setString(idx++, office.getEmail());
+      update.setTime(idx++, office.getOpensAt());
+      update.setTime(idx++, office.getClosesAt());
+      update.setInt(idx++, districtId);
+      update.setInt(idx++, officeId);
       update.executeUpdate();
 
-      return Response.ok(retrieveById(conn, officeId)).build();
+      return Response.ok(retrieveById(conn, districtId, officeId)).build();
     }
     finally {
       conn.close();
@@ -142,32 +147,45 @@ public class DistrictOffices {
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  public Response getOffices() throws SQLException {
+  public Response getOffices(@PathParam("districtId") int districtId) throws SQLException {
 
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
-      List<DistrictOffice> offices = new ArrayList<>();
-      ResultSet rs = conn.createStatement().executeQuery(SQL_SELECT_DISTRICT_OFFICE);
-      while (rs.next()) {
-        offices.add(new DistrictOffice(rs));
-      }
-      return Response.ok(offices).build();
+      return Response.ok(getDistrictOffices(conn, districtId)).build();
     }
     finally {
       conn.close();
     }
+  }
+
+
+  public static List<DistrictOffice> getDistrictOffices(
+      Connection conn,
+      int districtId)
+      throws SQLException {
+
+    List<DistrictOffice> offices = new ArrayList<>();
+    PreparedStatement statement = conn.prepareStatement(SQL_SELECT_DISTRICT_OFFICE);
+    statement.setInt(1, districtId);
+    ResultSet rs = statement.executeQuery();
+    while (rs.next()) {
+      offices.add(new DistrictOffice(rs));
+    }
+    return offices;
   }
 
 
   @GET
   @Path("{officeId}")
   @Produces(MediaType.APPLICATION_JSON)
-  public Response getById(@PathParam("officeId") int officeId)
+  public Response getById(
+      @PathParam("districtId") int districtId,
+      @PathParam("officeId") int officeId)
       throws SQLException {
 
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
-      return Response.ok(retrieveById(conn, officeId)).build();
+      return Response.ok(retrieveById(conn, districtId, officeId)).build();
     }
     finally {
       conn.close();
@@ -177,7 +195,9 @@ public class DistrictOffices {
 
   @DELETE
   @Path("{officeId}")
-  public Response deleteOffice(@PathParam("officeId") int officeId)
+  public Response deleteOffice(
+      @PathParam("districtId") int districtId,
+      @PathParam("officeId") int officeId)
       throws SQLException {
 
     // todo: ensure admin is for district
@@ -185,7 +205,8 @@ public class DistrictOffices {
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
       PreparedStatement delete = conn.prepareStatement(SQL_DELETE_DISTRICT_OFFICE);
-      delete.setInt(1, officeId);
+      delete.setInt(1, districtId);
+      delete.setInt(2, officeId);
       delete.executeUpdate();
       return Response.noContent().build();
     }
@@ -197,17 +218,19 @@ public class DistrictOffices {
 
   private DistrictOffice retrieveById(
       Connection conn,
+      int districtId,
       int districtOfficeId)
       throws SQLException {
 
-    String whereClause = " WHERE " + DistrictOffice.DISTRICT_OFFICE_ID + " = ?";
+    String whereClause = " AND " + DistrictOffice.DISTRICT_OFFICE_ID + " = ?";
     PreparedStatement statement = conn.prepareStatement(
         SQL_SELECT_DISTRICT_OFFICE + whereClause);
-    statement.setInt(1, districtOfficeId);
+    statement.setInt(1, districtId);
+    statement.setInt(2, districtOfficeId);
     ResultSet rs = statement.executeQuery();
     if (!rs.next()) {
-      throw new NotFoundException("No district office found with ID '"
-          + districtOfficeId + "'");
+      throw new NotFoundException("No office found with ID '"
+          + districtOfficeId + "' in district " + districtId);
     }
     return new DistrictOffice(rs);
   }
