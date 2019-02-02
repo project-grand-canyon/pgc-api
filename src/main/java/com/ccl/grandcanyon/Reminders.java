@@ -1,7 +1,9 @@
 package com.ccl.grandcanyon;
 
 import com.ccl.grandcanyon.types.Caller;
+import com.ccl.grandcanyon.types.District;
 import com.fasterxml.jackson.databind.node.BooleanNode;
+import org.apache.commons.lang3.RandomStringUtils;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
@@ -28,7 +30,11 @@ public class Reminders {
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
       Caller caller = Callers.retrieveById(conn, callerId);
-      boolean success = ReminderService.getInstance().sendReminder(caller, "this is a test");
+      District district = Districts.retrieveDistrictById(
+              conn, caller.getDistrictId()
+      );
+      String trackingId = RandomStringUtils.random(8, true, true);
+      boolean success = ReminderService.getInstance().sendReminder(caller, district, trackingId);
       return Response.ok(BooleanNode.valueOf(success)).build();
     }
     finally {

@@ -15,6 +15,7 @@ public class GCApplication extends ResourceConfig {
 
   public GCApplication() {
 
+    register(CORSFilter.class);
     register(AuthFilter.class);
     register(AuthResponseFilter.class);
 

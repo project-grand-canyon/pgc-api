@@ -3,6 +3,7 @@ package com.ccl.grandcanyon;
 import com.ccl.grandcanyon.deliverymethod.DeliveryService;
 import com.ccl.grandcanyon.types.Caller;
 import com.ccl.grandcanyon.types.ContactMethod;
+import com.ccl.grandcanyon.types.District;
 import com.ccl.grandcanyon.types.Reminder;
 import com.nimbusds.jose.*;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -52,6 +53,10 @@ public class ReminderService {
           "LEFT JOIN callers AS c ON c.caller_id = r.caller_id " +
           "LEFT JOIN callers_contact_methods AS ccm on c.caller_id = ccm.caller_id";
 
+  private final static String SQL_SELECT_DISTRICT =
+      "SELECT * FROM districts WHERE " +
+          District.DISTRICT_ID + " = ?";
+
 
   private static final Logger logger = Logger.getLogger(ReminderService.class.getName());
 
@@ -71,8 +76,14 @@ public class ReminderService {
   private DeliveryService smsDeliveryService;
   private DeliveryService emailDeliveryService;
 
+  private static int dayOfMonthCounter = 1;
 
-
+  // TODO: Instead of distributing all callers across the month, do so for each district
+  private static int getNewDayOfMonth() {
+    int dayToReturn = dayOfMonthCounter;
+    dayOfMonthCounter = dayOfMonthCounter == 31 ? 1 : dayOfMonthCounter + 1;
+    return dayToReturn;
+  }
 
   public static void init(Properties config) throws JOSEException {
 
@@ -145,14 +156,9 @@ public class ReminderService {
       Connection conn,
       int callerId) throws SQLException {
 
-    OffsetDateTime currentDateTime = OffsetDateTime.now();
-    int dayOfMonth = currentDateTime.toOffsetTime().isAfter(latestReminder) ?
-        currentDateTime.plusDays(1).getDayOfMonth() :
-        currentDateTime.getDayOfMonth();
-
     PreparedStatement statement = conn.prepareStatement(SQL_INSERT_REMINDER);
     statement.setInt(1, callerId);
-    statement.setInt(2, dayOfMonth);
+    statement.setInt(2, getNewDayOfMonth());
     statement.executeUpdate();
   }
 
@@ -174,6 +180,7 @@ public class ReminderService {
 
   boolean sendReminder(
       Caller caller,
+      District district,
       String trackingId) {
 
     boolean smsReminderSent = false;
@@ -181,7 +188,7 @@ public class ReminderService {
 
     if (caller.getContactMethods().contains(ContactMethod.sms)) {
       try {
-        smsReminderSent = smsDeliveryService.send(caller, trackingId);
+        smsReminderSent = smsDeliveryService.sendRegularCallInReminder(caller, district, trackingId);
         if (smsReminderSent) {
           logger.info(String.format("Sent SMS reminder to caller {id: %d name %s %s}.",
               caller.getCallerId(), caller.getFirstName(), caller.getLastName()));
@@ -195,14 +202,14 @@ public class ReminderService {
     }
     if (caller.getContactMethods().contains(ContactMethod.email)) {
       try {
-        emailReminderSent = emailDeliveryService.send(caller, trackingId);
+        emailReminderSent = emailDeliveryService.sendRegularCallInReminder(caller, district, trackingId);
         if (emailReminderSent) {
-          logger.info(String.format("Sent email reminder to caller {id: %d name %s %s}.",
+          logger.info(String.format("Sent email reminder to caller {id: %d, name %s %s}.",
               caller.getCallerId(), caller.getFirstName(), caller.getLastName()));
         }
       }
       catch (Exception e) {
-        logger.warning(String.format("Failed to send email to caller {id: %d name %s %s}: %s",
+        logger.warning(String.format("Failed to send email to caller {id: %d, name %s %s}: %s",
             caller.getCallerId(), caller.getFirstName(), caller.getLastName(), e.getMessage()));
         emailReminderSent = false;
       }
@@ -303,9 +310,13 @@ public class ReminderService {
               lastReminderTime.getYear() != currentYear) {
 
             Caller caller = new Caller(rs);
+            PreparedStatement statement = conn.prepareStatement(SQL_SELECT_DISTRICT);
+            statement.setInt(1, caller.getDistrictId());
+            ResultSet rs2 = statement.executeQuery();
+            District district = new District(rs2);
             if (!caller.isPaused()) {
               String trackingId = RandomStringUtils.randomAlphanumeric(24);
-              if (sendReminder(caller, trackingId)) {
+              if (sendReminder(caller, district, trackingId)) {
                 updateReminderStatus(conn, caller.getCallerId(), trackingId);
               }
             }
