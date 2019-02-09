@@ -20,10 +20,6 @@ public class GCContextListener implements ServletContextListener {
   final static String sqlUrl = "sqlUrl";
   final static String sqlPoolSize = "sqlPoolSize";
 
-  final static String reminderServiceInterval = "reminderServiceInterval";
-  final static String reminderInterval = "reminderInterval";
-  final static String secondReminderInterval = "secondReminderInterval";
-
   final static String jwtLifetime = "jwtLifetime";
   final static String jwtRefreshInterval = "jwtRefreshInterval";
 
@@ -53,10 +49,13 @@ public class GCContextListener implements ServletContextListener {
     config.setMaximumPoolSize(Integer.parseInt(properties.getProperty(sqlPoolSize, "3")));
     SQLHelper.init(new HikariDataSource(config));
 
-    ReminderService.init(
-        Integer.parseInt(properties.getProperty(reminderServiceInterval, "60")),
-        Integer.parseInt(properties.getProperty(reminderInterval, "30")),
-        Integer.parseInt(properties.getProperty(secondReminderInterval, "4")));
+    try {
+      ReminderService.init(properties);
+    }
+    catch (Exception e) {
+      throw new RuntimeException(
+          "Initialization failed:  error initializing Reminder service", e);
+    }
 
     try {
       AuthenticationService.init(

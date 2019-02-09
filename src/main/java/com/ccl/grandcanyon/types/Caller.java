@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +22,8 @@ public class Caller extends GCBase {
   public static final String DISTRICT_ID = "district_id";
   public static final String ZIPCODE = "zipcode";
   public static final String PAUSED = "paused";
+  public static final String CALL_WEEK_OF_MONTH = "call_week_of_month";
+  public static final String CALL_DAY_OF_WEEK = "call_day_of_week";
 
   private int callerId;
   private String firstName;
@@ -39,6 +42,7 @@ public class Caller extends GCBase {
    * @throws SQLException
    */
   public Caller(ResultSet rs) throws SQLException {
+
     super(rs);
     callerId = rs.getInt(CALLER_ID);
     firstName = rs.getString(FIRST_NAME);

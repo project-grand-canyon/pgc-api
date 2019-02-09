@@ -82,7 +82,7 @@ created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 last_modified DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 PRIMARY KEY (district_office_id) )
 
-CREATE TABLE calls ( caller_id INT, district_id INT NOT NULL,
+CREATE TABLE calls ( caller_id INT, month INT, year INT, district_id INT,
 talking_point_id INT, created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 FOREIGN KEY (caller_id) REFERENCES callers (caller_id),
 FOREIGN KEY (district_id) REFERENCES districts (district_id) )
@@ -109,5 +109,15 @@ FOREIGN KEY (district_id) REFERENCES districts (district_id) ON DELETE CASCADE,
 FOREIGN KEY (talking_point_id) REFERENCES talking_points (talking_point_id) ON DELETE CASCADE,
 UNIQUE (district_id, talking_point_id),
 UNIQUE (district_id, position))
+
+CREATE TABLE reminders (caller_id INT NOT NULL,
+day_of_month INT NOT NULL,
+last_reminder_timestamp DATETIME,
+second_reminder_timestamp DATETIME,
+tracking_id VARCHAR(32),
+CHECK (day_of_month>=1),
+CHECK (day_of_month<=31),
+PRIMARY KEY (caller_id),
+FOREIGN KEY (caller_id) REFERENCES callers (caller_id) ON DELETE CASCADE)
 
 

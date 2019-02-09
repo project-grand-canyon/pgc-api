@@ -1,7 +1,9 @@
 package com.ccl.grandcanyon;
 
+import com.ccl.grandcanyon.auth.AuthenticationService;
 import com.ccl.grandcanyon.auth.PasswordUtil;
 import com.ccl.grandcanyon.types.Admin;
+import com.ccl.grandcanyon.types.ChangePasswordRequest;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
@@ -244,6 +246,39 @@ public class Admins {
       PreparedStatement delete = conn.prepareStatement(SQL_DELETE_ADMIN);
       delete.setInt(1, adminId);
       delete.executeUpdate();
+      return Response.noContent().build();
+    }
+    finally {
+      conn.close();
+    }
+  }
+
+
+  @PUT
+  @Path("{adminId}/password")
+  public Response changePassword(
+      @PathParam("adminId") int adminId,
+      ChangePasswordRequest passwordRequest)
+      throws SQLException {
+
+    Admin activeUser = (Admin)requestContext.getProperty(GCAuth.CURRENT_PRINCIPAL);
+    if (activeUser.getAdminId() != adminId) {
+      throw new ForbiddenException("Change password API is self-service only");
+    }
+
+    // validate current password
+    AuthenticationService.getInstance().authenticate(
+        activeUser.getUserName(), passwordRequest.getCurrentPassword());
+
+    String token = PasswordUtil.hash(passwordRequest.getNewPassword().toCharArray());
+    Connection conn = SQLHelper.getInstance().getConnection();
+    try {
+      PreparedStatement statement = conn.prepareStatement(
+          "UPDATE admins SET " + Admin.TOKEN + " = ? " +
+          "WHERE " + Admin.ADMIN_ID + " = ?");
+      statement.setString(1, token);
+      statement.setInt(2, adminId);
+      statement.executeUpdate();
       return Response.noContent().build();
     }
     finally {

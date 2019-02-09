@@ -18,7 +18,6 @@ import java.util.Map;
 @Path("/talkingpoints")
 public class TalkingPoints {
 
-  // todo: use string constants
   private static final String SQL_SELECT_TALKING_POINT =
       "SELECT tp.*, tps.district_id, tps.state " +
           "FROM talking_points tp " +

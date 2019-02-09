@@ -71,8 +71,7 @@
       <type>jar</type>
       <scope>provided</scope>
     </dependency>
-    <!-- [START gae_flex_mysql_dependencies] -->
-    <dependency>                        <!-- http://dev.mysql.com/doc/connector-j/en/ -->
+    <dependency>
       <groupId>mysql</groupId>
       <artifactId>mysql-connector-java</artifactId>
       <version>6.0.5</version>
@@ -111,6 +110,16 @@
       <groupId>com.nimbusds</groupId>
       <artifactId>nimbus-jose-jwt</artifactId>
       <version>6.5.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.twilio.sdk</groupId>
+      <artifactId>twilio</artifactId>
+      <version>7.34.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.8.1</version>
     </dependency>
     <!-- [END gae_flex_mysql_dependencies] -->
   </dependencies>
