@@ -223,7 +223,10 @@ public class Admins {
       @PathParam("adminId") int adminId)
       throws SQLException {
 
-    // todo: authorization, should admin only be able to get self, or by district?
+    Admin currentUser = (Admin)requestContext.getProperty(GCAuth.CURRENT_PRINCIPAL);
+    if (!currentUser.isRoot() && currentUser.getAdminId() != adminId) {
+      throw new ForbiddenException("Not permitted to retrieve admins other than self");
+    }
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
       return Response.ok(retrieveById(conn, adminId)).build();

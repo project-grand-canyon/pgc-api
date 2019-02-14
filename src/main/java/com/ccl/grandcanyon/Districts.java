@@ -1,12 +1,10 @@
 package com.ccl.grandcanyon;
 
-import com.ccl.grandcanyon.types.District;
-import com.ccl.grandcanyon.types.DistrictHydrated;
-import com.ccl.grandcanyon.types.Scope;
-import com.ccl.grandcanyon.types.TalkingPoint;
+import com.ccl.grandcanyon.types.*;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
+import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -65,6 +63,9 @@ public class Districts {
   @Context
   UriInfo uriInfo;
 
+  @Context
+  ContainerRequestContext requestContext;
+
 
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
@@ -115,7 +116,10 @@ public class Districts {
       District district)
       throws SQLException {
 
-    // todo: ensure admin is for district
+    Admin currentUser = (Admin)requestContext.getProperty(GCAuth.CURRENT_PRINCIPAL);
+    if (!currentUser.isRoot() && !currentUser.getDistricts().contains(districtId)) {
+      throw new ForbiddenException("Not an administrator for district " + districtId);
+    }
 
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
@@ -220,15 +224,18 @@ public class Districts {
   @DELETE
   @Path("{districtId}")
   public Response deleteDistrict(
-      @PathParam("districtId") int districtID)
+      @PathParam("districtId") int districtId)
       throws SQLException {
 
-    // todo: ensure admin is for district
+    Admin currentUser = (Admin)requestContext.getProperty(GCAuth.CURRENT_PRINCIPAL);
+    if (!currentUser.isRoot() && !currentUser.getDistricts().contains(districtId)) {
+      throw new ForbiddenException("Not an administrator for district " + districtId);
+    }
 
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
       PreparedStatement delete = conn.prepareStatement(SQL_DELETE_DISTRICT);
-      delete.setInt(1, districtID);
+      delete.setInt(1, districtId);
       delete.executeUpdate();
       return Response.noContent().build();
     }
@@ -247,7 +254,10 @@ public class Districts {
       List<Integer> orderedTalkingPoints)
       throws SQLException {
 
-    // todo: ensure admin is for district
+    Admin currentUser = (Admin)requestContext.getProperty(GCAuth.CURRENT_PRINCIPAL);
+    if (!currentUser.isRoot() && !currentUser.getDistricts().contains(districtId)) {
+      throw new ForbiddenException("Not an administrator for district " + districtId);
+    }
 
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
@@ -374,7 +384,7 @@ public class Districts {
 
 
 
-  private District retrieveDistrictById(
+  static District retrieveDistrictById(
       Connection conn,
       int districtId)
       throws SQLException {
@@ -384,7 +394,7 @@ public class Districts {
 
 
 
-  private ResultSet getResultSetForId(
+  static private ResultSet getResultSetForId(
       Connection conn,
       int districtId)
       throws SQLException {

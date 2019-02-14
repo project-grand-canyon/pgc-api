@@ -2,9 +2,11 @@ package com.ccl.grandcanyon;
 
 
 
+import com.ccl.grandcanyon.types.Admin;
 import com.ccl.grandcanyon.types.DistrictOffice;
 
 import javax.ws.rs.*;
+import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -59,6 +61,9 @@ public class DistrictOffices {
   @Context
   UriInfo uriInfo;
 
+  @Context
+  ContainerRequestContext requestContext;
+
 
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
@@ -67,7 +72,10 @@ public class DistrictOffices {
       @PathParam("districtId") int districtId,
       DistrictOffice office) throws SQLException {
 
-    // todo: ensure admin is for district
+    Admin currentUser = (Admin)requestContext.getProperty(GCAuth.CURRENT_PRINCIPAL);
+    if (!currentUser.isRoot() && !currentUser.getDistricts().contains(districtId)) {
+      throw new ForbiddenException("Not an administrator for district " + districtId);
+    }
 
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
@@ -117,7 +125,10 @@ public class DistrictOffices {
       DistrictOffice office)
       throws SQLException {
 
-    // todo: ensure admin is for district
+    Admin currentUser = (Admin)requestContext.getProperty(GCAuth.CURRENT_PRINCIPAL);
+    if (!currentUser.isRoot() && !currentUser.getDistricts().contains(districtId)) {
+      throw new ForbiddenException("Not an administrator for district " + districtId);
+    }
 
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
@@ -200,7 +211,10 @@ public class DistrictOffices {
       @PathParam("officeId") int officeId)
       throws SQLException {
 
-    // todo: ensure admin is for district
+    Admin currentUser = (Admin)requestContext.getProperty(GCAuth.CURRENT_PRINCIPAL);
+    if (!currentUser.isRoot() && !currentUser.getDistricts().contains(districtId)) {
+      throw new ForbiddenException("Not an administrator for district " + districtId);
+    }
 
     Connection conn = SQLHelper.getInstance().getConnection();
     try {

@@ -1,19 +1,20 @@
 package com.ccl.grandcanyon;
 
 
+import com.ccl.grandcanyon.types.Admin;
+import com.ccl.grandcanyon.types.District;
+import com.ccl.grandcanyon.types.Scope;
 import com.ccl.grandcanyon.types.TalkingPoint;
 
 import javax.ws.rs.*;
+import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Path("/talkingpoints")
 public class TalkingPoints {
@@ -62,18 +63,20 @@ public class TalkingPoints {
   @Context
   UriInfo uriInfo;
 
+  @Context
+  ContainerRequestContext requestContext;
+
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
   public Response createTalkingPoint(TalkingPoint talkingPoint) throws SQLException {
 
-    // todo: check admin privilege against districts, states
-
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
+      checkPermissions(conn, talkingPoint, "create");
+
       // wrap multiple inserts in a transaction
       conn.setAutoCommit(false);
-
       PreparedStatement insert = conn.prepareStatement(SQL_CREATE_TALKING_POINT,
           Statement.RETURN_GENERATED_KEYS);
       insert.setString(1, talkingPoint.getContent());
@@ -120,10 +123,9 @@ public class TalkingPoints {
       TalkingPoint talkingPoint)
       throws SQLException {
 
-    // todo: check admin privilege against districts, states
-
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
+      checkPermissions(conn, talkingPoint, "modify");
       // use transaction
       conn.setAutoCommit(false);
 
@@ -199,10 +201,9 @@ public class TalkingPoints {
       @PathParam("talkingPointId") int talkingPointId)
       throws SQLException {
 
-    // todo: check admin privilege against districts, states
-
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
+      checkPermissions(conn, retrieveById(conn, talkingPointId), "delete");
       PreparedStatement delete = conn.prepareStatement(SQL_DELETE_TALKING_POINT);
       delete.setInt(1, talkingPointId);
       delete.executeUpdate();
@@ -300,8 +301,39 @@ public class TalkingPoints {
   }
 
 
+  private void checkPermissions(
+      Connection conn,
+      TalkingPoint talkingPoint,
+      String action) throws SQLException {
 
+    // check admin permission to create this talking point
+    Admin currentUser = (Admin)requestContext.getProperty(GCAuth.CURRENT_PRINCIPAL);
+    if (!currentUser.isRoot()) {
+      switch (talkingPoint.getScope()) {
+        case national:
+          throw new ForbiddenException(String.format(
+              "District admins are not permitted to %s national talking points", action));
+        case state:
+          Set<String> allowedStates = new HashSet<>();
+          for (int districtId : currentUser.getDistricts()) {
+            District district = Districts.retrieveDistrictById(conn, districtId);
+            allowedStates.add(district.getState());
+          }
+          if (!allowedStates.containsAll(talkingPoint.getStates())) {
+            throw new ForbiddenException(String.format(
+                "Permission denied to %s talking point for unmanaged state", action));
+          }
+          break;
+        case district:
+          Set<Integer> allowedDistricts = new HashSet<>(currentUser.getDistricts());
+          if (!allowedDistricts.containsAll(talkingPoint.getDistricts())) {
+            throw new ForbiddenException(String.format(
+                "Permission denied to %s talking point for unmanaged district", action));
+          }
+          break;
+      }
+    }
 
-
+  }
 
 }
