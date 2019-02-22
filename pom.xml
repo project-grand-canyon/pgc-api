@@ -121,6 +121,11 @@
       <artifactId>commons-lang3</artifactId>
       <version>3.8.1</version>
     </dependency>
+    <dependency>
+      <groupId>com.mashape.unirest</groupId>
+      <artifactId>unirest-java</artifactId>
+      <version>1.4.9</version>
+    </dependency>
     <!-- [END gae_flex_mysql_dependencies] -->
   </dependencies>
   <build>

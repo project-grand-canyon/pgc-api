@@ -1,6 +1,6 @@
 package com.ccl.grandcanyon;
 
-import com.ccl.grandcanyon.reminders.TwilioReminderService;
+import com.ccl.grandcanyon.deliverymethod.DeliveryService;
 import com.ccl.grandcanyon.types.Caller;
 import com.ccl.grandcanyon.types.ContactMethod;
 import com.ccl.grandcanyon.types.Reminder;
@@ -12,7 +12,6 @@ import java.sql.*;
 import java.time.*;
 import java.time.format.DateTimeParseException;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -27,6 +26,8 @@ public class ReminderService {
   private final static String SECOND_REMINDER_INTERVAL = "secondReminderInterval";
   private final static String EARLIEST_REMINDER_TIME = "earliestReminderTime";
   private final static String LATEST_REMINDER_TIME = "latestReminderTime";
+  private final static String SMS_DELIVERY_SERVICE = "smsDeliveryService";
+  private final static String EMAIL_DELIVERY_SERVICE = "emailDeliveryService";
 
   private final static String SQL_SELECT_REMINDER =
       "SELECT * FROM reminders WHERE " +
@@ -67,6 +68,10 @@ public class ReminderService {
   private ScheduledFuture reminderTask;
   private SecureRandom rand = new SecureRandom();
 
+  private DeliveryService smsDeliveryService;
+  private DeliveryService emailDeliveryService;
+
+
 
 
   public static void init(Properties config) throws JOSEException {
@@ -84,6 +89,7 @@ public class ReminderService {
 
     this.serviceIntervalMinutes = Integer.parseInt(config.getProperty(REMINDER_SERVICE_INTERVAL, "60"));
     this.secondReminderInterval = Integer.parseInt(config.getProperty(SECOND_REMINDER_INTERVAL, "4"));
+
     try {
       this.earliestReminder = OffsetTime.parse(config.getProperty(EARLIEST_REMINDER_TIME));
     }
@@ -91,6 +97,7 @@ public class ReminderService {
       logger.warning("Failed to parse property 'earliestReminderTime', using default of 09:00 EST");
       this.earliestReminder = OffsetTime.of(9, 0, 0, 0, ZoneOffset.ofHours(-5));
     }
+
     try {
       this.latestReminder = OffsetTime.parse(config.getProperty(LATEST_REMINDER_TIME));
     }
@@ -99,8 +106,25 @@ public class ReminderService {
       this.latestReminder = OffsetTime.of(18, 0, 0, 0, ZoneOffset.ofHours(-5));
     }
 
-    // todo: make SMS/Email services more generic
-    TwilioReminderService.init(config);
+    try {
+      this.smsDeliveryService = (DeliveryService)Class.forName(
+          config.getProperty(SMS_DELIVERY_SERVICE)).newInstance();
+      this.smsDeliveryService.init(config);
+    }
+    catch (Exception e) {
+      logger.warning("Failed to initialize SMS delivery service: " + e.getMessage());
+      this.smsDeliveryService = null;
+    }
+
+    try {
+      this.emailDeliveryService = (DeliveryService)Class.forName(
+          config.getProperty(EMAIL_DELIVERY_SERVICE)).newInstance();
+      this.emailDeliveryService.init(config);
+    }
+    catch (Exception e) {
+      logger.warning("Failed to initialize Email deliver service: " + e.getMessage());
+      this.emailDeliveryService = null;
+    }
 
     if (Boolean.parseBoolean(config.getProperty(REMINDER_SERVICE_ENABLED))) {
       // start the background task that will send reminders to callers
@@ -148,30 +172,45 @@ public class ReminderService {
 
 
 
-  private boolean sendReminder(
+  boolean sendReminder(
       Caller caller,
       String trackingId) {
 
-    boolean reminderSent = false;
+    boolean smsReminderSent = false;
+    boolean emailReminderSent = false;
+
     if (caller.getContactMethods().contains(ContactMethod.sms)) {
       try {
-        reminderSent = new TwilioReminderService(caller, trackingId).send();
+        smsReminderSent = smsDeliveryService.send(caller, trackingId);
+        if (smsReminderSent) {
+          logger.info(String.format("Sent SMS reminder to caller {id: %d name %s %s}.",
+              caller.getCallerId(), caller.getFirstName(), caller.getLastName()));
+        }
       }
       catch (Exception e) {
         logger.warning(String.format("Failed to send SMS to caller {id: %d name %s %s}: %s",
             caller.getCallerId(), caller.getFirstName(), caller.getLastName(), e.getMessage()));
-        reminderSent = false;
+        smsReminderSent = false;
       }
     }
     if (caller.getContactMethods().contains(ContactMethod.email)) {
-      // todo: email
+      try {
+        emailReminderSent = emailDeliveryService.send(caller, trackingId);
+        if (emailReminderSent) {
+          logger.info(String.format("Sent email reminder to caller {id: %d name %s %s}.",
+              caller.getCallerId(), caller.getFirstName(), caller.getLastName()));
+        }
+      }
+      catch (Exception e) {
+        logger.warning(String.format("Failed to send email to caller {id: %d name %s %s}: %s",
+            caller.getCallerId(), caller.getFirstName(), caller.getLastName(), e.getMessage()));
+        emailReminderSent = false;
+      }
     }
-    if (reminderSent) {
-      logger.info(String.format("Sent reminder to caller {id: %d name %s %s}.",
-          caller.getCallerId(), caller.getFirstName(), caller.getLastName()));
-    }
-    return reminderSent;
+
+    return smsReminderSent | emailReminderSent;
   }
+
 
   private void updateReminderStatus(
       Connection conn,

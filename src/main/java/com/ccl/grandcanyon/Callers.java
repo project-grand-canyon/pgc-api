@@ -222,7 +222,7 @@ public class Callers {
   }
 
 
-  private Caller retrieveById(
+  static Caller retrieveById(
       Connection conn,
       int callerId)
       throws SQLException {
