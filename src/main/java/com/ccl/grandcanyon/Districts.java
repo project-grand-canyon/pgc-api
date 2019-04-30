@@ -379,6 +379,7 @@ public class Districts {
     }
 
     district.setOffices(DistrictOffices.getDistrictOffices(conn, district.getDistrictId()));
+    district.setRequests(Requests.getRequestsForDistrict(conn, district.getDistrictId()));
     return district;
   }
 

@@ -12,6 +12,18 @@ last_modified DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 UNIQUE (state, district_number),
 PRIMARY KEY (district_id) )
 
+CREATE TABLE admins ( admin_id INT NOT NULL AUTO_INCREMENT,
+user_name VARCHAR(20) NOT NULL,
+email VARCHAR(100),
+token VARCHAR(100) NOT NULL,
+is_root BOOL default FALSE,
+login_enabled BOOL default FALSE,
+created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+last_modified DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+PRIMARY KEY (admin_id),
+FOREIGN KEY (district_id) REFERENCES districts (district_id),
+UNIQUE (user_name) )
+
 CREATE TABLE callers (caller_id INT NOT NULL AUTO_INCREMENT,
 first_name VARCHAR(128) NOT NULL,
 last_name VARCHAR(128) NOT NULL,
@@ -43,9 +55,12 @@ content VARCHAR(512) NOT NULL,
 theme_id INT NOT NULL,
 enabled BOOL NOT NULL,
 scope ENUM ('national', 'state', 'district') NOT NULL,
+reference_url VARCHAR(512),
 created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+created_by INT,
 last_modified DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 PRIMARY KEY (talking_point_id),
+FOREIGN KEY (created_by) REFERENCES admins (admin_id),
 FOREIGN KEY (theme_id) REFERENCES themes (theme_id) )
 
 CREATE TABLE talking_points_scopes (
@@ -87,18 +102,6 @@ talking_point_id INT, created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 FOREIGN KEY (caller_id) REFERENCES callers (caller_id),
 FOREIGN KEY (district_id) REFERENCES districts (district_id) )
 
-CREATE TABLE admins ( admin_id INT NOT NULL AUTO_INCREMENT,
-user_name VARCHAR(20) NOT NULL,
-email VARCHAR(100),
-token VARCHAR(100) NOT NULL,
-is_root BOOL default FALSE,
-login_enabled BOOL default FALSE,
-created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-last_modified DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-PRIMARY KEY (admin_id),
-FOREIGN KEY (district_id) REFERENCES districts (district_id),
-UNIQUE (user_name) )
-
 CREATE TABLE admins_districts (admin_id INT NOT NULL, district_id INT NOT NULL,
 FOREIGN KEY (admin_id) REFERENCES admins (admin_id) ON DELETE CASCADE,
 FOREIGN KEY (district_id) REFERENCES districts (district_id) ON DELETE CASCADE )
@@ -119,5 +122,13 @@ CHECK (day_of_month>=1),
 CHECK (day_of_month<=31),
 PRIMARY KEY (caller_id),
 FOREIGN KEY (caller_id) REFERENCES callers (caller_id) ON DELETE CASCADE)
+
+CREATE TABLE requests (request_id INT NOT NULL AUTO_INCREMENT,
+content VARCHAR(512) NOT NULL,
+district_id INT NOT NULL,
+created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+last_modified DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+PRIMARY KEY (request_id),
+FOREIGN KEY (district_id) REFERENCES districts (district_id))
 
 

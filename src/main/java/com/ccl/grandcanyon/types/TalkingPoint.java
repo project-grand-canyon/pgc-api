@@ -19,6 +19,8 @@ public class TalkingPoint extends GCBase {
   public static final String ENABLED = "enabled";
   public static final String DISTRICT_ID = "district_id";
   public static final String STATE = "state";
+  public static final String CREATED_BY = "created_by";
+  public static final String REFERENCE_URL = "reference_url";
 
   private int talkingPointId;
   private int themeId;
@@ -27,6 +29,8 @@ public class TalkingPoint extends GCBase {
   private boolean enabled;
   private List<Integer> districts;
   private List<String> states;
+  private int createdBy;
+  private String referenceUrl;
 
 
 
@@ -37,6 +41,8 @@ public class TalkingPoint extends GCBase {
     this.themeId = rs.getInt(THEME_ID);
     this.enabled = rs.getBoolean(ENABLED);
     this.scope = Scope.valueOf(rs.getString(SCOPE));
+    this.createdBy = rs.getInt(CREATED_BY);
+    this.referenceUrl = rs.getString(REFERENCE_URL);
     this.districts = new ArrayList<>();
     this.states = new ArrayList<>();
     do {
@@ -114,5 +120,21 @@ public class TalkingPoint extends GCBase {
 
   public void setStates(List<String> states) {
     this.states = states;
+  }
+
+  public int getCreatedBy() {
+    return createdBy;
+  }
+
+  public void setCreatedBy(int createdBy) {
+    this.createdBy = createdBy;
+  }
+
+  public String getReferenceUrl() {
+    return referenceUrl;
+  }
+
+  public void setReferenceUrl(String referenceUrl) {
+    this.referenceUrl = referenceUrl;
   }
 }

@@ -26,6 +26,7 @@ public class GCApplication extends ResourceConfig {
     register(Calls.class);
     register(Admins.class);
     register(Reminders.class);
+    register(Requests.class);
     register(Login.class);
 
     register(JacksonJsonProvider.class);

@@ -29,8 +29,10 @@ public class TalkingPoints {
           TalkingPoint.CONTENT + ", " +
           TalkingPoint.ENABLED + ", " +
           TalkingPoint.SCOPE + ", " +
-          TalkingPoint.THEME_ID +
-          ") VALUES (?, ?, ?, ?)";
+          TalkingPoint.THEME_ID + ", " +
+          TalkingPoint.CREATED_BY + ", " +
+          TalkingPoint.REFERENCE_URL +
+          ") VALUES (?, ?, ?, ?, ?, ?)";
 
   private static final String SQL_INSERT_TALKING_POINT_STATES =
       "INSERT INTO talking_points_scopes (" +
@@ -47,7 +49,8 @@ public class TalkingPoints {
           TalkingPoint.CONTENT + " = ?, " +
           TalkingPoint.ENABLED + " = ?, " +
           TalkingPoint.SCOPE + " = ?, " +
-          TalkingPoint.THEME_ID + " = ? " +
+          TalkingPoint.THEME_ID + " = ?, " +
+          TalkingPoint.REFERENCE_URL + " = ? " +
           "WHERE " + TalkingPoint.TALKING_POINT_ID + " = ?";
 
   private static final String SQL_DELETE_TALKING_POINT =
@@ -57,6 +60,11 @@ public class TalkingPoints {
   private static final String SQL_DELETE_TALKING_POINT_SCOPES =
       "DELETE FROM talking_points_scopes " +
           "WHERE " + TalkingPoint.TALKING_POINT_ID + " = ?";
+
+  private static final String SQL_CLEAR_ADMIN_TALKING_POINTS =
+      "UPDATE talking_points SET " +
+          TalkingPoint.CREATED_BY + " = NULL " +
+          "WHERE " + TalkingPoint.CREATED_BY + " = ?";
 
 
 
@@ -79,10 +87,13 @@ public class TalkingPoints {
       conn.setAutoCommit(false);
       PreparedStatement insert = conn.prepareStatement(SQL_CREATE_TALKING_POINT,
           Statement.RETURN_GENERATED_KEYS);
-      insert.setString(1, talkingPoint.getContent());
-      insert.setBoolean(2, talkingPoint.isEnabled());
-      insert.setString(3, talkingPoint.getScope().name());
-      insert.setInt(4, talkingPoint.getThemeId());
+      int idx = 1;
+      insert.setString(idx++, talkingPoint.getContent());
+      insert.setBoolean(idx++, talkingPoint.isEnabled());
+      insert.setString(idx++, talkingPoint.getScope().name());
+      insert.setInt(idx++, talkingPoint.getThemeId());
+      insert.setInt(idx++, ((Admin)requestContext.getProperty(GCAuth.CURRENT_PRINCIPAL)).getAdminId());
+      insert.setString(idx++, talkingPoint.getReferenceUrl());
       insert.executeUpdate();
 
       int talkingPointId;
@@ -130,11 +141,13 @@ public class TalkingPoints {
       conn.setAutoCommit(false);
 
       PreparedStatement update = conn.prepareStatement(SQL_UPDATE_TALKING_POINT);
-      update.setString(1, talkingPoint.getContent());
-      update.setBoolean(2, talkingPoint.isEnabled());
-      update.setString(3, talkingPoint.getScope().name());
-      update.setInt(4, talkingPoint.getThemeId());
-      update.setInt(5, talkingPointId);
+      int idx = 1;
+      update.setString(idx++, talkingPoint.getContent());
+      update.setBoolean(idx++, talkingPoint.isEnabled());
+      update.setString(idx++, talkingPoint.getScope().name());
+      update.setInt(idx++, talkingPoint.getThemeId());
+      update.setString(idx++, talkingPoint.getReferenceUrl());
+      update.setInt(idx++, talkingPointId);
       update.executeUpdate();
 
       // replace scopes with updated set
@@ -238,6 +251,17 @@ public class TalkingPoints {
       map.put(tp.getTalkingPointId(), tp);
     }
     return map;
+  }
+
+
+  public static void clearTalkingPointsForAdmin(
+      Connection conn,
+      int adminId)
+      throws SQLException {
+
+    PreparedStatement statement = conn.prepareStatement(SQL_CLEAR_ADMIN_TALKING_POINTS);
+    statement.setInt(1, adminId);
+    statement.executeUpdate();
   }
 
 

@@ -163,9 +163,31 @@ public class Callers {
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  public Response getCallers() throws SQLException {
+  public Response getCallers(
+      @QueryParam("districtId") Integer districtId)
+      throws SQLException {
 
-    return Response.ok(getAllCallers()).build();
+    Connection conn = SQLHelper.getInstance().getConnection();
+    try {
+      List<Caller> callers = new ArrayList<>();
+      ResultSet rs;
+      if (districtId != null) {
+        String whereClause =  " WHERE c." + Caller.DISTRICT_ID + " = ?";
+        PreparedStatement statement = conn.prepareStatement(SQL_SELECT_CALLER + whereClause);
+        statement.setInt(1, districtId);
+        rs = statement.executeQuery();
+      }
+      else {
+          rs = conn.createStatement().executeQuery(SQL_SELECT_CALLER);
+      }
+      while (rs.next()) {
+        callers.add(new Caller(rs));
+      }
+      return Response.ok(callers).build();
+    }
+    finally {
+      conn.close();
+    }
   }
 
   @GET
@@ -186,6 +208,7 @@ public class Callers {
     }
   }
 
+
   @DELETE
   @Path("{callerId}")
   public Response deleteCaller(
@@ -204,23 +227,6 @@ public class Callers {
     }
   }
 
-  public static List<Caller> getAllCallers() throws SQLException {
-
-    Connection conn = SQLHelper.getInstance().getConnection();
-    try {
-      List<Caller> callers = new ArrayList<>();
-      ResultSet rs = conn.createStatement().executeQuery(SQL_SELECT_CALLER);
-      while (rs.next()) {
-        callers.add(new Caller(rs));
-      }
-      return callers;
-    }
-    finally {
-      conn.close();
-    }
-
-  }
-
 
   static Caller retrieveById(
       Connection conn,
@@ -236,6 +242,7 @@ public class Callers {
     }
     return new Caller(rs);
   }
+
 
 
   private void insertContactMethods(
