@@ -35,7 +35,7 @@ public class TwilioService implements DeliveryService {
       }
     }
 
-    String body = "It's your day to call Rep. " + district.getRepLastName() + ". http://project-grand-canyon.com/call/" + district.getState() + "/" + district.getNumber() + "?track=" + trackingId + "&caller=" + caller.getCallerId();
+    String body = "It's your day to call Rep. " + district.getRepLastName() + ". http://project-grand-canyon.com/call/" + district.getState() + "/" + district.getNumber() + "?t=" + trackingId + "&c=" + caller.getCallerId();
 
     Message message = Message.creator(
         new PhoneNumber(formattedNumber.toString()),
