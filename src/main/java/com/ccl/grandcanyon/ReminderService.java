@@ -98,6 +98,8 @@ public class ReminderService {
 
   private ReminderService(Properties config) {
 
+    logger.info("Init Reminder Service");
+
     this.serviceIntervalMinutes = Integer.parseInt(config.getProperty(REMINDER_SERVICE_INTERVAL, "60"));
     this.secondReminderInterval = Integer.parseInt(config.getProperty(SECOND_REMINDER_INTERVAL, "4"));
 
@@ -138,6 +140,7 @@ public class ReminderService {
     }
 
     if (Boolean.parseBoolean(config.getProperty(REMINDER_SERVICE_ENABLED))) {
+      logger.info("Booting up the reminder task");
       // start the background task that will send reminders to callers
       this.reminderTask = Executors.newSingleThreadScheduledExecutor().
           scheduleAtFixedRate(new ReminderSender(), 10, serviceIntervalMinutes * 60, TimeUnit.SECONDS);
@@ -240,18 +243,20 @@ public class ReminderService {
     @Override
     public void run() {
 
+      logger.info("Running reminder sender");
+
       LocalDateTime currentDateTime = LocalDateTime.now();
 
       DayOfWeek dayOfWeek = currentDateTime.getDayOfWeek();
       if (dayOfWeek.equals(DayOfWeek.SATURDAY) || dayOfWeek.equals(DayOfWeek.SUNDAY)) {
-        // do nothing
+        logger.info("It's a weekend. Do nothing.");
         return;
       }
 
       LocalTime currentTime = currentDateTime.toLocalTime();
       if (currentTime.isBefore(earliestReminder.toLocalTime()) ||
           currentTime.isAfter(latestReminder.toLocalTime())) {
-        // do nothing
+        logger.info("It's after hours. Do nothing.");
         return;
       }
 
@@ -293,13 +298,14 @@ public class ReminderService {
       }
 
       Connection conn = null;
+      int sentCount = 0;
       try {
         conn = SQLHelper.getInstance().getConnection();
-        ResultSet rs = conn.createStatement().executeQuery(
-            SQL_SELECT_CALLERS + whereClause.toString());
+        String query = SQL_SELECT_CALLERS + whereClause.toString();
+        logger.info(query);
+        ResultSet rs = conn.createStatement().executeQuery(query);
         Month currentMonth = currentDateTime.getMonth();
         int currentYear = currentDateTime.getYear();
-
         while (rs.next()) {
           Reminder reminder = new Reminder(rs);
           LocalDateTime lastReminderTime = (reminder.getLastReminderTimestamp() == null) ?
@@ -313,11 +319,14 @@ public class ReminderService {
             PreparedStatement statement = conn.prepareStatement(SQL_SELECT_DISTRICT);
             statement.setInt(1, caller.getDistrictId());
             ResultSet rs2 = statement.executeQuery();
-            District district = new District(rs2);
-            if (!caller.isPaused()) {
-              String trackingId = RandomStringUtils.randomAlphanumeric(24);
-              if (sendReminder(caller, district, trackingId)) {
-                updateReminderStatus(conn, caller.getCallerId(), trackingId);
+            if (rs2.next()){
+              District district = new District(rs2);
+              if (!caller.isPaused()) {
+                String trackingId = RandomStringUtils.randomAlphanumeric(8);
+                if (sendReminder(caller, district, trackingId)) {
+                  sentCount++;
+                  updateReminderStatus(conn, caller.getCallerId(), trackingId);
+                }
               }
             }
           }
@@ -333,6 +342,7 @@ public class ReminderService {
         logger.severe("Reminder service failure: " + e.toString());
       }
       finally {
+        logger.info(String.format("Sent %s reminders", sentCount));
         if (conn != null) {
           try {
             conn.close();
