@@ -5,7 +5,6 @@ import com.ccl.grandcanyon.types.Caller;
 import com.ccl.grandcanyon.types.ContactMethod;
 import com.ccl.grandcanyon.types.District;
 import com.ccl.grandcanyon.types.Reminder;
-import com.nimbusds.jose.*;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import java.security.SecureRandom;
@@ -85,7 +84,7 @@ public class ReminderService {
     return dayToReturn;
   }
 
-  public static void init(Properties config) throws JOSEException {
+  public static void init(Properties config) {
 
     assert(instance == null);
     instance = new ReminderService(config);
@@ -245,7 +244,7 @@ public class ReminderService {
 
       logger.info("Running reminder sender");
 
-      LocalDateTime currentDateTime = LocalDateTime.now();
+      OffsetDateTime currentDateTime = OffsetDateTime.now();
 
       DayOfWeek dayOfWeek = currentDateTime.getDayOfWeek();
       if (dayOfWeek.equals(DayOfWeek.SATURDAY) || dayOfWeek.equals(DayOfWeek.SUNDAY)) {
@@ -253,9 +252,9 @@ public class ReminderService {
         return;
       }
 
-      LocalTime currentTime = currentDateTime.toLocalTime();
-      if (currentTime.isBefore(earliestReminder.toLocalTime()) ||
-          currentTime.isAfter(latestReminder.toLocalTime())) {
+      OffsetTime currentTime = currentDateTime.toOffsetTime();
+      if (currentTime.isBefore(earliestReminder) ||
+          currentTime.isAfter(latestReminder)) {
         logger.info("It's after hours. Do nothing.");
         return;
       }
