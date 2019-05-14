@@ -143,6 +143,7 @@ public class Districts {
 
 
   @GET
+  @RolesAllowed(GCAuth.ANONYMOUS)
   @Produces(MediaType.APPLICATION_JSON)
   public Response getDistricts(
       @QueryParam("id") Integer id,
@@ -338,6 +339,7 @@ public class Districts {
 
   @GET
   @Path("{districtId}/hydrated")
+  @RolesAllowed(GCAuth.ANONYMOUS)
   @Produces(MediaType.APPLICATION_JSON)
   public Response getDistrictHydrated(@PathParam("districtId") int districtId)
       throws SQLException {

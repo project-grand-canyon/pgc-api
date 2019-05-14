@@ -195,7 +195,7 @@ public class Admins {
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  @RolesAllowed(GCAuth.SUPER_ADMIN_ROLE)
+  @RolesAllowed(GCAuth.ADMIN_ROLE)
   public Response getAdmins() throws SQLException {
 
     Connection conn = SQLHelper.getInstance().getConnection();

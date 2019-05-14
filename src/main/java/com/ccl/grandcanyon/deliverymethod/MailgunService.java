@@ -1,6 +1,7 @@
 package com.ccl.grandcanyon.deliverymethod;
 
 import com.ccl.grandcanyon.types.Caller;
+import com.ccl.grandcanyon.types.District;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
@@ -38,16 +39,16 @@ public class MailgunService implements DeliveryService {
   }
 
 
-  public boolean send(Caller caller, String trackingId) throws UnirestException {
+  public boolean sendRegularCallInReminder(Caller caller, District district, String trackingId) throws UnirestException {
 
-    // todo: generate full link and retrieve message text (and subject) from elsewhere
+    String body = "It's your day to call Rep. " + district.getRepLastName() + ". http://project-grand-canyon.com/call/" + district.getState() + "/" + district.getNumber() + "?t=" + trackingId + "&c=" + caller.getCallerId();
 
     HttpRequestWithBody request = Unirest.post(targetUrl).
         basicAuth("api", apiKey).
         queryString("from", fromAddress).
         queryString("to", caller.getEmail()).
         queryString("subject", "Project Grand Canyon reminder").
-        queryString("text", "Call your representative today using this link: " + trackingId);
+        queryString("text", body);
 
     HttpResponse<JsonNode> response = request.asJson();
     boolean success = Response.Status.Family.familyOf(response.getStatus())

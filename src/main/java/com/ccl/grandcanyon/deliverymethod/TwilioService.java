@@ -1,6 +1,7 @@
 package com.ccl.grandcanyon.deliverymethod;
 
 import com.ccl.grandcanyon.types.Caller;
+import com.ccl.grandcanyon.types.District;
 import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
@@ -12,8 +13,7 @@ public class TwilioService implements DeliveryService {
   private final static String ACCOUNT_ID_PROP = "twilio.SID";
   private final static String AUTH_TOKEN_PROP = "twilio.AuthToken";
 
-  // todo: temporary trial number
-  private final static String fromPhoneNumber = "+15128724874";
+  private final static String fromPhoneNumber = "+15123557939";
 
 
   public void init(Properties config) {
@@ -22,7 +22,7 @@ public class TwilioService implements DeliveryService {
   }
 
 
-  public boolean send(Caller caller, String trackingId) {
+  public boolean sendRegularCallInReminder(Caller caller, District district, String trackingId) {
 
     // format caller phone number:  this is for USA numbers only!!
     StringBuilder formattedNumber = new StringBuilder("+");
@@ -35,12 +35,12 @@ public class TwilioService implements DeliveryService {
       }
     }
 
-    // todo: generate full link and retrieve message text from somewhere
+    String body = "It's your day to call Rep. " + district.getRepLastName() + ". http://project-grand-canyon.com/call/" + district.getState() + "/" + district.getNumber() + "?t=" + trackingId + "&c=" + caller.getCallerId();
 
     Message message = Message.creator(
         new PhoneNumber(formattedNumber.toString()),
         new PhoneNumber(fromPhoneNumber),
-        "Your PGC call link is " + trackingId).create();
+            body).create();
     return !(message.getStatus().equals(Message.Status.FAILED));
   }
 }

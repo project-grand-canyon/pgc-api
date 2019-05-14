@@ -2,6 +2,7 @@ package com.ccl.grandcanyon;
 
 import com.ccl.grandcanyon.types.Theme;
 
+import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -95,6 +96,7 @@ public class Themes {
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
+  @RolesAllowed(GCAuth.ANONYMOUS)
   public Response getThemes() throws SQLException {
 
     Connection conn = SQLHelper.getInstance().getConnection();
