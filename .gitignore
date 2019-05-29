@@ -2,3 +2,4 @@
 y/
 target
 src/main/resources/config.properties
+src/main/resources/sentry.properties
