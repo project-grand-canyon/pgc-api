@@ -85,7 +85,6 @@ public class ReminderService {
   }
 
   public static void init(Properties config) {
-
     assert(instance == null);
     instance = new ReminderService(config);
   }

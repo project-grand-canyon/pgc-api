@@ -13,6 +13,11 @@ import java.net.URI;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 
 /**
@@ -101,6 +106,8 @@ public class Callers {
       ReminderService.getInstance().createInitialReminder(conn, callerId);
       Caller newCaller = retrieveById(conn, callerId);
       conn.commit();
+
+      WelcomeService.getInstance().handleNewCaller(newCaller);
 
       URI location = uriInfo.getAbsolutePathBuilder().path(Integer.toString(callerId)).build();
       return Response.created(location).entity(newCaller).build();

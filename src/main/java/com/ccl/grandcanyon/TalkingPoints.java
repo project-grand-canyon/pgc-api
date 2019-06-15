@@ -111,6 +111,8 @@ public class TalkingPoints {
       TalkingPoint newTalkingPoint = retrieveById(conn, talkingPointId);
       conn.commit();
 
+      EventAlertingService.getInstance().handleEvent("New Talking Point", newTalkingPoint.getContent());
+
       URI location = uriInfo.getAbsolutePathBuilder().path(Integer.toString(newTalkingPoint.getTalkingPointId())).build();
       return Response.created(location).entity(newTalkingPoint).build();
     }
