@@ -23,7 +23,33 @@ public class TwilioService implements DeliveryService {
 
 
   public boolean sendRegularCallInReminder(Caller caller, District district, String trackingId) {
+    String body = "It's your day to call Rep. " + district.getRepLastName() + ". http://project-grand-canyon.com/call/" + district.getState() + "/" + district.getNumber() + "?t=" + trackingId + "&c=" + caller.getCallerId();
 
+    Message message = Message.creator(
+        new PhoneNumber(formattedPhoneNumber(caller)),
+        new PhoneNumber(fromPhoneNumber),
+            body).create();
+    return !(message.getStatus().equals(Message.Status.FAILED));
+  }
+
+  @Override
+  public boolean sendWelcomeMessage(Caller caller) throws Exception {
+    String body = "You're all signed up for Project Grand Canyon. Thanks for joining!";
+
+    Message message = Message.creator(
+            new PhoneNumber(formattedPhoneNumber(caller)),
+            new PhoneNumber(fromPhoneNumber),
+            body).create();
+    return !(message.getStatus().equals(Message.Status.FAILED));
+  }
+
+  @Override
+  public boolean sendEventAlert(String name, String details) throws Exception {
+    // No-op. Let mailgun service handle this
+    return true;
+  }
+
+  private String formattedPhoneNumber(Caller caller) {
     // format caller phone number:  this is for USA numbers only!!
     StringBuilder formattedNumber = new StringBuilder("+");
     if (!caller.getPhone().startsWith("1")) {
@@ -34,13 +60,6 @@ public class TwilioService implements DeliveryService {
         formattedNumber.append(c);
       }
     }
-
-    String body = "It's your day to call Rep. " + district.getRepLastName() + ". http://project-grand-canyon.com/call/" + district.getState() + "/" + district.getNumber() + "?t=" + trackingId + "&c=" + caller.getCallerId();
-
-    Message message = Message.creator(
-        new PhoneNumber(formattedNumber.toString()),
-        new PhoneNumber(fromPhoneNumber),
-            body).create();
-    return !(message.getStatus().equals(Message.Status.FAILED));
+    return formattedNumber.toString();
   }
 }

@@ -10,4 +10,8 @@ public interface DeliveryService {
   void init(Properties configuration);
 
   boolean sendRegularCallInReminder(Caller caller, District district, String trackingId) throws Exception;
+
+  boolean sendWelcomeMessage(Caller caller) throws Exception;
+
+  boolean sendEventAlert(String name, String details) throws Exception;
 }

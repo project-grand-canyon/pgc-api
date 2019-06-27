@@ -119,6 +119,7 @@ public class Admins {
 
       insertDistricts(conn, adminId, admin);
       Admin newAdmin = retrieveById(conn, adminId);
+      EventAlertingService.getInstance().handleEvent("New Admin Sign Up", newAdmin.getEmail());
       conn.commit();
 
       URI location = uriInfo.getAbsolutePathBuilder().path(Integer.toString(adminId)).build();

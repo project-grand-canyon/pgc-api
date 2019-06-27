@@ -54,7 +54,23 @@ public class GCContextListener implements ServletContextListener {
     }
     catch (Exception e) {
       throw new RuntimeException(
-          "Initialization failed:  error initializing Reminder service", e);
+          "Initialization failed: error initializing Reminder service", e);
+    }
+
+    try {
+      WelcomeService.init(properties);
+    }
+    catch (Exception e) {
+      throw new RuntimeException(
+              "Initialization failed: error initializing Welcome service", e);
+    }
+
+    try {
+      EventAlertingService.init(properties);
+    }
+    catch (Exception e) {
+      throw new RuntimeException(
+              "Initialization failed: error initializing EventAlertingService", e);
     }
 
     try {
