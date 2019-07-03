@@ -1,7 +1,6 @@
 package com.ccl.grandcanyon.deliverymethod;
 
 import com.ccl.grandcanyon.types.Caller;
-import com.ccl.grandcanyon.types.District;
 import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
@@ -22,34 +21,10 @@ public class TwilioService implements DeliveryService {
   }
 
 
-  public boolean sendRegularCallInReminder(Caller caller, District district, String trackingId) {
-    String body = "It's your day to call Rep. " + district.getRepLastName() + ". http://project-grand-canyon.com/call/" + district.getState() + "/" + district.getNumber() + "?t=" + trackingId + "&c=" + caller.getCallerId();
+  public boolean sendTextMessage(
+      Caller caller,
+      com.ccl.grandcanyon.types.Message message) {
 
-    Message message = Message.creator(
-        new PhoneNumber(formattedPhoneNumber(caller)),
-        new PhoneNumber(fromPhoneNumber),
-            body).create();
-    return !(message.getStatus().equals(Message.Status.FAILED));
-  }
-
-  @Override
-  public boolean sendWelcomeMessage(Caller caller) throws Exception {
-    String body = "You're all signed up for Project Grand Canyon. Thanks for joining!";
-
-    Message message = Message.creator(
-            new PhoneNumber(formattedPhoneNumber(caller)),
-            new PhoneNumber(fromPhoneNumber),
-            body).create();
-    return !(message.getStatus().equals(Message.Status.FAILED));
-  }
-
-  @Override
-  public boolean sendEventAlert(String name, String details) throws Exception {
-    // No-op. Let mailgun service handle this
-    return true;
-  }
-
-  private String formattedPhoneNumber(Caller caller) {
     // format caller phone number:  this is for USA numbers only!!
     StringBuilder formattedNumber = new StringBuilder("+");
     if (!caller.getPhone().startsWith("1")) {
@@ -60,6 +35,20 @@ public class TwilioService implements DeliveryService {
         formattedNumber.append(c);
       }
     }
-    return formattedNumber.toString();
+
+    Message twilioMessage = Message.creator(
+        new PhoneNumber(formattedNumber.toString()),
+        new PhoneNumber(fromPhoneNumber), message.getBody()).create();
+    return !(twilioMessage.getStatus().equals(Message.Status.FAILED));
+  }
+
+
+  @Override
+  public boolean sendHtmlMessage(
+      Caller caller,
+      com.ccl.grandcanyon.types.Message message) {
+
+    // HTML not supported
+    return sendTextMessage(caller, message);
   }
 }

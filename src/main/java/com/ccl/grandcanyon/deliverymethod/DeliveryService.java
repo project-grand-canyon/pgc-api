@@ -1,7 +1,7 @@
 package com.ccl.grandcanyon.deliverymethod;
 
 import com.ccl.grandcanyon.types.Caller;
-import com.ccl.grandcanyon.types.District;
+import com.ccl.grandcanyon.types.Message;
 
 import java.util.Properties;
 
@@ -9,9 +9,7 @@ public interface DeliveryService {
 
   void init(Properties configuration);
 
-  boolean sendRegularCallInReminder(Caller caller, District district, String trackingId) throws Exception;
+  boolean sendTextMessage(Caller caller, Message message) throws Exception;
 
-  boolean sendWelcomeMessage(Caller caller) throws Exception;
-
-  boolean sendEventAlert(String name, String details) throws Exception;
+  boolean sendHtmlMessage(Caller caller, Message message) throws Exception;
 }

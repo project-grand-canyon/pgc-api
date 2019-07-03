@@ -1,12 +1,14 @@
 package com.ccl.grandcanyon;
 
 import com.ccl.grandcanyon.deliverymethod.DeliveryService;
-import com.ccl.grandcanyon.types.Caller;
-import com.ccl.grandcanyon.types.ContactMethod;
-import com.ccl.grandcanyon.types.District;
-import com.ccl.grandcanyon.types.Reminder;
+import com.ccl.grandcanyon.types.*;
 import org.apache.commons.lang3.RandomStringUtils;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.net.URL;
 import java.security.SecureRandom;
 import java.sql.*;
 import java.time.*;
@@ -18,6 +20,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class ReminderService {
 
@@ -74,6 +77,9 @@ public class ReminderService {
 
   private DeliveryService smsDeliveryService;
   private DeliveryService emailDeliveryService;
+
+  private String regularCallInReminderHTML;
+  private String callReminderEmailResource = "callNotificationEmail.html";
 
   private static int dayOfMonthCounter = 1;
 
@@ -137,6 +143,20 @@ public class ReminderService {
       this.emailDeliveryService = null;
     }
 
+    try {
+      URL resource = getClass().getClassLoader().getResource(callReminderEmailResource);
+      if (resource == null) {
+        throw new FileNotFoundException("File '" + callReminderEmailResource + "' not found.");
+      }
+      File file = new File(resource.getFile());
+      BufferedReader br = new BufferedReader(new FileReader(file));
+      this.regularCallInReminderHTML = br.lines().collect(Collectors.joining());
+    }
+    catch (Exception e) {
+      throw new RuntimeException("Unable to load regular call-in notification email template: " + e.getLocalizedMessage());
+    }
+
+
     if (Boolean.parseBoolean(config.getProperty(REMINDER_SERVICE_ENABLED))) {
       logger.info("Booting up the reminder task");
       // start the background task that will send reminders to callers
@@ -187,9 +207,15 @@ public class ReminderService {
     boolean smsReminderSent = false;
     boolean emailReminderSent = false;
 
+    String callInPageUrl = "projectgrandcanyon.com/call/" + district.getState() + "/" + district.getNumber() +
+        "?t=" + trackingId + "&c=" + caller.getCallerId();
+
     if (caller.getContactMethods().contains(ContactMethod.sms)) {
+
+      Message reminderMessage = new Message();
+      reminderMessage.setBody("It's your day to call Rep. " + district.getRepLastName() + ". http://" + callInPageUrl);
       try {
-        smsReminderSent = smsDeliveryService.sendRegularCallInReminder(caller, district, trackingId);
+        smsReminderSent = smsDeliveryService.sendHtmlMessage(caller, reminderMessage);
         if (smsReminderSent) {
           logger.info(String.format("Sent SMS reminder to caller {id: %d name %s %s}.",
               caller.getCallerId(), caller.getFirstName(), caller.getLastName()));
@@ -201,9 +227,14 @@ public class ReminderService {
         smsReminderSent = false;
       }
     }
+
     if (caller.getContactMethods().contains(ContactMethod.email)) {
+
+      Message reminderMessage = new Message();
+      reminderMessage.setSubject("It's your day to call!");
+      reminderMessage.setBody(this.regularCallInReminderHTML.replaceAll("projectgrandcanyon.com/call/", callInPageUrl));
       try {
-        emailReminderSent = emailDeliveryService.sendRegularCallInReminder(caller, district, trackingId);
+        emailReminderSent = emailDeliveryService.sendHtmlMessage(caller, reminderMessage);
         if (emailReminderSent) {
           logger.info(String.format("Sent email reminder to caller {id: %d, name %s %s}.",
               caller.getCallerId(), caller.getFirstName(), caller.getLastName()));
@@ -219,6 +250,13 @@ public class ReminderService {
     return smsReminderSent | emailReminderSent;
   }
 
+  public DeliveryService getSmsDeliveryService() {
+    return smsDeliveryService;
+  }
+
+  public DeliveryService getEmailDeliveryService() {
+    return emailDeliveryService;
+  }
 
   private void updateReminderStatus(
       Connection conn,

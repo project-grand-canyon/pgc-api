@@ -1,77 +1,84 @@
 package com.ccl.grandcanyon;
 
-import com.ccl.grandcanyon.deliverymethod.DeliveryService;
 import com.ccl.grandcanyon.types.Caller;
 import com.ccl.grandcanyon.types.ContactMethod;
+import com.ccl.grandcanyon.types.Message;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.net.URL;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class WelcomeService {
 
-    private final static String SMS_DELIVERY_SERVICE = "smsDeliveryService";
-    private final static String EMAIL_DELIVERY_SERVICE = "emailDeliveryService";
+  private static final Logger logger = Logger.getLogger(WelcomeService.class.getName());
 
-    private static final Logger logger = Logger.getLogger(WelcomeService.class.getName());
+  private static WelcomeService instance;
 
-    private static WelcomeService instance;
+  private String welcomeHtml;
+  private String welcomeResource = "welcomeEmail.html";
 
-    private DeliveryService smsDeliveryService;
-    private DeliveryService emailDeliveryService;
+  public static void init(Properties config) {
+    assert (instance == null);
+    instance = new WelcomeService(config);
+  }
 
-
-    public static void init(Properties config) {
-        assert (instance == null);
-        instance = new WelcomeService(config);
-    }
-
-    public static WelcomeService getInstance() {
+  public static WelcomeService getInstance() {
         return instance;
     }
 
-    private WelcomeService(Properties config) {
+  private WelcomeService(Properties config) {
 
-        logger.info("Init Welcome Service");
+    logger.info("Init Welcome Service");
 
-        Executors.newSingleThreadExecutor().submit(() -> {
-            try {
-                this.smsDeliveryService = (DeliveryService) Class.forName(
-                        config.getProperty(SMS_DELIVERY_SERVICE)).newInstance();
-                this.smsDeliveryService.init(config);
-            } catch (Exception e) {
-                logger.warning("Failed to initialize SMS delivery service: " + e.getMessage());
-                this.smsDeliveryService = null;
-            }
-
-            try {
-                this.emailDeliveryService = (DeliveryService) Class.forName(
-                        config.getProperty(EMAIL_DELIVERY_SERVICE)).newInstance();
-                this.emailDeliveryService.init(config);
-            } catch (Exception e) {
-                logger.warning("Failed to initialize Email deliver service: " + e.getMessage());
-                this.emailDeliveryService = null;
-            }
-        });
+    try {
+      URL resource = getClass().getClassLoader().getResource(welcomeResource);
+      if (resource == null) {
+        throw new FileNotFoundException("File '" + welcomeResource + "' not found.");
+      }
+      File file = new File(resource.getFile());
+      BufferedReader br = new BufferedReader(new FileReader(file));
+      this.welcomeHtml = br.lines().collect(Collectors.joining());
+    }
+    catch (Exception e) {
+      throw new RuntimeException("Unable to load welcome email template: " + e.getLocalizedMessage());
     }
 
-    public void handleNewCaller(Caller caller) {
-        logger.info("New Caller");
-        if (caller.getContactMethods().contains(ContactMethod.sms)){
-            try {
-                this.smsDeliveryService.sendWelcomeMessage(caller);
-            } catch (Exception e) {
-                logger.severe(String.format("Failed to send welcome SMS to caller {id: %d}: %s", caller.getCallerId(), e.getMessage()));
-            }
-        }
+  }
 
-        if (caller.getContactMethods().contains(ContactMethod.email)){
-            try {
-                this.emailDeliveryService.sendWelcomeMessage(caller);
-            } catch (Exception e) {
-                logger.severe(String.format("Failed to send welcome email to caller {id: %d}: %s", caller.getCallerId(), e.getMessage()));
-            }
-        }
+  public void handleNewCaller(Caller caller) {
+    logger.info("New Caller");
 
-    }
+    // do this asynchronously so as not to delay response to end-user
+    Executors.newSingleThreadExecutor().submit(() -> {
+      if (caller.getContactMethods().contains(ContactMethod.sms)) {
+        Message message = new Message();
+        message.setBody("You're all signed up for Project Grand Canyon. Thanks for joining!");
+        try {
+          ReminderService.getInstance().getSmsDeliveryService().sendTextMessage(caller, message);
+        }
+        catch (Exception e) {
+          logger.severe(String.format("Failed to send welcome SMS to caller {id: %d}: %s", caller.getCallerId(), e.getMessage()));
+        }
+      }
+
+      if (caller.getContactMethods().contains(ContactMethod.email)) {
+        Message message = new Message();
+        message.setSubject("Welcome to Project Grand Canyon!");
+        message.setBody(welcomeHtml);
+        try {
+          ReminderService.getInstance().getEmailDeliveryService().sendHtmlMessage(caller, message);
+        }
+        catch (Exception e) {
+          logger.severe(String.format("Failed to send welcome email to caller {id: %d}: %s", caller.getCallerId(), e.getMessage()));
+        }
+      }
+
+    });
+  }
 }
