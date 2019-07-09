@@ -1,0 +1,1844 @@
+{
+	"info": {
+		"_postman_id": "609d7934-854d-4660-97d8-9cb4bf75d93f",
+		"name": "GrandCanyon",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Districts",
+			"item": [
+				{
+					"name": "Create district",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{rootToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n        \"state\": \"TX\",\n        \"number\": 1,\n        \"repFirstName\": \"Louie\",\n        \"repLastName\": \"Gomert\",\n        \"info\": \"Useless rep from Texas\",\n        \"callTargets\":\n        [\n        \t{\"targetDistrictId\":0, \"percentage\":50}, \n        \t{\"targetDistrictId\":5, \"percentage\":25}, \n        \t{\"targetDistrictId\":7, \"percentage\":25}\n       \t]\n    }"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/districts",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"districts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all districts",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{rootToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/districts",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"districts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get District By Id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{rootToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/districts/8",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"districts",
+								"8"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update District",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{rootToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n        \"districtId\": 8,\n        \"state\": \"TX\",\n        \"number\": 1,\n        \"repFirstName\": \"Louie\",\n        \"repLastName\": \"Gomert\",\n        \"repImageUrl\": null,\n        \"callTargets\": [\n            {\n                \"targetDistrictId\": 8,\n                \"percentage\": 10\n            },\n            {\n                \"targetDistrictId\": 5,\n                \"percentage\": 90\n            }\n        ],\n        \"info\": \"Useless rep from Texas\"\n    }"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/districts/8",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"districts",
+								"8"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete district",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/districts/4",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"districts",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get district hydrated",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{rootToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/districts/3/hydrated",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"districts",
+								"3",
+								"hydrated"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get District By State,Number",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{rootToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/districts?id=1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"districts"
+							],
+							"query": [
+								{
+									"key": "state",
+									"value": "TX",
+									"disabled": true
+								},
+								{
+									"key": "number",
+									"value": "11",
+									"disabled": true
+								},
+								{
+									"key": "hydrated",
+									"value": "true",
+									"disabled": true
+								},
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Callers",
+			"item": [
+				{
+					"name": "Create caller",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"firstName\":\"Welcome\",\"lastName\":\"Test\",\"contactMethods\":[\"email\",\"sms\"],\"email\":\"nprager@grandecom.net\",\"phone\":\"512-797-8556\",\"districtId\":1,\"zipCode\":\"75756\",\"paused\":false}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/callers",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"callers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Caller By Id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/callers/30",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"callers",
+								"30"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Caller",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n        \"firstName\": \"Neal\",\n        \"lastName\": \"Prager\",\n        \"contactMethods\": [\n            \"email\"\n        ],\n        \"phone\": \"512-828-2338\",\n        \"email\": \"nealprager57@gmail.com\",\n        \"districtId\": 1,\n        \"zipCode\": \"75756\",\n        \"paused\": false\n    }"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/callers/30",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"callers",
+								"30"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all callers",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{rootToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/callers",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"callers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete caller",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "newpassword",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "district2and3",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/callers/22",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"callers",
+								"22"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Me as caller",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"firstName\":\"Neal\",\"lastName\":\"Prager\",\"contactMethods\":[\"sms\"],\"email\":\"nealprager57@gmail.com\",\"phone\":\"512-828-2338\",\"districtId\":1,\"zipCode\":\"75756\",\"paused\":false}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/callers",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"callers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Callers By District",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{rootToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/callers?districtId=2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"callers"
+							],
+							"query": [
+								{
+									"key": "districtId",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "One Time Message (District)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{districtToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"subject\":\"One-time message test\", \"body\":\"Message for District Two\"}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/callers/onetimemessage/2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"callers",
+								"onetimemessage",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "One Time Message (all)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{rootToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"subject\":\"One-time message test\", \"body\":\"Message for All Callers\"}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/callers/onetimemessage",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"callers",
+								"onetimemessage"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Themes",
+			"item": [
+				{
+					"name": "Create theme",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"name\": \"Delete Me Please\"}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/themes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"themes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all themes",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{rootToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/themes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"themes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get theme by Id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/themes/3",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"themes",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Theme",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"name\": \"Environmental Protection Agency news\"}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/themes/2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"themes",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete theme",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/themes/3",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"themes",
+								"3"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Talking Points",
+			"item": [
+				{
+					"name": "Create talking point",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{districtToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"content\":\"Senate district 7 Talking Point\", \"themeId\":1, \"enabled\":true, \"scope\":\"district\", \"districts\":[7], \"referenceUrl\":\"http://senator7.stuff\"}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/talkingpoints",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"talkingpoints"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all talking points",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{rootToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/talkingpoints",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"talkingpoints"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get talking point by Id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{rootToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/talkingpoints/10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"talkingpoints",
+								"10"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update talking point",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n        \"talkingPointId\": 7,\n        \"themeId\": 1,\n        \"content\": \"State News\",\n        \"scope\": \"state\",\n        \"enabled\": true,\n        \"districts\": [2,3],\n        \"states\": [\"TX\"]\n    }"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/talkingpoints/7",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"talkingpoints",
+								"7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete talking point",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{rootToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/talkingpoints/15",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"talkingpoints",
+								"15"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Offices",
+			"item": [
+				{
+					"name": "Create Office",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkaXN0cmljdDJhbmQzIiwiaXNzIjoibG9jYWxob3N0IiwiZXhwIjoxNTUwMDkyMDUyLCJpYXQiOjE1NTAwNzc2NTJ9.ONP-55_nVpe99B_EPfPAv7oCwNcD_xluZLuCd2s4Pyw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"phone\": \"512-555-2121\",\n  \"address\": {\n    \"addressLine1\": \"5678 RogerLovesDon Ave.\",\n    \"city\": \"Georgetown\",\n    \"state\": \"TX\",\n    \"country\": \"US\",\n    \"zipCode\": \"78701\"\n  },\n  \"email\": \"roger.williams@us.gov\",\n  \"opensAt\": \"011:00:00\",\n  \"closesAt\": \"12:00:00\"\n }"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/districts/3/offices",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"districts",
+								"3",
+								"offices"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get offices for a district",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{rootToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/districts/2/offices",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"districts",
+								"2",
+								"offices"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get office by Id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkaXN0cmljdDJhbmQzIiwiaXNzIjoibG9jYWxob3N0IiwiZXhwIjoxNTUwMDkyMDUyLCJpYXQiOjE1NTAwNzc2NTJ9.ONP-55_nVpe99B_EPfPAv7oCwNcD_xluZLuCd2s4Pyw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/districts/{{districtId}}/offices/2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"districts",
+								"{{districtId}}",
+								"offices",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Office",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkaXN0cmljdDJhbmQzIiwiaXNzIjoibG9jYWxob3N0IiwiZXhwIjoxNTUwMDkyMDUyLCJpYXQiOjE1NTAwNzc2NTJ9.ONP-55_nVpe99B_EPfPAv7oCwNcD_xluZLuCd2s4Pyw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"phone\": \"512-555-1125\",\n  \"address\": {\n    \"addressLine1\": \"4321 LobbyistsAreWelcome Dr.\",\n    \"city\": \"Round Rock\",\n    \"state\": \"TX\",\n    \"country\": \"US\",\n    \"zipCode\": \"78759\"\n  },\n  \"email\": \"mccaul@us.gov\",\n  \"opensAt\": \"07:00:00\",\n  \"closesAt\": \"18:00:00\"\n }"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/districts/4/offices/2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"districts",
+								"4",
+								"offices",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Office",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/districts/{{districtId}}/offices/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"districts",
+								"{{districtId}}",
+								"offices",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Calls",
+			"item": [
+				{
+					"name": "Save call",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"trackingId\":\"\\\"m7EDwcWukyBP9MQ8jnjMOg==\\\"\", \"districtId\": 3}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/calls",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"calls"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get calls",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{rootToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/calls",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"calls"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Admins",
+			"item": [
+				{
+					"name": "Create Initial Super Admin",
+					"request": {
+						"auth": {
+							"type": "basic"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"userName\":\"admin\", \"password\":\"password\", \"root\":true}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admins",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admins"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Admin",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "admin",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "password",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"userName\":\"testAlert\", \"password\":\"password\", \"root\":false, \"districts\":[1], \"loginEnabled\": true, \"email\":\"testAlert@pgc.com\"}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admins",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admins"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all admins",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "admin",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "password",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admins",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admins"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Admin By Id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkaXN0cmljdDJhbmQzIiwiaXNzIjoibG9jYWxob3N0IiwiZXhwIjoxNTUwMDkyMDUyLCJpYXQiOjE1NTAwNzc2NTJ9.ONP-55_nVpe99B_EPfPAv7oCwNcD_xluZLuCd2s4Pyw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admins/5",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admins",
+								"5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Admin",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "admin",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "password",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admins/7",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admins",
+								"7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Admin",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{rootToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n        \"userName\": \"district4admin\",\n        \"email\": \"district4admin@pgc.com\",\n        \"districts\": [\n            3,\n            2\n        ],\n        \"loginEnabled\": true,\n        \"root\": false\n    }"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admins/7",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admins",
+								"7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register an admin",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"userName\":\"district4admin\", \"email\":\"district4admin@pgc.com\", \"password\":\"password\", \"root\":false, \"districts\":[2,3]}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admins",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admins"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change Password",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkaXN0cmljdDJhbmQzIiwiaXNzIjoibG9jYWxob3N0IiwiZXhwIjoxNTQ4OTkxODYwLCJpYXQiOjE1NDg5Nzc0NjB9.ZpqVYDmqJO1nAXnCg3VPibTl6NTeUHfa5HI9en0bPpY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"currentPassword\":\"newpassword\", \"newPassword\":\"district2password\"}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admins/6/password",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admins",
+								"6",
+								"password"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Login",
+			"item": [
+				{
+					"name": "SuperAdmin Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"userName\":\"admin\", \"password\":\"password\"}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DistrictAdmin for Senator Login",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"userName\":\"senatorAdmin\", \"password\":\"password\"}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "District Admin Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"userName\":\"senatorAdmin\", \"password\":\"password\"}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Scripts",
+			"item": [
+				{
+					"name": "Create or Update Script",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{rootToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[10,2]"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/districts/1/script",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"districts",
+								"1",
+								"script"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get script",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{rootToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/districts/1/script",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"districts",
+								"1",
+								"script"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Reminders",
+			"item": [
+				{
+					"name": "Send a test reminder",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{rootToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/reminders/30",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reminders",
+								"30"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Currently for testing only"
+		},
+		{
+			"name": "Requests",
+			"item": [
+				{
+					"name": "Get all requests",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{rootToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/requests",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Request",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{districtToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"districtId\":7, \"content\":\"A third request for district 7\"}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/requests",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Request",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{districtToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"districtId\":7, \"content\":\"Modified request\"}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/requests/2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"requests",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Request by ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{districtToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/requests/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"requests",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Request",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{districtToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/requests/4",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"requests",
+								"4"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "ad03dbb1-e83c-41d5-81e5-f8a80e81be93",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "031f258a-f900-4c1d-b4da-4616df9a382e",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "d170ccc0-52c5-4e49-a887-44886a36eefd",
+			"key": "baseUrl",
+			"value": "http://localhost:8080/api",
+			"type": "string"
+		},
+		{
+			"id": "cbb41f6e-14f5-4e62-a155-b0a2ed667d70",
+			"key": "cloudBaseUrl",
+			"value": "https://grandcanyon-222321.appspot.com/api",
+			"type": "string"
+		},
+		{
+			"id": "8b48577b-e3c6-493a-8aa2-f6cf57ada112",
+			"key": "rootToken",
+			"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlzcyI6ImxvY2FsaG9zdCIsImV4cCI6MTU0ODI5NDc1NywiaWF0IjoxNTQ4MjgwMzU3fQ.r2C7ka8lIOYIKIeW3Zz75IiPAlgfrLaJXqx2dkR4NE4",
+			"type": "string"
+		},
+		{
+			"id": "698c4346-144a-49d0-8838-f26e13e4629d",
+			"key": "districtId",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"id": "0860394d-737a-4c3a-a5a6-99dd7e26e778",
+			"key": "districtToken",
+			"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzZW5hdG9yQWRtaW4iLCJpc3MiOiJsb2NhbGhvc3QiLCJleHAiOjE1NTAwOTMxMTQsImlhdCI6MTU1MDA3ODcxNH0.ylNH_UOKCCC9JZ3PNhb-qTA5vur-F7r96u1C7P5jzj4",
+			"type": "string"
+		}
+	]
+}
