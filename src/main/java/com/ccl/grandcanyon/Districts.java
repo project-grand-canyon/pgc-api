@@ -18,7 +18,10 @@ public class Districts {
 
   private static final String ORDERING = "ordering";
 
-  private static final String SQL_SELECT_DISTRICT = "SELECT * FROM districts";
+  private static final String SQL_SELECT_DISTRICT =
+      "SELECT d.*, ct.target_district_id, ct.percentage " +
+          "FROM districts d " +
+          "LEFT JOIN call_targets AS ct ON ct.district_id = d.district_id";
 
   private static final String SQL_CREATE_DISTRICT =
       "INSERT INTO districts (" +
@@ -59,6 +62,16 @@ public class Districts {
       "DELETE FROM district_scripts " +
           "WHERE " + District.DISTRICT_ID + " = ?";
 
+  public static final String SQL_INSERT_CALL_TARGETS =
+      "INSERT into call_targets (" +
+          CallTarget.DISTRICT_ID + ", " +
+          CallTarget.TARGET_DISTRICT_ID + ", " +
+          CallTarget.PERCENTAGE +
+          ") VALUES ";
+
+  public static final String SQL_DELETE_CALL_TARGETS =
+      "DELETE from call_targets where " + CallTarget.DISTRICT_ID + " = ?";
+
 
   @Context
   UriInfo uriInfo;
@@ -75,6 +88,7 @@ public class Districts {
 
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
+      conn.setAutoCommit(false);
       PreparedStatement insertStatement = conn.prepareStatement(SQL_CREATE_DISTRICT,
           Statement.RETURN_GENERATED_KEYS);
       int idx = 1;
@@ -97,11 +111,20 @@ public class Districts {
         throw new SQLException("Create of District failed, no ID obtained.");
       }
 
+      insertCallTargets(conn, districtId, district);
+
       District newDistrict = retrieveDistrictById(conn, districtId);
+      conn.commit();
+
       URI location = uriInfo.getAbsolutePathBuilder().path(Integer.toString(newDistrict.getDistrictId())).build();
       return Response.created(location).entity(newDistrict).build();
     }
+    catch (SQLException e) {
+      conn.rollback();
+      throw e;
+    }
     finally {
+      conn.setAutoCommit(true);
       conn.close();
     }
   }
@@ -123,6 +146,7 @@ public class Districts {
 
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
+      conn.setAutoCommit(false);
       PreparedStatement statement = conn.prepareStatement(SQL_UPDATE_DISTRICT);
       int idx = 1;
       statement.setString(idx++, district.getState());
@@ -134,9 +158,19 @@ public class Districts {
       statement.setInt(idx++, districtId);
       statement.executeUpdate();
 
-      return Response.ok(retrieveDistrictById(conn, districtId)).build();
+      deleteCallTargets(conn, districtId);
+      insertCallTargets(conn, districtId, district);
+
+      District updatedDistrict = retrieveDistrictById(conn, districtId);
+      conn.commit();
+      return Response.ok(updatedDistrict).build();
+    }
+    catch (SQLException e) {
+      conn.rollback();
+      throw e;
     }
     finally {
+      conn.setAutoCommit(true);
       conn.close();
     }
   }
@@ -171,13 +205,13 @@ public class Districts {
       PreparedStatement statement;
       StringBuilder query = new StringBuilder(SQL_SELECT_DISTRICT);
       if (id != null) {
-        query.append(" WHERE " + District.DISTRICT_ID + " = ?");
+        query.append(" WHERE d." + District.DISTRICT_ID + " = ?");
         statement = conn.prepareStatement(query.toString());
         statement.setInt(1, id);
       }
       else if (state != null) {
-        query.append(" WHERE " + District.STATE + " = ?");
-        query.append(" AND " + District.DISTRICT_NUMBER + " = ?");
+        query.append(" WHERE d." + District.STATE + " = ?");
+        query.append(" AND d." + District.DISTRICT_NUMBER + " = ?");
         statement = conn.prepareStatement(query.toString());
         statement.setString(1, state);
         statement.setInt(2, number);
@@ -386,6 +420,55 @@ public class Districts {
   }
 
 
+  private void insertCallTargets(
+      Connection conn,
+      int districtId,
+      District district) throws SQLException {
+
+    if (district.getCallTargets() == null || district.getCallTargets().isEmpty()) {
+      CallTarget target = new CallTarget();
+      target.setTargetDistrictId(districtId);
+      target.setPercentage(100);
+      district.setCallTargets(Collections.singletonList(target));
+    }
+    else {
+      int total = 0;
+      for (CallTarget target : district.getCallTargets()) {
+        total += target.getPercentage();
+      }
+      if (total != 100) {
+        throw new BadRequestException("Percentage total for call targets must be 100.");
+      }
+    }
+
+    StringBuilder callTargetInsert = new StringBuilder(SQL_INSERT_CALL_TARGETS);
+    for (CallTarget target : district.getCallTargets()) {
+      if (target.getTargetDistrictId() == 0) {
+        target.setTargetDistrictId(districtId);
+      }
+      callTargetInsert.append("(").
+          append(districtId).append(",").
+          append(target.getTargetDistrictId()).
+          append(",").
+          append(target.getPercentage()).
+          append("),");
+    }
+    callTargetInsert.deleteCharAt(callTargetInsert.length() - 1);
+    conn.createStatement().executeUpdate(callTargetInsert.toString());
+  }
+
+
+  private void deleteCallTargets(
+      Connection conn,
+      int districtId) throws SQLException {
+
+    PreparedStatement delete = conn.prepareStatement(SQL_DELETE_CALL_TARGETS);
+    delete.setInt(1, districtId);
+    delete.executeUpdate();
+  }
+
+
+
 
   static District retrieveDistrictById(
       Connection conn,
@@ -402,7 +485,7 @@ public class Districts {
       int districtId)
       throws SQLException {
 
-    String whereClause = " WHERE " + District.DISTRICT_ID + " = ?";
+    String whereClause = " WHERE d." + District.DISTRICT_ID + " = ?";
     PreparedStatement statement = conn.prepareStatement(SQL_SELECT_DISTRICT + whereClause);
     statement.setInt(1, districtId);
     ResultSet rs = statement.executeQuery();

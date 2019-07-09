@@ -30,11 +30,8 @@ public class Reminders {
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
       Caller caller = Callers.retrieveById(conn, callerId);
-      District district = Districts.retrieveDistrictById(
-              conn, caller.getDistrictId()
-      );
       String trackingId = RandomStringUtils.random(8, true, true);
-      boolean success = ReminderService.getInstance().sendReminder(caller, district, trackingId);
+      boolean success = ReminderService.getInstance().sendReminder(conn, caller, trackingId);
       return Response.ok(BooleanNode.valueOf(success)).build();
     }
     finally {

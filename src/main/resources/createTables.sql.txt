@@ -131,4 +131,10 @@ last_modified DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 PRIMARY KEY (request_id),
 FOREIGN KEY (district_id) REFERENCES districts (district_id))
 
+CREATE TABLE call_targets (district_id INT NOT NULL,
+target_district_id INT NOT NULL,
+percentage INT NOT NULL,
+FOREIGN KEY (district_id) REFERENCES districts (district_id),
+FOREIGN KEY (target_district_id) REFERENCES districts (district_id))
+
 

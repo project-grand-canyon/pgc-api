@@ -3,6 +3,9 @@ package com.ccl.grandcanyon.types;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Class representing a congressional district or senate seat.
@@ -24,6 +27,7 @@ public class District extends GCBase {
   private String repFirstName;
   private String repLastName;
   private String repImageUrl;
+  private List<CallTarget> callTargets;
 
   private String info;
 
@@ -41,10 +45,28 @@ public class District extends GCBase {
     this.repLastName = rs.getString(REP_LAST_NAME);
     this.repImageUrl = rs.getString(REP_IMAGE_URL);
     this.info = rs.getString(INFO);
+    this.callTargets = new ArrayList<>();
+    do {
+      CallTarget callTarget = new CallTarget();
+      int targetDistrictId = rs.getInt(CallTarget.TARGET_DISTRICT_ID);
+      if (targetDistrictId == 0) {
+        callTarget.setTargetDistrictId(this.districtId);
+        callTarget.setPercentage(100);
+      }
+      else {
+        callTarget.setTargetDistrictId(targetDistrictId);
+        callTarget.setPercentage(rs.getInt(CallTarget.PERCENTAGE));
+      }
+      callTargets.add(callTarget);
+    }
+    while (rs.next() && rs.getInt(DISTRICT_ID) == this.districtId);
+    // undo the last result set since it doesn't belong to this District
+    rs.previous();
   }
 
   // default, for JSON
   public District() {
+    this.callTargets = Collections.emptyList();
   }
 
   public int getDistrictId() {
@@ -90,10 +112,19 @@ public class District extends GCBase {
     this.repImageUrl = repImageUrl;
   }
 
+
   public String getInfo() {
     return info;
   }
   public void setInfo(String info) {
     this.info = info;
+  }
+
+  public List<CallTarget> getCallTargets() {
+    return callTargets;
+  }
+
+  public void setCallTargets(List<CallTarget> callTargets) {
+    this.callTargets = callTargets;
   }
 }

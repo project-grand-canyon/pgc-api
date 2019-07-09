@@ -13,9 +13,7 @@ import java.security.SecureRandom;
 import java.sql.*;
 import java.time.*;
 import java.time.format.DateTimeParseException;
-import java.util.HashSet;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -55,9 +53,6 @@ public class ReminderService {
           "LEFT JOIN callers AS c ON c.caller_id = r.caller_id " +
           "LEFT JOIN callers_contact_methods AS ccm on c.caller_id = ccm.caller_id";
 
-  private final static String SQL_SELECT_DISTRICT =
-      "SELECT * FROM districts WHERE " +
-          District.DISTRICT_ID + " = ?";
 
 
   private static final Logger logger = Logger.getLogger(ReminderService.class.getName());
@@ -200,20 +195,23 @@ public class ReminderService {
 
 
   boolean sendReminder(
+      Connection conn,
       Caller caller,
-      District district,
-      String trackingId) {
+      String trackingId) throws SQLException {
 
     boolean smsReminderSent = false;
     boolean emailReminderSent = false;
 
-    String callInPageUrl = "projectgrandcanyon.com/call/" + district.getState() + "/" + district.getNumber() +
-        "?t=" + trackingId + "&c=" + caller.getCallerId();
+    District targetDistrict = getDistrictToCall(conn, caller);
+
+    String callInPageUrl = "projectgrandcanyon.com/call/" + targetDistrict.getState() + "/" +
+        targetDistrict.getNumber() + "?t=" + trackingId + "&c=" + caller.getCallerId();
 
     if (caller.getContactMethods().contains(ContactMethod.sms)) {
 
       Message reminderMessage = new Message();
-      reminderMessage.setBody("It's your day to call Rep. " + district.getRepLastName() + ". http://" + callInPageUrl);
+      reminderMessage.setBody("It's your day to call Rep. " + targetDistrict.getRepLastName() +
+          ". http://" + callInPageUrl);
       try {
         smsReminderSent = smsDeliveryService.sendHtmlMessage(caller, reminderMessage);
         if (smsReminderSent) {
@@ -270,6 +268,36 @@ public class ReminderService {
     statement.setString(idx++, trackingId);
     statement.setInt(idx, callerId);
     statement.executeUpdate();
+  }
+
+
+  private District getDistrictToCall(
+      Connection conn,
+      Caller caller) throws SQLException {
+
+    District callerDistrict = Districts.retrieveDistrictById(conn, caller.getDistrictId());
+    int targetDistrictId = 0;
+
+    int random = new Random().nextInt(100);
+    int sum = 0;
+    List<CallTarget> targets = callerDistrict.getCallTargets();
+    assert(targets != null && !targets.isEmpty());
+
+    for (CallTarget target : targets) {
+      sum += target.getPercentage();
+      if (random < sum) {
+        targetDistrictId = target.getTargetDistrictId();
+        break;
+      }
+    }
+    if (targetDistrictId == 0) {
+      logger.severe(String.format("District %d has invalid call target set with sum = %d",
+          callerDistrict.getDistrictId(), sum));
+      targetDistrictId = callerDistrict.getDistrictId();
+    }
+    return (targetDistrictId == callerDistrict.getDistrictId()) ?
+        callerDistrict :
+        Districts.retrieveDistrictById(conn, targetDistrictId);
   }
 
 
@@ -352,17 +380,11 @@ public class ReminderService {
               lastReminderTime.getYear() != currentYear) {
 
             Caller caller = new Caller(rs);
-            PreparedStatement statement = conn.prepareStatement(SQL_SELECT_DISTRICT);
-            statement.setInt(1, caller.getDistrictId());
-            ResultSet rs2 = statement.executeQuery();
-            if (rs2.next()){
-              District district = new District(rs2);
-              if (!caller.isPaused()) {
-                String trackingId = RandomStringUtils.randomAlphanumeric(8);
-                if (sendReminder(caller, district, trackingId)) {
-                  sentCount++;
-                  updateReminderStatus(conn, caller.getCallerId(), trackingId);
-                }
+            if (!caller.isPaused()) {
+              String trackingId = RandomStringUtils.randomAlphanumeric(8);
+              if (sendReminder(conn, caller, trackingId)) {
+                sentCount++;
+                updateReminderStatus(conn, caller.getCallerId(), trackingId);
               }
             }
           }
@@ -389,7 +411,6 @@ public class ReminderService {
         }
       }
     }
-
-
   }
+
 }
