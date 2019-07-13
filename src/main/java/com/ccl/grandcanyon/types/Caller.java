@@ -22,8 +22,6 @@ public class Caller extends GCBase {
   public static final String DISTRICT_ID = "district_id";
   public static final String ZIPCODE = "zipcode";
   public static final String PAUSED = "paused";
-  public static final String CALL_WEEK_OF_MONTH = "call_week_of_month";
-  public static final String CALL_DAY_OF_WEEK = "call_day_of_week";
 
   private int callerId;
   private String firstName;

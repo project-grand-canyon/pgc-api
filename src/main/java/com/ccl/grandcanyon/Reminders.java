@@ -1,9 +1,8 @@
 package com.ccl.grandcanyon;
 
 import com.ccl.grandcanyon.types.Caller;
-import com.ccl.grandcanyon.types.District;
+import com.ccl.grandcanyon.types.ReminderStatus;
 import com.fasterxml.jackson.databind.node.BooleanNode;
-import org.apache.commons.lang3.RandomStringUtils;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
@@ -30,9 +29,8 @@ public class Reminders {
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
       Caller caller = Callers.retrieveById(conn, callerId);
-      String trackingId = RandomStringUtils.random(8, true, true);
-      boolean success = ReminderService.getInstance().sendReminder(conn, caller, trackingId);
-      return Response.ok(BooleanNode.valueOf(success)).build();
+      ReminderStatus status = ReminderService.getInstance().sendReminder(conn, caller);
+      return Response.ok(BooleanNode.valueOf(status.success())).build();
     }
     finally {
       conn.close();

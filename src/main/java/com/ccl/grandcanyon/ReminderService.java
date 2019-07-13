@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.net.URL;
-import java.security.SecureRandom;
 import java.sql.*;
 import java.time.*;
 import java.time.format.DateTimeParseException;
@@ -43,7 +42,6 @@ public class ReminderService {
   private final static String SQL_UPDATE_REMINDER =
       "UPDATE reminders SET " +
           Reminder.LAST_REMINDER_TIMESTAMP + " = ?, " +
-          Reminder.DAY_OF_MONTH + " = ?, " +
           Reminder.TRACKING_ID + " = ? " +
           "WHERE " + Reminder.CALLER_ID + " = ?";
 
@@ -53,7 +51,16 @@ public class ReminderService {
           "LEFT JOIN callers AS c ON c.caller_id = r.caller_id " +
           "LEFT JOIN callers_contact_methods AS ccm on c.caller_id = ccm.caller_id";
 
-
+  private final static String SQL_INSERT_REMINDER_HISTORY =
+      "INSERT into reminder_history (" +
+          ReminderStatus.CALLER_ID + ", " +
+          ReminderStatus.CALLER_DISTRICT_ID + ", " +
+          ReminderStatus.TARGET_DISTRICT_ID + ", " +
+          ReminderStatus.TIME_SENT + ", " +
+          ReminderStatus.TRACKING_ID + ", " +
+          ReminderStatus.EMAIL_DELIVERED + ", " +
+          ReminderStatus.SMS_DELIVERED +
+          ") VALUES (?, ?, ?, ?, ?, ?, ?)";
 
   private static final Logger logger = Logger.getLogger(ReminderService.class.getName());
 
@@ -68,7 +75,6 @@ public class ReminderService {
   private OffsetTime latestReminder;
 
   private ScheduledFuture reminderTask;
-  private SecureRandom rand = new SecureRandom();
 
   private DeliveryService smsDeliveryService;
   private DeliveryService emailDeliveryService;
@@ -194,15 +200,15 @@ public class ReminderService {
 
 
 
-  boolean sendReminder(
+  ReminderStatus sendReminder(
       Connection conn,
-      Caller caller,
-      String trackingId) throws SQLException {
+      Caller caller) throws SQLException {
 
     boolean smsReminderSent = false;
     boolean emailReminderSent = false;
 
     District targetDistrict = getDistrictToCall(conn, caller);
+    String trackingId = RandomStringUtils.randomAlphanumeric(8);
 
     String callInPageUrl = "projectgrandcanyon.com/call/" + targetDistrict.getState() + "/" +
         targetDistrict.getNumber() + "?t=" + trackingId + "&c=" + caller.getCallerId();
@@ -245,8 +251,9 @@ public class ReminderService {
       }
     }
 
-    return smsReminderSent | emailReminderSent;
+    return new ReminderStatus(caller, targetDistrict, smsReminderSent, emailReminderSent, trackingId);
   }
+
 
   public DeliveryService getSmsDeliveryService() {
     return smsDeliveryService;
@@ -258,16 +265,28 @@ public class ReminderService {
 
   private void updateReminderStatus(
       Connection conn,
-      int callerId,
-      String trackingId) throws SQLException {
+      ReminderStatus reminderStatus)
+      throws SQLException {
 
-    PreparedStatement statement = conn.prepareStatement(SQL_UPDATE_REMINDER);
+    Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+    PreparedStatement update = conn.prepareStatement(SQL_UPDATE_REMINDER);
     int idx = 1;
-    statement.setTimestamp(idx++, new Timestamp(System.currentTimeMillis()));
-    statement.setInt(idx++, LocalDateTime.now().getDayOfMonth());
-    statement.setString(idx++, trackingId);
-    statement.setInt(idx, callerId);
-    statement.executeUpdate();
+    update.setTimestamp(idx++, timestamp);
+    update.setString(idx++, reminderStatus.getTrackingId());
+    update.setInt(idx, reminderStatus.getCaller().getCallerId());
+    update.executeUpdate();
+
+    // add history record
+    PreparedStatement history = conn.prepareStatement(SQL_INSERT_REMINDER_HISTORY);
+    idx = 1;
+    history.setInt(idx++, reminderStatus.getCaller().getCallerId());
+    history.setInt(idx++, reminderStatus.getCaller().getDistrictId());
+    history.setInt(idx++, reminderStatus.getTargetDistrict().getDistrictId());
+    history.setTimestamp(idx++, timestamp);
+    history.setString(idx++, reminderStatus.getTrackingId());
+    history.setBoolean(idx++, reminderStatus.emailDelivered());
+    history.setBoolean(idx, reminderStatus.smsDelivered());
+    history.executeUpdate();
   }
 
 
@@ -381,10 +400,10 @@ public class ReminderService {
 
             Caller caller = new Caller(rs);
             if (!caller.isPaused()) {
-              String trackingId = RandomStringUtils.randomAlphanumeric(8);
-              if (sendReminder(conn, caller, trackingId)) {
+              ReminderStatus reminderStatus = sendReminder(conn, caller);
+              if (reminderStatus.success()) {
                 sentCount++;
-                updateReminderStatus(conn, caller.getCallerId(), trackingId);
+                updateReminderStatus(conn, reminderStatus);
               }
             }
           }
