@@ -62,14 +62,19 @@ public class Districts {
       "DELETE FROM district_scripts " +
           "WHERE " + District.DISTRICT_ID + " = ?";
 
-  public static final String SQL_INSERT_CALL_TARGETS =
+  private static final String SQL_UPDATE_SCRIPT_MODIFIED_TIME =
+      "UPDATE districts set " +
+          District.SCRIPT_MODIFIED_TIME + " = ? " +
+          "WHERE " + District.DISTRICT_ID + " = ?";
+
+  private static final String SQL_INSERT_CALL_TARGETS =
       "INSERT into call_targets (" +
           CallTarget.DISTRICT_ID + ", " +
           CallTarget.TARGET_DISTRICT_ID + ", " +
           CallTarget.PERCENTAGE +
           ") VALUES ";
 
-  public static final String SQL_DELETE_CALL_TARGETS =
+  private static final String SQL_DELETE_CALL_TARGETS =
       "DELETE from call_targets where " + CallTarget.DISTRICT_ID + " = ?";
 
 
@@ -335,6 +340,13 @@ public class Districts {
         insert.deleteCharAt(insert.length() - 1);
         conn.createStatement().executeUpdate(insert.toString());
       }
+
+      // update script-modified time on district
+      PreparedStatement updateTime = conn.prepareStatement(SQL_UPDATE_SCRIPT_MODIFIED_TIME);
+      updateTime.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
+      updateTime.setInt(2, districtId);
+      updateTime.executeUpdate();
+
       conn.commit();
 
       URI location = uriInfo.getAbsolutePathBuilder().build();

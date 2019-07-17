@@ -10,6 +10,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.net.URL;
 import java.sql.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeParseException;
 import java.util.*;
@@ -28,6 +30,7 @@ public class ReminderService {
   private final static String LATEST_REMINDER_TIME = "latestReminderTime";
   private final static String SMS_DELIVERY_SERVICE = "smsDeliveryService";
   private final static String EMAIL_DELIVERY_SERVICE = "emailDeliveryService";
+  private final static String STALE_SCRIPT_WARNING_INTERVAL = "staleScriptWarningInterval";
 
   private final static String SQL_SELECT_REMINDER =
       "SELECT * FROM reminders WHERE " +
@@ -62,6 +65,16 @@ public class ReminderService {
           ReminderStatus.SMS_DELIVERED +
           ") VALUES (?, ?, ?, ?, ?, ?, ?)";
 
+  private final static String SQL_STALE_SCRIPT_QUERY =
+      "SELECT d.*, a.admin_id, a.login_enabled, a.email from districts d " +
+          "LEFT JOIN admins_districts as ad ON ad.district_id = d.district_id " +
+          "LEFT JOIN admins as a ON a.admin_id = ad.admin_id";
+
+  private final static String SQL_UPDATE_STALE_SCRIPT_NOTIFICATION =
+      "UPDATE districts SET " +
+          District.LAST_STALE_SCRIPT_NOTIFICATION + " = ? " +
+          "WHERE " + District.DISTRICT_ID + " = ?";
+
   private static final Logger logger = Logger.getLogger(ReminderService.class.getName());
 
   private static ReminderService instance;
@@ -82,7 +95,11 @@ public class ReminderService {
   private String regularCallInReminderHTML;
   private String callReminderEmailResource = "callNotificationEmail.html";
 
+  private long staleScriptWarningInterval;
+
   private static int dayOfMonthCounter = 1;
+
+  private DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd");
 
   // TODO: Instead of distributing all callers across the month, do so for each district
   private static int getNewDayOfMonth() {
@@ -143,6 +160,9 @@ public class ReminderService {
       logger.warning("Failed to initialize Email deliver service: " + e.getMessage());
       this.emailDeliveryService = null;
     }
+
+    int staleScriptWarningInDays = Integer.parseInt(config.getProperty(STALE_SCRIPT_WARNING_INTERVAL, "30"));
+    this.staleScriptWarningInterval = TimeUnit.DAYS.toMillis(staleScriptWarningInDays);
 
     try {
       URL resource = getClass().getClassLoader().getResource(callReminderEmailResource);
@@ -320,8 +340,48 @@ public class ReminderService {
   }
 
 
+  private boolean sendStaleScrptNotification(
+      District district,
+      String adminEmail)
+      throws Exception {
+
+    boolean success = false;
+    if (adminEmail != null) {
+      Message message = new Message();
+      message.setSubject("Your district call-in script may need updating.");
+
+      // todo: replace with HTML?  Add a link to admin portal?
+      message.setBody(district.getScriptModifiedTime() == null ?
+          String.format(
+              "The call in script for %s district %d has not yet been created.",
+              district.getState(), district.getNumber()) :
+          String.format(
+              "The call in script for %s district %d has not been udated since %s. " +
+                  "It's time to consider refreshing the talking points.  Thank you!",
+              district.getState(), district.getNumber(), dateFormat.format(district.getScriptModifiedTime())));
+
+      Caller adminAsCaller = new Caller();
+      adminAsCaller.setEmail(adminEmail);
+      success = emailDeliveryService.sendTextMessage(adminAsCaller, message);
+    }
+    if (success) {
+      logger.info(String.format(
+          "Sent stale script warning to %s for %s district %d",
+          adminEmail, district.getState(), district.getNumber()));
+    }
+    else {
+      logger.warning(String.format(
+          "Could not send stale script warning to Admin for %s district %d.  Possibly invalid email address '%s'.",
+          district.getState(), district.getNumber(), adminEmail));
+    }
+    return success;
+  }
+
+
 
   class ReminderSender implements Runnable {
+
+    private boolean isAfterHours = true;
 
     @Override
     public void run() {
@@ -340,6 +400,7 @@ public class ReminderService {
       if (currentTime.isBefore(earliestReminder) ||
           currentTime.isAfter(latestReminder)) {
         logger.info("It's after hours. Do nothing.");
+        isAfterHours = true;
         return;
       }
 
@@ -384,6 +445,14 @@ public class ReminderService {
       int sentCount = 0;
       try {
         conn = SQLHelper.getInstance().getConnection();
+
+        // once a day check for stale district scripts
+        if (isAfterHours) {
+          isAfterHours = false;
+          logger.info("Reminder Service:  Checking for stale district scripts.");
+          checkForStaleScripts(conn);
+        }
+
         String query = SQL_SELECT_CALLERS + whereClause.toString();
         logger.info(query);
         ResultSet rs = conn.createStatement().executeQuery(query);
@@ -425,9 +494,44 @@ public class ReminderService {
             conn.close();
           }
           catch (SQLException e) {
-            logger.warning("Failed to close SQL connection: " + e.getMessage());
+            logger.warning("Failed to close SQL connection during reminder check: " + e.getMessage());
           }
         }
+      }
+    }
+
+
+    private void checkForStaleScripts(Connection conn) {
+
+      Timestamp staleTime = new Timestamp(System.currentTimeMillis() - staleScriptWarningInterval);
+      Timestamp now = new Timestamp(System.currentTimeMillis());
+      try {
+        ResultSet rs = conn.createStatement().executeQuery(SQL_STALE_SCRIPT_QUERY);
+        while (rs.next()) {
+          District district = new District(rs);
+          // send a notification if it's been > N days since script was modified and it's been greater than
+          // N days since the last time we sent a notification.
+          if ((district.getScriptModifiedTime() == null || district.getScriptModifiedTime().before(staleTime)) &&
+              district.getLastStaleScriptNotification().before(staleTime)) {
+            if (rs.getBoolean(Admin.LOGIN_ENABLED)) {
+              if (sendStaleScrptNotification(district, rs.getString(Admin.EMAIL))) {
+                PreparedStatement update = conn.prepareStatement(SQL_UPDATE_STALE_SCRIPT_NOTIFICATION);
+                int idx = 1;
+                update.setTimestamp(idx++, now);
+                update.setInt(idx, district.getDistrictId());
+                update.executeUpdate();
+              }
+            }
+            else {
+              logger.warning(String.format(
+                  "Could not send stale script warning to Admin for %s district %d:  Admin account not enabled.",
+                  district.getState(), district.getNumber()));
+            }
+          }
+        }
+      }
+      catch (Throwable e) {
+        logger.severe("Unexpected error checking for stale scripts: " + e.toString());
       }
     }
   }

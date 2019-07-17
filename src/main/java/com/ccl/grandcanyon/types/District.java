@@ -1,6 +1,7 @@
 package com.ccl.grandcanyon.types;
 
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -20,6 +21,8 @@ public class District extends GCBase {
   public static final String REP_LAST_NAME = "rep_last_name";
   public static final String REP_IMAGE_URL = "rep_image_url";
   public static final String INFO = "info";
+  public static final String SCRIPT_MODIFIED_TIME = "script_modified_time";
+  public static final String LAST_STALE_SCRIPT_NOTIFICATION = "last_stale_script_notification";
 
   private int districtId;
   private String state;
@@ -28,6 +31,8 @@ public class District extends GCBase {
   private String repLastName;
   private String repImageUrl;
   private List<CallTarget> callTargets;
+  private Timestamp scriptModifiedTime;
+  private Timestamp lastStaleScriptNotification;
 
   private String info;
 
@@ -45,23 +50,37 @@ public class District extends GCBase {
     this.repLastName = rs.getString(REP_LAST_NAME);
     this.repImageUrl = rs.getString(REP_IMAGE_URL);
     this.info = rs.getString(INFO);
+    this.scriptModifiedTime = rs.getTimestamp(SCRIPT_MODIFIED_TIME);
+    this.lastStaleScriptNotification = rs.getTimestamp(LAST_STALE_SCRIPT_NOTIFICATION);
     this.callTargets = new ArrayList<>();
-    do {
-      CallTarget callTarget = new CallTarget();
-      int targetDistrictId = rs.getInt(CallTarget.TARGET_DISTRICT_ID);
-      if (targetDistrictId == 0) {
-        callTarget.setTargetDistrictId(this.districtId);
-        callTarget.setPercentage(100);
+
+    boolean retrieveCallTargets = false;
+    ResultSetMetaData metaData = rs.getMetaData();
+    for (int i = 1; i < metaData.getColumnCount(); i++) {
+      if (CallTarget.TARGET_DISTRICT_ID.equalsIgnoreCase(metaData.getColumnName(i))) {
+        retrieveCallTargets = true;
+        break;
       }
-      else {
-        callTarget.setTargetDistrictId(targetDistrictId);
-        callTarget.setPercentage(rs.getInt(CallTarget.PERCENTAGE));
-      }
-      callTargets.add(callTarget);
     }
-    while (rs.next() && rs.getInt(DISTRICT_ID) == this.districtId);
-    // undo the last result set since it doesn't belong to this District
-    rs.previous();
+
+    if (retrieveCallTargets) {
+      do {
+        CallTarget callTarget = new CallTarget();
+        int targetDistrictId = rs.getInt(CallTarget.TARGET_DISTRICT_ID);
+        if (targetDistrictId == 0) {
+          callTarget.setTargetDistrictId(this.districtId);
+          callTarget.setPercentage(100);
+        }
+        else {
+          callTarget.setTargetDistrictId(targetDistrictId);
+          callTarget.setPercentage(rs.getInt(CallTarget.PERCENTAGE));
+        }
+        callTargets.add(callTarget);
+      }
+      while (rs.next() && rs.getInt(DISTRICT_ID) == this.districtId);
+      // undo the last result set since it doesn't belong to this District
+      rs.previous();
+    }
   }
 
   // default, for JSON
@@ -72,15 +91,19 @@ public class District extends GCBase {
   public int getDistrictId() {
     return districtId;
   }
+
   public void setDistrictId(int districtId) {
     this.districtId = districtId;
   }
+
   public String getState() {
     return state;
   }
+
   public void setState(String state) {
     this.state = state;
   }
+
   public int getNumber() {
     return number;
   }
@@ -112,7 +135,6 @@ public class District extends GCBase {
     this.repImageUrl = repImageUrl;
   }
 
-
   public String getInfo() {
     return info;
   }
@@ -126,5 +148,21 @@ public class District extends GCBase {
 
   public void setCallTargets(List<CallTarget> callTargets) {
     this.callTargets = callTargets;
+  }
+
+  public Timestamp getScriptModifiedTime() {
+    return scriptModifiedTime;
+  }
+
+  public void setScriptModifiedTime(Timestamp scriptModifiedTime) {
+    this.scriptModifiedTime = scriptModifiedTime;
+  }
+
+  public Timestamp getLastStaleScriptNotification() {
+    return lastStaleScriptNotification;
+  }
+
+  public void setLastStaleScriptNotification(Timestamp lastStaleScriptNotification) {
+    this.lastStaleScriptNotification = lastStaleScriptNotification;
   }
 }
