@@ -83,6 +83,8 @@ public class GCContextListener implements ServletContextListener {
           "Initialization failed: failed to initialize Authentication Service", e);
     }
 
+    Stats.init(properties);
+
     Runtime.getRuntime().addShutdownHook(new Thread() {
       public void run() {
         SQLHelper sqlHelper = SQLHelper.getInstance();

@@ -11,8 +11,8 @@ import java.sql.Timestamp;
  */
 public abstract class GCBase {
 
-  private static final String CREATED = "created";
-  private static final String LAST_MODIFIED = "last_modified";
+  public static final String CREATED = "created";
+  public static final String LAST_MODIFIED = "last_modified";
 
   private Timestamp created;
   private Timestamp lastModified;
