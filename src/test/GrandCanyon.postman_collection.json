@@ -64,10 +64,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{baseUrl}}/districts",
 							"host": [
@@ -95,10 +91,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{baseUrl}}/districts/8",
 							"host": [
@@ -136,16 +128,16 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n        \"districtId\": 8,\n        \"state\": \"TX\",\n        \"number\": 1,\n        \"repFirstName\": \"Louie\",\n        \"repLastName\": \"Gomert\",\n        \"repImageUrl\": null,\n        \"callTargets\": [\n            {\n                \"targetDistrictId\": 8,\n                \"percentage\": 10\n            },\n            {\n                \"targetDistrictId\": 5,\n                \"percentage\": 90\n            }\n        ],\n        \"info\": \"Useless rep from Texas\"\n    }"
+							"raw": "{\n        \"state\": \"TX\",\n        \"number\": 35,\n        \"repFirstName\": \"Lloyd\",\n        \"repLastName\": \"Doggett\",\n        \"repImageUrl\": null,\n        \"callTargets\": [\n            {\n                \"targetDistrictId\": 1,\n                \"percentage\": 20\n            },\n            {\n                \"targetDistrictId\": 5,\n                \"percentage\": 40\n            },\n            {\n                \"targetDistrictId\": 7,\n                \"percentage\": 40\n            }\n        ],\n        \"info\": \"Only Democrat representing Austin\"\n    }"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/districts/8",
+							"raw": "{{baseUrl}}/districts/1",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"districts",
-								"8"
+								"1"
 							]
 						}
 					},
@@ -156,10 +148,6 @@
 					"request": {
 						"method": "DELETE",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{baseUrl}}/districts/4",
 							"host": [
@@ -188,10 +176,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{baseUrl}}/districts/3/hydrated",
 							"host": [
@@ -221,10 +205,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{baseUrl}}/districts?id=1",
 							"host": [
@@ -296,18 +276,14 @@
 					"request": {
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
-							"raw": "{{baseUrl}}/callers/30",
+							"raw": "{{baseUrl}}/callers/33",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"callers",
-								"30"
+								"33"
 							]
 						}
 					},
@@ -327,16 +303,16 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n        \"firstName\": \"Neal\",\n        \"lastName\": \"Prager\",\n        \"contactMethods\": [\n            \"email\"\n        ],\n        \"phone\": \"512-828-2338\",\n        \"email\": \"nealprager57@gmail.com\",\n        \"districtId\": 1,\n        \"zipCode\": \"75756\",\n        \"paused\": false\n    }"
+							"raw": "{\n    \"firstName\": \"Welcome\",\n    \"lastName\": \"Test\",\n    \"contactMethods\": [\n        \"email\"\n    ],\n    \"phone\": \"512-301-4444\",\n    \"email\": \"nprager@grandecom.net\",\n    \"districtId\": 1,\n    \"zipCode\": \"75756\",\n    \"paused\": false\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/callers/30",
+							"raw": "{{baseUrl}}/callers/33",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"callers",
-								"30"
+								"33"
 							]
 						}
 					},
@@ -357,10 +333,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{baseUrl}}/callers",
 							"host": [
@@ -393,10 +365,6 @@
 						},
 						"method": "DELETE",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{baseUrl}}/callers/22",
 							"host": [
@@ -456,10 +424,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{baseUrl}}/callers?districtId=2",
 							"host": [
@@ -502,7 +466,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\"subject\":\"One-time message test\", \"body\":\"Message for District Two\"}"
+							"raw": "{\"subject\":\"One-time message test\", \"body\":\"Message for District One\"}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/callers/onetimemessage/2",
@@ -605,10 +569,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{baseUrl}}/themes",
 							"host": [
@@ -626,10 +586,6 @@
 					"request": {
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{baseUrl}}/themes/3",
 							"host": [
@@ -677,10 +633,6 @@
 					"request": {
 						"method": "DELETE",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{baseUrl}}/themes/3",
 							"host": [
@@ -752,10 +704,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{baseUrl}}/talkingpoints",
 							"host": [
@@ -783,10 +731,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{baseUrl}}/talkingpoints/10",
 							"host": [
@@ -844,10 +788,6 @@
 						},
 						"method": "DELETE",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{baseUrl}}/talkingpoints/15",
 							"host": [
@@ -921,10 +861,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{baseUrl}}/districts/2/offices",
 							"host": [
@@ -954,10 +890,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{baseUrl}}/districts/{{districtId}}/offices/2",
 							"host": [
@@ -1019,10 +951,6 @@
 					"request": {
 						"method": "DELETE",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{baseUrl}}/districts/{{districtId}}/offices/1",
 							"host": [
@@ -1060,7 +988,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\"trackingId\":\"\\\"m7EDwcWukyBP9MQ8jnjMOg==\\\"\", \"districtId\": 3}"
+							"raw": "{\"trackingId\":\"fbZVTwL2\", \"districtId\": 1}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/calls",
@@ -1089,10 +1017,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{baseUrl}}/calls",
 							"host": [
@@ -1204,10 +1128,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{baseUrl}}/admins",
 							"host": [
@@ -1235,10 +1155,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{baseUrl}}/admins/5",
 							"host": [
@@ -1272,10 +1188,6 @@
 						},
 						"method": "DELETE",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{baseUrl}}/admins/7",
 							"host": [
@@ -1313,16 +1225,16 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n        \"userName\": \"district4admin\",\n        \"email\": \"district4admin@pgc.com\",\n        \"districts\": [\n            3,\n            2\n        ],\n        \"loginEnabled\": true,\n        \"root\": false\n    }"
+							"raw": "{\n        \"adminId\": 8,\n        \"userName\": \"senatorAdmin\",\n        \"email\": \"nprager@grandecom.net\",\n        \"districts\": [\n            7\n        ],\n        \"loginEnabled\": true,\n        \"root\": false\n    }"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/admins/7",
+							"raw": "{{baseUrl}}/admins/8",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"admins",
-								"7"
+								"8"
 							]
 						}
 					},
@@ -1551,10 +1463,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{baseUrl}}/districts/1/script",
 							"host": [
@@ -1589,18 +1497,14 @@
 						},
 						"method": "PUT",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
-							"raw": "{{baseUrl}}/reminders/30",
+							"raw": "{{baseUrl}}/reminders/33",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"reminders",
-								"30"
+								"33"
 							]
 						}
 					},
@@ -1627,10 +1531,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{baseUrl}}/requests",
 							"host": [
@@ -1735,10 +1635,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{baseUrl}}/requests/1",
 							"host": [
@@ -1767,10 +1663,6 @@
 						},
 						"method": "DELETE",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{baseUrl}}/requests/4",
 							"host": [
@@ -1779,6 +1671,101 @@
 							"path": [
 								"requests",
 								"4"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Stats",
+			"item": [
+				{
+					"name": "Get Global Stats (unprivileged)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/stats",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"stats"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Global Stats (privileged)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{rootToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/stats",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"stats"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get District Stats (unprivileged)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/stats/815",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"stats",
+								"815"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get District Stats (privileged)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{rootToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/stats/815",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"stats",
+								"815"
 							]
 						}
 					},
@@ -1811,31 +1798,31 @@
 	],
 	"variable": [
 		{
-			"id": "d170ccc0-52c5-4e49-a887-44886a36eefd",
+			"id": "41abeb29-7e12-43fd-83e3-e39cce097e39",
 			"key": "baseUrl",
 			"value": "http://localhost:8080/api",
 			"type": "string"
 		},
 		{
-			"id": "cbb41f6e-14f5-4e62-a155-b0a2ed667d70",
+			"id": "a795db6c-52d0-470f-9fa0-4700a4fa3b54",
 			"key": "cloudBaseUrl",
 			"value": "https://grandcanyon-222321.appspot.com/api",
 			"type": "string"
 		},
 		{
-			"id": "8b48577b-e3c6-493a-8aa2-f6cf57ada112",
+			"id": "583e80f0-0ba0-4107-8913-3a2f61b1bbe9",
 			"key": "rootToken",
 			"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlzcyI6ImxvY2FsaG9zdCIsImV4cCI6MTU0ODI5NDc1NywiaWF0IjoxNTQ4MjgwMzU3fQ.r2C7ka8lIOYIKIeW3Zz75IiPAlgfrLaJXqx2dkR4NE4",
 			"type": "string"
 		},
 		{
-			"id": "698c4346-144a-49d0-8838-f26e13e4629d",
+			"id": "cf3f0711-ecee-49b9-800e-bc9342f7b2b1",
 			"key": "districtId",
 			"value": "1",
 			"type": "string"
 		},
 		{
-			"id": "0860394d-737a-4c3a-a5a6-99dd7e26e778",
+			"id": "1761c0bf-5f60-4609-8440-a021919f8770",
 			"key": "districtToken",
 			"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzZW5hdG9yQWRtaW4iLCJpc3MiOiJsb2NhbGhvc3QiLCJleHAiOjE1NTAwOTMxMTQsImlhdCI6MTU1MDA3ODcxNH0.ylNH_UOKCCC9JZ3PNhb-qTA5vur-F7r96u1C7P5jzj4",
 			"type": "string"
