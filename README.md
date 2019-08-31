@@ -9,6 +9,19 @@ API for [projectgrandcanyon.com](projectgrandcanyon.com), a project of [CCL](cit
 
 ## Local Dev
 
+### Using a locally running MySQL Database
+
+1. Install docker
+2. Run `docker run --name pgc-mysql -e MYSQL_ROOT_PASSWORD=pw -d -p 3306:3306 mysql:5.7`
+3. Login to the database `mysql -h localhost -P 3306 --protocol=tcp -u root -ppw`
+4. Create a database `create database core;`
+5. Exit MySQL `exit`
+6. Run DDL `mysql -h localhost -P 3306 --protocol=tcp -u root -ppw core < src/main/resources/createTables.sql`
+7. Create a config file `cp src/main/resources/config.properties.example src/main/resources/config.properties`
+8. Run the app `mvn clean jetty:run`
+
+### Using a shared CloudSQL Database
+
 1. Create a [GCP](https://cloud.google.com/) account, download `gcloud`, and authenticate
 2. Ask maintainers to be added to GCP IAM for access to the database. Also ask for access to `config.properties` and `sentry.properties` files, which contain application settings and secrets
 3. Place `config.properties` and `sentry.properties` files in `src/main/resources/` directory 

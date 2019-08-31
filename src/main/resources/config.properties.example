@@ -1,0 +1,51 @@
+# full URL to mySQL database
+sqlUrl=jdbc:mysql://root:pw@localhost/core
+
+# Size of SQL connection pool
+sqlPoolSize=3
+
+# Set to false to disable the reminder service such that no email or SMS reminders are sent to callers.
+reminderServiceEnabled=true
+
+# How often, in minutes, the Reminder service should wake up to send reminder notifications to eligible callers.
+reminderServiceInterval=60
+
+# Earliest time of day to send reminders each day (hh:mm:ss-UTC offset).
+# Example: "09:00:00-05:00" is 9 am EST.
+earliestReminderTime=09:00:00-05:00
+
+# Latest time of day to send reminders each day (hh:mm:ss-UTC offset).
+# Example: "18:00:00-05:00" is 6 pm EST.
+latestReminderTime=18:00:00-05:00
+
+# How long, in days, before sending a second reminder to a caller if no call has been recorded since the first reminder
+secondReminderInterval=4
+
+# lifteime of an authentication JWT, in minutes
+jwtLifetime=240
+
+# Refresh interval for a JWT, in minutes.  When a JWT is presented later then (expiration time - interval), a new
+# JWT is automatically generated and returned to the client
+jwtRefreshInterval=60
+
+# Java class that will provide SMS message delivery
+smsDeliveryService=com.ccl.grandcanyon.deliverymethod.TwilioService
+
+#Twilio Account SID
+twilio.SID=
+
+#Twilio Auth Token
+twilio.AuthToken=
+
+# Java class that will provide Email message delivery
+emailDeliveryService=com.ccl.grandcanyon.deliverymethod.MailgunService
+
+emailFromAddress=Bla <bla@bla.bla>
+
+eventService.address=bla@bla.bla
+
+#Mailgun API Key
+mailgun.APIKey=
+
+#Mailgun base URL
+mailgun.baseURL=
