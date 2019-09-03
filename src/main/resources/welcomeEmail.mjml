@@ -1,4 +1,13 @@
 <mjml>
+  <mj-head>
+    <mj-attributes>
+        <mj-accordion border="none" padding="1px" />
+        <mj-accordion-element icon-wrapped-url="https://projectgrandcanyon.com/img/down-triangle.png" icon-unwrapped-url="https://projectgrandcanyon.com/img/up-triangle.png" icon-height="24px" icon-width="24px" />
+        <mj-accordion-title background-color="#fff" color="#031017" padding="15px" font-size="24px" />
+        <mj-accordion-text background-color="#fff" padding="15px" color="#505050" font-size="18px" />
+      </mj-attributes>
+    </mj-attributes>
+  </mj-head>
   <mj-body>
     <mj-section>
       <mj-column width="100px" vertical-align="middle">
@@ -18,15 +27,43 @@
     </mj-hero>
     <mj-section>
       <mj-column>
-        <mj-text font-size="24px">
-          What is Project Grand Canyon?
-        </mj-text>
-        <mj-text font-size="20px">
-          Project Grand Canyon is an effort by volunteers from Citizens' Climate Lobby to inspire as many people as possible to call their Member of Congress and express their concern about climate change.
+        <mj-accordion>
+        	<mj-accordion-element>
+            <mj-accordion-title>
+          			Here's what to expect:
+            </mj-accordion-title>
+            <mj-accordion-text>
+              You will get a call-in notification on the {day_of_month} day of each month asking you to call your Member of Congress. Your notification will include a call-in guide to help you make your call. You can check out a preview <a href="https://projectgrandcanyon.com/call/{state}/{district_number}">here</a>.
+            </mj-accordion-text>
+          </mj-accordion-element>
+        	<mj-accordion-element>
+            <mj-accordion-title>
+							What is Project Grand Canyon?
+            </mj-accordion-title>
+            <mj-accordion-text>
+              Project Grand Canyon is an effort by volunteers from Citizens' Climate Lobby to inspire as many people as possible to call their Member of Congress and express their concern about climate change.
           <br/><br/> Congressional staffers and representatives have told us nothing is more powerful in helping a representative know what their constituents want than written letters and phone calls.
           <br/>
-          <br/> Based on this fact, we created Project Grand Canyon. Just as the Grand Canyon was excavated one water drop at a time, our Members of Congress' resistance to climate solutions will be worn down by the drip, drip, drip of thousands of phone
-          calls per month.</mj-text>
+          <br/> Based on this fact, we created Project Grand Canyon. Just as the Grand Canyon was excavated one water drop at a time, our Members of Congress' resistance to climate solutions will be worn down by the drip, drip, drip of thousands of phone calls per month.
+            </mj-accordion-text>
+          </mj-accordion-element>
+                  	<mj-accordion-element>
+            <mj-accordion-title>
+							What is CCL?
+            </mj-accordion-title>
+            <mj-accordion-text>
+              CCL exists to create the political will for climate solutions by enabling individual breakthroughs in the exercise of personal and political power.
+              <br /><br />You can learn more at <a href="https://citizensclimatelobby.org/about-ccl/">citizensclimatelobby.org</a>
+            </mj-accordion-text>
+          </mj-accordion-element>
+        </mj-accordion>
+      </mj-column>
+    </mj-section>
+		<mj-section>
+    	<mj-column>
+      	<mj-text align="center">
+        	From your friends at <a href="projectgrandcanyon.com">projectgrandcanyon.com</a>
+        </mj-text>
       </mj-column>
     </mj-section>
   </mj-body>
