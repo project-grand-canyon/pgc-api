@@ -99,7 +99,7 @@ public class ReminderService {
 
   private static int dayOfMonthCounter = 1;
 
-  private DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd");
+  private DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
   // TODO: Instead of distributing all callers across the month, do so for each district
   private static int getNewDayOfMonth() {
@@ -356,7 +356,7 @@ public class ReminderService {
               "The call in script for %s district %d has not yet been created.",
               district.getState(), district.getNumber()) :
           String.format(
-              "The call in script for %s district %d has not been udated since %s. " +
+              "The call in script for %s district %d has not been updated since %s. " +
                   "It's time to consider refreshing the talking points.  Thank you!",
               district.getState(), district.getNumber(), dateFormat.format(district.getScriptModifiedTime())));
 
