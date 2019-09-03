@@ -29,6 +29,16 @@ API for [projectgrandcanyon.com](projectgrandcanyon.com), a project of [CCL](cit
 
 The application expects to connect to a Google CloudSQL database.  The database URL is in defined by the sqlUrl property in pom.xml.
 
+### API Sessions
+
+1. Install [Postman](https://www.getpostman.com/)
+2. Import the postman file from `src/main/resources` to your Postman app
+3. Make request "Create Initial Super Admin"
+4. Log into DB and run query `UPDATE admins SET login_enabled = 1 WHERE admin_id = {new admin id};`
+5. Make request "Super Admin Login"
+6. Under the GrandCanyon collection, click edit -> Variables, and replace the "CURRENT VALUE" of `rootToken` with the token returned by the previous step.
+7. You have created a session for this super admin. Include the variable `rootToken` as the bearer token in requests to authenticated endpoints.
+
 ## Deployment
 Run this command: 
 
