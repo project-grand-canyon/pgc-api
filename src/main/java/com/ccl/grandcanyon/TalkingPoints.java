@@ -3,7 +3,6 @@ package com.ccl.grandcanyon;
 
 import com.ccl.grandcanyon.types.Admin;
 import com.ccl.grandcanyon.types.District;
-import com.ccl.grandcanyon.types.Scope;
 import com.ccl.grandcanyon.types.TalkingPoint;
 
 import javax.ws.rs.*;
@@ -18,6 +17,12 @@ import java.util.*;
 
 @Path("/talkingpoints")
 public class TalkingPoints {
+
+  private enum TalkingPointAction {
+    CREATE,
+    MODIFY,
+    DELETE
+  }
 
   private static final String SQL_SELECT_TALKING_POINT =
       "SELECT tp.*, tps.district_id, tps.state " +
@@ -66,8 +71,6 @@ public class TalkingPoints {
           TalkingPoint.CREATED_BY + " = NULL " +
           "WHERE " + TalkingPoint.CREATED_BY + " = ?";
 
-
-
   @Context
   UriInfo uriInfo;
 
@@ -81,7 +84,7 @@ public class TalkingPoints {
 
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
-      checkPermissions(conn, talkingPoint, "create");
+      checkPermissions(conn, talkingPoint, TalkingPointAction.CREATE);
 
       // wrap multiple inserts in a transaction
       conn.setAutoCommit(false);
@@ -138,7 +141,7 @@ public class TalkingPoints {
 
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
-      checkPermissions(conn, talkingPoint, "modify");
+      checkPermissions(conn, talkingPoint, TalkingPointAction.MODIFY);
       // use transaction
       conn.setAutoCommit(false);
 
@@ -218,7 +221,7 @@ public class TalkingPoints {
 
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
-      checkPermissions(conn, retrieveById(conn, talkingPointId), "delete");
+      checkPermissions(conn, retrieveById(conn, talkingPointId), TalkingPointAction.DELETE);
       PreparedStatement delete = conn.prepareStatement(SQL_DELETE_TALKING_POINT);
       delete.setInt(1, talkingPointId);
       delete.executeUpdate();
@@ -330,36 +333,40 @@ public class TalkingPoints {
   private void checkPermissions(
       Connection conn,
       TalkingPoint talkingPoint,
-      String action) throws SQLException {
+      TalkingPointAction action) throws SQLException {
 
     // check admin permission to create this talking point
     Admin currentUser = (Admin)requestContext.getProperty(GCAuth.CURRENT_PRINCIPAL);
-    if (!currentUser.isRoot()) {
-      switch (talkingPoint.getScope()) {
-        case national:
-          throw new ForbiddenException(String.format(
-              "District admins are not permitted to %s national talking points", action));
-        case state:
-          Set<String> allowedStates = new HashSet<>();
-          for (int districtId : currentUser.getDistricts()) {
-            District district = Districts.retrieveDistrictById(conn, districtId);
-            allowedStates.add(district.getState());
-          }
-          if (!allowedStates.containsAll(talkingPoint.getStates())) {
-            throw new ForbiddenException(String.format(
-                "Permission denied to %s talking point for unmanaged state", action));
-          }
-          break;
-        case district:
-          Set<Integer> allowedDistricts = new HashSet<>(currentUser.getDistricts());
-          if (!allowedDistricts.containsAll(talkingPoint.getDistricts())) {
-            throw new ForbiddenException(String.format(
-                "Permission denied to %s talking point for unmanaged district", action));
-          }
-          break;
-      }
+
+    if (currentUser == null) {
+      throw new ForbiddenException(String.format(
+              "Only admins are permitted to %s talking points", action));
     }
 
-  }
+    if (currentUser.isRoot()) {
+      // Root can do everything
+      return;
+    }
 
+    switch (action) {
+      case CREATE:
+        // No-op: any admin can create a talking point at any scope, for any district or state
+        return;
+      case MODIFY:
+      case DELETE:
+
+        PreparedStatement statement = conn.prepareStatement(SQL_SELECT_TALKING_POINT +
+                " WHERE tp." + TalkingPoint.TALKING_POINT_ID + " = ?");
+        statement.setInt(1, talkingPoint.getTalkingPointId());
+        ResultSet rs = statement.executeQuery();
+        if (rs.next()) {
+          TalkingPoint talkingPointDao = new TalkingPoint(rs);
+          if (talkingPointDao.getCreatedBy() == currentUser.getAdminId()) {
+            return;
+          }
+        }
+        throw new ForbiddenException(String.format(
+                "Admins are permitted to %s only those talking points they have created", action));
+    }
+  }
 }
