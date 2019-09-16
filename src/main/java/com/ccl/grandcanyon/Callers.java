@@ -27,8 +27,10 @@ import java.util.logging.Logger;
 public class Callers {
 
   private static final String SQL_SELECT_CALLER =
-      "SELECT c.*, ccm.contact_method FROM callers c " +
-      "LEFT JOIN callers_contact_methods AS ccm ON c.caller_id = ccm.caller_id";
+      "SELECT c.*, ccm.contact_method, r.day_of_month, r.last_reminder_timestamp, last_call_timestamp FROM callers c " +
+      "LEFT JOIN callers_contact_methods AS ccm ON c.caller_id = ccm.caller_id " +
+      "LEFT JOIN reminders AS r ON c.caller_id = r.caller_id " +
+      "LEFT JOIN (SELECT caller_id,  MAX(created) as last_call_timestamp FROM calls GROUP by caller_id) cls ON c.caller_id = cls.caller_id";
 
   private static final String SQL_CREATE_CALLER =
       "INSERT INTO callers (" +
@@ -169,8 +171,6 @@ public class Callers {
       conn.setAutoCommit(true);
       conn.close();
     }
-
-
   }
 
   @GET
@@ -254,7 +254,6 @@ public class Callers {
       conn.close();
     }
   }
-
 
 
   @POST

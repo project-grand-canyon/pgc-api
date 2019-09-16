@@ -22,6 +22,9 @@ public class Caller extends GCBase {
   public static final String DISTRICT_ID = "district_id";
   public static final String ZIPCODE = "zipcode";
   public static final String PAUSED = "paused";
+  public static final String DAY_OF_MONTH = Reminder.DAY_OF_MONTH;
+  public static final String LAST_REMINDER_TIMESTAMP = Reminder.LAST_REMINDER_TIMESTAMP;
+  public static final String LAST_CALL_TIMESTAMP = "last_call_timestamp";
 
   private int callerId;
   private String firstName;
@@ -32,6 +35,9 @@ public class Caller extends GCBase {
   private int districtId;
   private String zipCode;
   private boolean paused;
+  private int reminderDayOfMonth;
+  private Timestamp lastReminderTimestamp;
+  private Timestamp lastCallTimestamp;
 
 
   /**
@@ -50,6 +56,9 @@ public class Caller extends GCBase {
     districtId = rs.getInt(DISTRICT_ID);
     zipCode = rs.getString(ZIPCODE);
     paused = rs.getBoolean(PAUSED);
+    reminderDayOfMonth = rs.getInt(DAY_OF_MONTH);
+    lastReminderTimestamp = rs.getTimestamp(LAST_REMINDER_TIMESTAMP);
+    lastCallTimestamp = rs.getTimestamp(LAST_CALL_TIMESTAMP);
     this.contactMethods = new ArrayList<>();
     do {
       String cm = rs.getString(CONTACT_METHOD);
@@ -134,5 +143,23 @@ public class Caller extends GCBase {
 
   public void setPaused(boolean paused) {
     this.paused = paused;
+  }
+
+  public int getReminderDayOfMonth() {
+    return reminderDayOfMonth;
+  }
+
+  public void setReminderDayOfMonth(int reminderDayOfMonth) {
+    this.reminderDayOfMonth = reminderDayOfMonth;
+  }
+
+  @JsonSerialize(using = TimestampSerializer.class)
+  public Timestamp getLastReminderTimestamp() {
+    return lastReminderTimestamp;
+  }
+
+  @JsonSerialize(using = TimestampSerializer.class)
+  public Timestamp getLastCallTimestamp() {
+    return lastCallTimestamp;
   }
 }
