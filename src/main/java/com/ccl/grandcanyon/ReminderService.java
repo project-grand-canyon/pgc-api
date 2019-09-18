@@ -271,7 +271,11 @@ public class ReminderService {
       }
     }
 
-    return new ReminderStatus(caller, targetDistrict, smsReminderSent, emailReminderSent, trackingId);
+    ReminderStatus status = new ReminderStatus(caller, targetDistrict, smsReminderSent, emailReminderSent, trackingId);
+    if (status.success()) {
+      updateReminderStatus(conn, status);
+    }
+    return status;
   }
 
 
@@ -304,8 +308,8 @@ public class ReminderService {
     history.setInt(idx++, reminderStatus.getTargetDistrict().getDistrictId());
     history.setTimestamp(idx++, timestamp);
     history.setString(idx++, reminderStatus.getTrackingId());
-    history.setBoolean(idx++, reminderStatus.emailDelivered());
-    history.setBoolean(idx, reminderStatus.smsDelivered());
+    history.setBoolean(idx++, reminderStatus.getEmailDelivered());
+    history.setBoolean(idx, reminderStatus.getSmsDelivered());
     history.executeUpdate();
   }
 
@@ -472,7 +476,6 @@ public class ReminderService {
               ReminderStatus reminderStatus = sendReminder(conn, caller);
               if (reminderStatus.success()) {
                 sentCount++;
-                updateReminderStatus(conn, reminderStatus);
               }
             }
           }

@@ -2,6 +2,7 @@ package com.ccl.grandcanyon;
 
 import com.ccl.grandcanyon.types.Admin;
 import com.ccl.grandcanyon.types.Caller;
+import com.ccl.grandcanyon.types.ReminderHistory;
 import com.ccl.grandcanyon.types.ReminderStatus;
 import com.fasterxml.jackson.databind.node.BooleanNode;
 
@@ -11,9 +12,14 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+
 
 
 @Path("/reminders")
@@ -22,6 +28,8 @@ public class Reminders {
   @Context
   ContainerRequestContext requestContext;
 
+  private final static String SQL_SELECT_REMINDER_HISTORY =
+      "SELECT * FROM reminder_history";
   /**
    * Generate on-demand reminder, for testing reminder delivery.
    */
@@ -50,8 +58,40 @@ public class Reminders {
       Set<Integer> allowedDistricts = new HashSet<>(currentUser.getDistricts());
       if (!allowedDistricts.contains(districtId)) {
         throw new ForbiddenException(String.format(
-                "Permission denied to %s for this district.", action));
+                "Permission denied to %s for caller in district %d.", action, districtId));
       }
     }
   }
+
+
+  /**
+   * Get reminder history for a specified caller.
+   */
+  @GET
+  @Path("{callerId}")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response getRemindersForCaller(
+      @PathParam("callerId") int callerId)
+      throws SQLException {
+
+    Connection conn = SQLHelper.getInstance().getConnection();
+    try {
+      Caller caller = Callers.retrieveById(conn, callerId);
+      checkPermissions(caller.getDistrictId(), "retrieve notification history");
+      List<ReminderHistory> reminders = new ArrayList<>();
+      String whereClause = " WHERE " + ReminderHistory.CALLER_ID + " = ?";
+      PreparedStatement statement = conn.prepareStatement(SQL_SELECT_REMINDER_HISTORY + whereClause);
+      statement.setInt(1, callerId);
+      ResultSet rs = statement.executeQuery();
+      while (rs.next()) {
+        reminders.add(new ReminderHistory(rs));
+
+      }
+      return Response.ok(reminders).build();
+    }
+    finally {
+      conn.close();
+    }
+  }
+
 }

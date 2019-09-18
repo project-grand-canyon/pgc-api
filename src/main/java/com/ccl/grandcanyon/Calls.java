@@ -1,16 +1,22 @@
 package com.ccl.grandcanyon;
 
+import com.ccl.grandcanyon.types.Admin;
 import com.ccl.grandcanyon.types.Call;
+import com.ccl.grandcanyon.types.Caller;
 import com.ccl.grandcanyon.types.Reminder;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -18,6 +24,9 @@ import java.util.logging.Logger;
  */
 @Path("/calls")
 public class Calls {
+
+  @Context
+  ContainerRequestContext requestContext;
 
   private static final String SQL_SELECT_CALLS = "SELECT * FROM calls";
 
@@ -100,6 +109,7 @@ public class Calls {
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
+  @RolesAllowed(GCAuth.SUPER_ADMIN_ROLE)
   public Response getCalls() throws SQLException {
 
     Connection conn = SQLHelper.getInstance().getConnection();
@@ -113,6 +123,45 @@ public class Calls {
     }
     finally {
       conn.close();
+    }
+  }
+
+
+  @GET
+  @Path("{callerId}")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response getCalls(
+      @PathParam("callerId") Integer callerId)
+      throws SQLException {
+
+    Connection conn = SQLHelper.getInstance().getConnection();
+    try {
+      Caller caller = Callers.retrieveById(conn, callerId);
+      checkPermissions(caller.getDistrictId(), "retrieve call history");
+      List<Call> calls = new ArrayList<>();
+      String whereClause = " WHERE " + Call.CALLER_ID + " = ?";
+      PreparedStatement statement = conn.prepareStatement(SQL_SELECT_CALLS + whereClause);
+      statement.setInt(1, callerId);
+      ResultSet rs = statement.executeQuery();
+      while (rs.next()) {
+        calls.add(new Call(rs));
+      }
+      return Response.ok(calls).build();
+    }
+    finally {
+      conn.close();
+    }
+  }
+
+
+  private void checkPermissions(int districtId, String action) {
+    Admin currentUser = (Admin)requestContext.getProperty(GCAuth.CURRENT_PRINCIPAL);
+    if (!currentUser.isRoot()) {
+      Set<Integer> allowedDistricts = new HashSet<>(currentUser.getDistricts());
+      if (!allowedDistricts.contains(districtId)) {
+        throw new ForbiddenException(String.format(
+            "Permission denied to %s for caller in district %d.", action, districtId));
+      }
     }
   }
 
