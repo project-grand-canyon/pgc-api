@@ -50,9 +50,10 @@ public class ReminderService {
 
 
   private final static String SQL_SELECT_CALLERS =
-      "SELECT r.*, c.*, ccm.contact_method FROM reminders r " +
+      "SELECT r.*, c.*, ccm.contact_method, last_call_timestamp FROM reminders r " +
           "LEFT JOIN callers AS c ON c.caller_id = r.caller_id " +
-          "LEFT JOIN callers_contact_methods AS ccm on c.caller_id = ccm.caller_id";
+          "LEFT JOIN callers_contact_methods AS ccm on c.caller_id = ccm.caller_id " +
+          "LEFT JOIN (SELECT caller_id,  MAX(created) as last_call_timestamp FROM calls GROUP by caller_id) cls ON c.caller_id = cls.caller_id";
 
   private final static String SQL_INSERT_REMINDER_HISTORY =
       "INSERT into reminder_history (" +
