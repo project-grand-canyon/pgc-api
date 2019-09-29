@@ -32,12 +32,17 @@ The application expects to connect to a Google CloudSQL database.  The database 
 ### API Sessions
 
 1. Install [Postman](https://www.getpostman.com/)
-2. Import the postman file from `src/main/resources` to your Postman app
+2. Import the postman file from `src/main/test` to your Postman app
 3. Make request "Create Initial Super Admin"
-4. Log into DB and run query `UPDATE admins SET login_enabled = 1 WHERE admin_id = {new admin id};`
+4. Log into DB and run query `UPDATE admins SET login_enabled = 1 WHERE admin_id = {new admin id};`. Get the `{new admin id}` by querying `SELECT * FROM admins`.
 5. Make request "Super Admin Login"
-6. Under the GrandCanyon collection, click edit -> Variables, and replace the "CURRENT VALUE" of `rootToken` with the token returned by the previous step.
+6. Under the GrandCanyon collection, click edit -> Variables, and replace the "CURRENT VALUE" of `rootToken` with the token returned by the previous step. This will allow you to use the admin credentials of your local server in Postman requests.
 7. You have created a session for this super admin. Include the variable `rootToken` as the bearer token in requests to authenticated endpoints.
+
+#### Creating a test user
+
+1. Run "Create Admin" in Postman. You may need to alter the `districts` array in the body to match the id present in your database (`SELECT * FROM districts`). This will automatically create a user with login enabled, so you will not have to worry about email validation.
+2. Log in as the user (testAlert/password).
 
 ## Deployment
 Run this command: 
