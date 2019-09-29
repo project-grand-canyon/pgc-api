@@ -237,7 +237,10 @@ public class ReminderService {
     if (caller.getContactMethods().contains(ContactMethod.sms)) {
 
       Message reminderMessage = new Message();
-      reminderMessage.setBody("It's your day to call Rep. " + targetDistrict.getRepLastName() +
+
+      String legislatorTitle = targetDistrict.getNumber() > 0 ? "Rep." : "Senator";
+
+      reminderMessage.setBody("It's your day to call " + legislatorTitle + " " + targetDistrict.getRepLastName() +
           ". http://" + callInPageUrl);
       try {
         smsReminderSent = smsDeliveryService.sendHtmlMessage(caller, reminderMessage);
