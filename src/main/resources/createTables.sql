@@ -202,3 +202,11 @@ CREATE TABLE `talking_points_scopes` (
   CONSTRAINT `talking_points_scopes_ibfk_1` FOREIGN KEY (`talking_point_id`) REFERENCES `talking_points` (`talking_point_id`) ON DELETE CASCADE,
   CONSTRAINT `talking_points_scopes_ibfk_2` FOREIGN KEY (`district_id`) REFERENCES `districts` (`district_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Create syntax for TABLE 'reset_tokens'
+CREATE TABLE `reset_tokens` (
+  `token` varchar(32) NOT NULL,
+  `expiration` datetime NOT NULL,
+  `admin_id`  int(11) NOT NULL,
+  CONSTRAINT `reset_tokens_ibfk_1` FOREIGN KEY (`admin_id`) REFERENCES `admins` (`admin_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

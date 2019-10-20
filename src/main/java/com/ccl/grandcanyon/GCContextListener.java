@@ -85,6 +85,8 @@ public class GCContextListener implements ServletContextListener {
 
     Stats.init(properties);
 
+    Admins.init(properties);
+
     Runtime.getRuntime().addShutdownHook(new Thread() {
       public void run() {
         SQLHelper sqlHelper = SQLHelper.getInstance();

@@ -2,8 +2,8 @@ package com.ccl.grandcanyon;
 
 import com.ccl.grandcanyon.auth.AuthenticationService;
 import com.ccl.grandcanyon.auth.PasswordUtil;
-import com.ccl.grandcanyon.types.Admin;
-import com.ccl.grandcanyon.types.ChangePasswordRequest;
+import com.ccl.grandcanyon.types.*;
+import com.fasterxml.jackson.databind.node.TextNode;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
@@ -13,6 +13,8 @@ import java.net.URI;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
+import java.util.UUID;
 
 
 /**
@@ -64,12 +66,34 @@ public class Admins {
       "DELETE FROM admins " +
           "WHERE " + Admin.ADMIN_ID + " = ?";
 
+  private static final String SQL_INSERT_RESET_TOKEN =
+      "INSERT INTO reset_tokens (" +
+          PasswordResetToken.ADMIN_ID + ", " +
+          PasswordResetToken.TOKEN + ", " +
+          PasswordResetToken.EXPIRATION +
+          ") VALUES (?, ?, ?)";
+
+  private static final String SQL_SELECT_RESET_TOKEN =
+      "SELECT * FROM reset_tokens WHERE " + PasswordResetToken.TOKEN + "= ?";
+
+  private static final String SQL_DELETE_RESET_TOKEN =
+      "DELETE FROM reset_tokens WHERE " + PasswordResetToken.TOKEN + "= ?";
+
+  private final static String PASSWORD_RESET_TOKEN_LIFETIME = "passwordResetTokenLifetime";
+
+  private static int passwordResetTokenLifetime;
 
   @Context
   UriInfo uriInfo;
 
   @Context
   ContainerRequestContext requestContext;
+
+
+  static void init(Properties config) {
+    passwordResetTokenLifetime = Integer.parseInt(config.getProperty(
+        PASSWORD_RESET_TOKEN_LIFETIME, "10"));
+  }
 
 
   @POST
@@ -266,6 +290,9 @@ public class Admins {
   }
 
 
+  /**
+   * Change the password of an authenticated Admin.
+   */
   @PUT
   @Path("{adminId}/password")
   public Response changePassword(
@@ -282,21 +309,165 @@ public class Admins {
     AuthenticationService.getInstance().authenticate(
         activeUser.getUserName(), passwordRequest.getCurrentPassword());
 
-    String token = PasswordUtil.hash(passwordRequest.getNewPassword().toCharArray());
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
-      PreparedStatement statement = conn.prepareStatement(
-          "UPDATE admins SET " + Admin.TOKEN + " = ? " +
-          "WHERE " + Admin.ADMIN_ID + " = ?");
-      statement.setString(1, token);
-      statement.setInt(2, adminId);
-      statement.executeUpdate();
+      updatePassword(conn, passwordRequest.getNewPassword(), adminId);
       return Response.noContent().build();
     }
     finally {
       conn.close();
     }
   }
+
+
+  /**
+   * Request to reset a forgotten password.
+   * @param emailAddress Email address to send a reset password link to.
+   */
+  @POST
+  @Path("/password_reset_request")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @RolesAllowed(GCAuth.ANONYMOUS)
+  public Response passwordResetRequest(TextNode emailAddress)
+    throws SQLException {
+
+    Connection conn = SQLHelper.getInstance().getConnection();
+    try {
+      String whereClause = " WHERE " + Admin.EMAIL + " = ?";
+      PreparedStatement queryAdmin = conn.prepareStatement(SQL_SELECT_ADMIN + whereClause);
+      queryAdmin.setString(1, emailAddress.asText());
+      ResultSet rs = queryAdmin.executeQuery();
+      Admin admin = null;
+      if (rs.next()) {
+        admin = new Admin(rs);
+      }
+      else {
+        throw new NotFoundException("Unknown email address");
+      }
+      if (rs.next()) {
+        // multiple admins with same email address: no-go
+        throw new BadRequestException("Ambiguous email address");
+      }
+
+      // generate token and store as new password request
+      UUID token = UUID.randomUUID();
+      long expirationTime = System.currentTimeMillis() + (passwordResetTokenLifetime * 1000L * 60L);
+      PreparedStatement insertToken = conn.prepareStatement(SQL_INSERT_RESET_TOKEN);
+      int i = 1;
+      insertToken.setInt(i++, admin.getAdminId());
+      insertToken.setString(i++, token.toString());
+      insertToken.setTimestamp(i++, new Timestamp(expirationTime));
+      insertToken.executeUpdate();
+
+      // send email to admin with link
+      // TODO: replace this message body with HTML email template.
+      ReminderService reminderService = ReminderService.getInstance();
+
+      String resetUrl = reminderService.getApplicationBaseUrl() + "/passwordreset?token=" + token;
+      Message resetRequestMessage = new Message();
+      resetRequestMessage.setSubject("Password Reset Requested");
+      resetRequestMessage.setBody("If you requsted a password reset, visit the page at the following URL:  http://" + resetUrl +
+          ".   If you did not request a password reset, ignore this message.");
+
+      // hack:  create a temp Caller in order to invoke email service
+      Caller adminRecipient = new Caller();
+      adminRecipient.setEmail(admin.getEmail());
+      try {
+        reminderService.getEmailDeliveryService().sendTextMessage(adminRecipient, resetRequestMessage);
+      }
+      catch (Exception e) {
+        throw new ServerErrorException(String.format(
+            "Failed to send password reset email to district administrator %s at email address %s: %s",
+            admin.getUserName(), emailAddress, e.getMessage()), Response.Status.INTERNAL_SERVER_ERROR);
+      }
+    }
+    finally {
+      conn.close();
+    }
+    return Response.ok().build();
+  }
+
+
+  /**
+   * Verify a password reset token.  This API should called after an email has been sent and the
+   * Admin has navigated to the included URL.
+   * @param tokenString the reset token string
+   * @return properties of the Admin who requested the reset.
+   */
+  @POST
+  @Path("/verify_reset_token")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
+  @RolesAllowed(GCAuth.ANONYMOUS)
+  public Response verifyResetToken(TextNode tokenString) throws SQLException {
+
+    Connection conn = SQLHelper.getInstance().getConnection();
+    try {
+      PasswordResetToken token = retrieveAndValidateResetToken(conn, tokenString.asText());
+      Admin admin = retrieveById(conn, token.getAdminId());
+      return Response.ok(admin).build();
+    }
+    finally {
+      conn.close();
+    }
+  }
+
+
+  /**
+   * Reset an Admin password using a valid previously issued reset token.
+   */
+  @POST
+  @Path("/reset_password")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @RolesAllowed(GCAuth.ANONYMOUS)
+  public Response resetPassword(PasswordResetRequest resetResponse) throws SQLException {
+
+    Connection conn = SQLHelper.getInstance().getConnection();
+    try {
+      PasswordResetToken resetToken = retrieveAndValidateResetToken(conn, resetResponse.getToken());
+      updatePassword(conn, resetResponse.getPassword(), resetToken.getAdminId());
+      deleteResetToken(conn, resetToken.getToken());
+    }
+    finally {
+      conn.close();
+    }
+    return Response.ok().build();
+  }
+
+
+  private PasswordResetToken retrieveAndValidateResetToken(
+      Connection conn,
+      String tokenString) throws SQLException {
+
+    PreparedStatement queryToken = conn.prepareStatement(SQL_SELECT_RESET_TOKEN);
+    queryToken.setString(1, tokenString);
+    ResultSet rs = queryToken.executeQuery();
+    if (!rs.next()) {
+      throw new NotFoundException("Invalid token");
+    }
+    PasswordResetToken token = new PasswordResetToken(rs);
+    if (token.getExpiration().before(new Timestamp(System.currentTimeMillis()))) {
+      deleteResetToken(conn, token.getToken());
+      throw new BadRequestException("Expired token");
+    }
+    return token;
+  }
+
+  private void updatePassword(
+      Connection conn,
+      String password,
+      int adminId) throws SQLException {
+
+    String token = PasswordUtil.hash(password.toCharArray());
+    PreparedStatement statement = conn.prepareStatement(
+        "UPDATE admins SET " + Admin.TOKEN + " = ? " +
+            "WHERE " + Admin.ADMIN_ID + " = ?");
+    statement.setString(1, token);
+    statement.setInt(2, adminId);
+    statement.executeUpdate();
+  }
+
+
 
 
   public static Admin getAdminByName(String userName) throws SQLException {
@@ -356,6 +527,16 @@ public class Admins {
 
     PreparedStatement delete = conn.prepareStatement(SQL_DELETE_ADMIN_DISTRICTS);
     delete.setInt(1, adminId);
+    delete.executeUpdate();
+  }
+
+
+  private void deleteResetToken(
+      Connection conn,
+      String token) throws SQLException {
+
+    PreparedStatement delete = conn.prepareStatement(SQL_DELETE_RESET_TOKEN);
+    delete.setString(1, token);
     delete.executeUpdate();
   }
 

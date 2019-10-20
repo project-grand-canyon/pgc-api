@@ -31,6 +31,7 @@ public class ReminderService {
   private final static String SMS_DELIVERY_SERVICE = "smsDeliveryService";
   private final static String EMAIL_DELIVERY_SERVICE = "emailDeliveryService";
   private final static String STALE_SCRIPT_WARNING_INTERVAL = "staleScriptWarningInterval";
+  private final static String APPLICATION_BASE_URL = "applicationBaseUrl";
 
   private final static String SQL_SELECT_REMINDER =
       "SELECT * FROM reminders WHERE " +
@@ -98,6 +99,8 @@ public class ReminderService {
 
   private long staleScriptWarningInterval;
 
+  private String applicationBaseUrl;
+
   private static int dayOfMonthCounter = 1;
 
   private DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -125,6 +128,7 @@ public class ReminderService {
 
     this.serviceIntervalMinutes = Integer.parseInt(config.getProperty(REMINDER_SERVICE_INTERVAL, "60"));
     this.secondReminderInterval = Integer.parseInt(config.getProperty(SECOND_REMINDER_INTERVAL, "4"));
+    this.applicationBaseUrl = config.getProperty(APPLICATION_BASE_URL);
 
     try {
       this.earliestReminder = OffsetTime.parse(config.getProperty(EARLIEST_REMINDER_TIME));
@@ -231,7 +235,7 @@ public class ReminderService {
     District targetDistrict = getDistrictToCall(conn, caller);
     String trackingId = RandomStringUtils.randomAlphanumeric(8);
 
-    String callInPageUrl = "projectgrandcanyon.com/call/" + targetDistrict.getState() + "/" +
+    String callInPageUrl = applicationBaseUrl + "/call/" + targetDistrict.getState() + "/" +
         targetDistrict.getNumber() + "?t=" + trackingId + "&c=" + caller.getCallerId();
 
     if (caller.getContactMethods().contains(ContactMethod.sms)) {
@@ -289,6 +293,10 @@ public class ReminderService {
 
   public DeliveryService getEmailDeliveryService() {
     return emailDeliveryService;
+  }
+
+  public String getApplicationBaseUrl() {
+    return applicationBaseUrl;
   }
 
   private void updateReminderStatus(
