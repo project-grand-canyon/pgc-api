@@ -257,7 +257,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\"firstName\":\"Welcome\",\"lastName\":\"Test\",\"contactMethods\":[\"email\",\"sms\"],\"email\":\"nprager@grandecom.net\",\"phone\":\"512-797-8556\",\"districtId\":1,\"zipCode\":\"75756\",\"paused\":false}"
+							"raw": "{\"firstName\":\"History\",\"lastName\":\"Test\",\"contactMethods\":[\"email\",\"sms\"],\"email\":\"historyTest@grandecom.net\",\"phone\":\"512-555-8556\",\"districtId\":535,\"zipCode\":\"75756\",\"paused\":true}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/callers",
@@ -277,13 +277,13 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/callers/33",
+							"raw": "{{baseUrl}}/callers/895",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"callers",
-								"33"
+								"895"
 							]
 						}
 					},
@@ -349,16 +349,11 @@
 					"name": "Delete caller",
 					"request": {
 						"auth": {
-							"type": "basic",
-							"basic": [
+							"type": "bearer",
+							"bearer": [
 								{
-									"key": "password",
-									"value": "newpassword",
-									"type": "string"
-								},
-								{
-									"key": "username",
-									"value": "district2and3",
+									"key": "token",
+									"value": "{{rootToken}}",
 									"type": "string"
 								}
 							]
@@ -366,13 +361,13 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/callers/22",
+							"raw": "{{baseUrl}}/callers/895",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"callers",
-								"22"
+								"895"
 							]
 						}
 					},
@@ -425,7 +420,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/callers?districtId=2",
+							"raw": "{{baseUrl}}/callers?districtId=7",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -435,7 +430,7 @@
 							"query": [
 								{
 									"key": "districtId",
-									"value": "2"
+									"value": "7"
 								}
 							]
 						}
@@ -1010,7 +1005,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "{{rootToken}}",
+									"value": "{{districtToken}}",
 									"type": "string"
 								}
 							]
@@ -1024,6 +1019,34 @@
 							],
 							"path": [
 								"calls"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get calls by caller",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{rootToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/calls/30",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"calls",
+								"30"
 							]
 						}
 					},
@@ -1148,7 +1171,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkaXN0cmljdDJhbmQzIiwiaXNzIjoibG9jYWxob3N0IiwiZXhwIjoxNTUwMDkyMDUyLCJpYXQiOjE1NTAwNzc2NTJ9.ONP-55_nVpe99B_EPfPAv7oCwNcD_xluZLuCd2s4Pyw",
+									"value": "{{rootToken}}",
 									"type": "string"
 								}
 							]
@@ -1156,13 +1179,13 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/admins/5",
+							"raw": "{{baseUrl}}/admins/8",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"admins",
-								"5"
+								"8"
 							]
 						}
 					},
@@ -1225,7 +1248,12 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n        \"adminId\": 8,\n        \"userName\": \"senatorAdmin\",\n        \"email\": \"nprager@grandecom.net\",\n        \"districts\": [\n            7\n        ],\n        \"loginEnabled\": true,\n        \"root\": false\n    }"
+							"raw": "{\n        \"adminId\": 8,\n        \"userName\": \"senatorAdmin\",\n        \"email\": \"nprager@grandecom.net\",\n        \"districts\": [\n            7\n        ],\n        \"loginEnabled\": true,\n        \"root\": false,\n        \"password\": \"changedPassword\"\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
 						"url": {
 							"raw": "{{baseUrl}}/admins/8",
@@ -1279,7 +1307,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkaXN0cmljdDJhbmQzIiwiaXNzIjoibG9jYWxob3N0IiwiZXhwIjoxNTQ4OTkxODYwLCJpYXQiOjE1NDg5Nzc0NjB9.ZpqVYDmqJO1nAXnCg3VPibTl6NTeUHfa5HI9en0bPpY",
+									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzZW5hdG9yQWRtaW4iLCJpc3MiOiJsb2NhbGhvc3QiLCJleHAiOjE1NzE2MTcyMjksImlhdCI6MTU3MTYwMjgyOX0.S5Suv_O7CKOJieDeCwbRnHeuIhVzYI6sT31jHJaOzSk",
 									"type": "string"
 								}
 							]
@@ -1295,17 +1323,133 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\"currentPassword\":\"newpassword\", \"newPassword\":\"district2password\"}"
+							"raw": "{\"currentPassword\":\"myresetpassword\", \"newPassword\":\"mychangedpassword\"}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/admins/6/password",
+							"raw": "{{baseUrl}}/admins/8/password",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"admins",
-								"6",
+								"8",
 								"password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Request password reset",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "\"nealprager57@gmail.com\"",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admins/password_reset_request",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admins",
+								"password_reset_request"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verify reset token",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "\"b6885ac2-6ff2-40c3-838d-1cf89a2fbd6f\"",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admins/verify_reset_token",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admins",
+								"verify_reset_token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reset Password",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"password\":\"myresetpassword\", \"token\":\"b6885ac2-6ff2-40c3-838d-1cf89a2fbd6f\"}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admins/reset_password",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admins",
+								"reset_password"
 							]
 						}
 					},
@@ -1330,7 +1474,12 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\"userName\":\"admin\", \"password\":\"password\"}"
+							"raw": "{\"userName\":\"admin\", \"password\":\"password\"}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
 						"url": {
 							"raw": "{{baseUrl}}/login",
@@ -1361,7 +1510,12 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\"userName\":\"senatorAdmin\", \"password\":\"password\"}"
+							"raw": "{\"userName\":\"senatorAdmin\", \"password\":\"changedPassword\"}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
 						"url": {
 							"raw": "{{baseUrl}}/login",
@@ -1389,7 +1543,12 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\"userName\":\"senatorAdmin\", \"password\":\"password\"}"
+							"raw": "{\"userName\":\"senatorAdmin\", \"password\":\"mychangedpassword\"}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
 						"url": {
 							"raw": "{{baseUrl}}/login",
@@ -1496,6 +1655,34 @@
 							]
 						},
 						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/reminders/33",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reminders",
+								"33"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get reminders for Caller",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{rootToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/reminders/33",
@@ -1798,34 +1985,35 @@
 	],
 	"variable": [
 		{
-			"id": "41abeb29-7e12-43fd-83e3-e39cce097e39",
+			"id": "8b1d725e-a28e-49f0-a581-f0c8c7df7e97",
 			"key": "baseUrl",
 			"value": "http://localhost:8080/api",
 			"type": "string"
 		},
 		{
-			"id": "a795db6c-52d0-470f-9fa0-4700a4fa3b54",
+			"id": "b7b5c7ad-0a4e-4f3c-ad57-511e5f8f9fca",
 			"key": "cloudBaseUrl",
 			"value": "https://grandcanyon-222321.appspot.com/api",
 			"type": "string"
 		},
 		{
-			"id": "583e80f0-0ba0-4107-8913-3a2f61b1bbe9",
+			"id": "906cbe8e-ce1d-4d25-b7da-a88312b572d5",
 			"key": "rootToken",
 			"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlzcyI6ImxvY2FsaG9zdCIsImV4cCI6MTU0ODI5NDc1NywiaWF0IjoxNTQ4MjgwMzU3fQ.r2C7ka8lIOYIKIeW3Zz75IiPAlgfrLaJXqx2dkR4NE4",
 			"type": "string"
 		},
 		{
-			"id": "cf3f0711-ecee-49b9-800e-bc9342f7b2b1",
+			"id": "48b124fb-0b8d-426d-8c90-b0786f91da89",
 			"key": "districtId",
 			"value": "1",
 			"type": "string"
 		},
 		{
-			"id": "1761c0bf-5f60-4609-8440-a021919f8770",
+			"id": "343aff69-1996-445b-9ca4-f06681f7e8aa",
 			"key": "districtToken",
 			"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzZW5hdG9yQWRtaW4iLCJpc3MiOiJsb2NhbGhvc3QiLCJleHAiOjE1NTAwOTMxMTQsImlhdCI6MTU1MDA3ODcxNH0.ylNH_UOKCCC9JZ3PNhb-qTA5vur-F7r96u1C7P5jzj4",
 			"type": "string"
 		}
-	]
+	],
+	"protocolProfileBehavior": {}
 }
