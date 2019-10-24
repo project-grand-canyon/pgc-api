@@ -1,19 +1,11 @@
 package com.ccl.grandcanyon.deliverymethod;
 
-import com.ccl.grandcanyon.SQLHelper;
 import com.ccl.grandcanyon.types.*;
-import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.JsonNode;
-import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
 import com.wildbit.java.postmark.Postmark;
 import com.wildbit.java.postmark.client.ApiClient;
 import com.wildbit.java.postmark.client.data.model.message.Message;
 import com.wildbit.java.postmark.client.data.model.message.MessageResponse;
 
-import javax.ws.rs.core.Response;
-import java.sql.*;
-import java.time.*;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
@@ -43,7 +35,7 @@ public class PostmarkService implements DeliveryService {
         }
         apiClient = Postmark.getApiClient(apiKey);
 
-        // 
+        //
         messageQueue = new LinkedList();
         this.sendingTask = Executors.newSingleThreadScheduledExecutor().
                 scheduleAtFixedRate(new PostmarkSender(), 10, 5, TimeUnit.SECONDS);
@@ -67,7 +59,7 @@ public class PostmarkService implements DeliveryService {
 
     public boolean sendMessage(
             Caller caller,
-            com.ccl.grandcanyon.types.Message message) throws UnirestException {
+            com.ccl.grandcanyon.types.Message message) {
 
         Message postmarkMessage = new Message(
                 fromAddress,
