@@ -81,7 +81,7 @@ public class PostmarkService implements DeliveryService {
                     MessageResponse response = apiClient.deliverMessage(message);
                     logger.info(String.format("Sent message %s to %s", response.getMessageId(), message.getTo()));
                 } catch (Exception e) {
-                    logger.warning(String.format("Failed to send email to caller at address %s: %s",
+                    logger.severe(String.format("Failed to send email to caller at address %s: %s",
                             message.getTo(), e.getLocalizedMessage()));
                 }
             }

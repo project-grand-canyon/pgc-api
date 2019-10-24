@@ -263,7 +263,7 @@ public class ReminderService {
     if (caller.getContactMethods().contains(ContactMethod.email)) {
 
       Message reminderMessage = new Message();
-      reminderMessage.setSubject("It's your day to call!");
+      reminderMessage.setSubject("It's your day to call about climate change!");
       reminderMessage.setBody(this.regularCallInReminderHTML.replaceAll("projectgrandcanyon.com/call/", callInPageUrl));
       try {
         emailReminderSent = emailDeliveryService.sendHtmlMessage(caller, reminderMessage);
