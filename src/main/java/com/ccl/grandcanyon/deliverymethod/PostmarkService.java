@@ -35,7 +35,7 @@ public class PostmarkService implements DeliveryService {
         }
         apiClient = Postmark.getApiClient(apiKey);
 
-        //
+        // Postmark rate limit
         messageQueue = new LinkedList();
         this.sendingTask = Executors.newSingleThreadScheduledExecutor().
                 scheduleAtFixedRate(new PostmarkSender(), 10, 5, TimeUnit.SECONDS);
