@@ -62,28 +62,7 @@ public class WelcomeService {
     logger.info("New Caller");
     // do this asynchronously so as not to delay response to end-user
     Executors.newSingleThreadExecutor().submit(() -> {
-      if (caller.getContactMethods().contains(ContactMethod.sms)) {
-        sendWelcomeSMS(caller);
-      }
-      if (caller.getContactMethods().contains(ContactMethod.email)) {
-        sendWelcomeEmail(caller);
-      }
-    });
-  }
-
-  private void sendWelcomeSMS(Caller caller) {
-    Message message = new Message();
-    message.setBody("You're all signed up for Project Grand Canyon. Thanks for joining!");
-    try {
-      ReminderService.getInstance().getSmsDeliveryService().sendTextMessage(caller, message);
-    }
-    catch (Exception e) {
-      logger.severe(String.format("Failed to send welcome SMS to caller {id: %d}: %s", caller.getCallerId(), e.getMessage()));
-    }
-  }
-
-  private void sendWelcomeEmail(Caller caller) {
-    try (Connection conn = SQLHelper.getInstance().getConnection()) {
+      try (Connection conn = SQLHelper.getInstance().getConnection()) {
         PreparedStatement selectStatement = conn.prepareStatement(SQL_SELECT_CALL_IN_INFO);
         selectStatement.setInt(1, caller.getCallerId());
         ResultSet rs = selectStatement.executeQuery();
@@ -92,14 +71,39 @@ public class WelcomeService {
         }
         District district = new District(rs);
         Reminder reminder = new Reminder(rs);
-        Message message = new Message();
-        message.setSubject("Welcome to Project Grand Canyon!");
-        String personalizedHtml = this.welcomeHtml
-                .replaceAll("\\{state\\}", district.getState())
-                .replaceAll("\\{district_number\\}", String.valueOf(district.getNumber()))
-                .replaceAll("\\{day_of_month\\}", DayOfMonthFormatter.getAdjective(reminder.getDayOfMonth()));
-        message.setBody(personalizedHtml);
-        ReminderService.getInstance().getEmailDeliveryService().sendHtmlMessage(caller, message);
+        if (caller.getContactMethods().contains(ContactMethod.sms)) {
+          sendWelcomeSMS(reminder, caller);
+        }
+        if (caller.getContactMethods().contains(ContactMethod.email)) {
+          sendWelcomeEmail(reminder, district, caller);
+        }
+      } catch (Exception e) {
+        logger.severe(String.format("Failed to send welcome messages: %s", e.getLocalizedMessage()));
+      }
+    });
+  }
+
+  private void sendWelcomeSMS(Reminder reminder, Caller caller) {
+    Message message = new Message();
+    message.setBody(String.format("You're signed up for Project Grand Canyon. You'll get your call-in guide on the %s of the month. Thanks for joining!", DayOfMonthFormatter.getAdjective(reminder.getDayOfMonth())));
+    try {
+      ReminderService.getInstance().getSmsDeliveryService().sendTextMessage(caller, message);
+    }
+    catch (Exception e) {
+      logger.severe(String.format("Failed to send welcome SMS to caller {id: %d}: %s", caller.getCallerId(), e.getMessage()));
+    }
+  }
+
+  private void sendWelcomeEmail(Reminder reminder, District district, Caller caller) {
+    try {
+      Message message = new Message();
+      message.setSubject("Welcome to Project Grand Canyon!");
+      String personalizedHtml = this.welcomeHtml
+              .replaceAll("\\{state\\}", district.getState())
+              .replaceAll("\\{district_number\\}", String.valueOf(district.getNumber()))
+              .replaceAll("\\{day_of_month\\}", DayOfMonthFormatter.getAdjective(reminder.getDayOfMonth()));
+      message.setBody(personalizedHtml);
+      ReminderService.getInstance().getEmailDeliveryService().sendHtmlMessage(caller, message);
     } catch (Exception e) {
       logger.severe(String.format("Failed to send welcome email to caller {id: %d}: %s", caller.getCallerId(), e.getMessage()));
     }

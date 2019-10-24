@@ -21,6 +21,12 @@
     </mj-hero>
     <mj-section>
       <mj-column>
+         <mj-text font-size="24px">
+           Comments, questions, moved districts?
+         </mj-text>
+        <mj-text font-size="20px">
+          Reply to this email with your feedback, questions, and/or district change request.
+        </mj-text>
         <mj-text font-size="24px">
           What is Project Grand Canyon?
         </mj-text>
@@ -33,6 +39,13 @@
         <mj-button font-size="25px" background-color="#1382c4" color="white" href="https://projectgrandcanyon.com/call/">
           View Call-In Guide
         </mj-button>
+      </mj-column>
+    </mj-section>
+    <mj-section>
+    	<mj-column>
+      	<mj-text align="center">
+        	From your friends at <a href="projectgrandcanyon.com">projectgrandcanyon.com</a>. To unsubscribe, simply reply to this email with "unsubscribe" in the body.
+        </mj-text>
       </mj-column>
     </mj-section>
   </mj-body>

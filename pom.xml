@@ -131,6 +131,11 @@
       <artifactId>unirest-java</artifactId>
       <version>1.4.9</version>
     </dependency>
+    <dependency>
+      <groupId>com.wildbit.java</groupId>
+      <artifactId>postmark</artifactId>
+      <version>1.2.1</version>
+    </dependency>
     <!-- [END gae_flex_mysql_dependencies] -->
   </dependencies>
   <build>
