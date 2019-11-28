@@ -330,7 +330,6 @@ public class Admins {
   @RolesAllowed(GCAuth.ANONYMOUS)
   public Response passwordResetRequest(TextNode emailAddress)
     throws SQLException {
-
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
       String whereClause = " WHERE " + Admin.EMAIL + " = ?";
@@ -363,11 +362,11 @@ public class Admins {
       // TODO: replace this message body with HTML email template.
       ReminderService reminderService = ReminderService.getInstance();
 
-      String resetUrl = reminderService.getApplicationBaseUrl() + "/passwordreset?token=" + token;
+      String resetUrl = reminderService.getApplicationBaseUrl() + "/finish_password_reset?token=" + token;
       Message resetRequestMessage = new Message();
       resetRequestMessage.setSubject("Password Reset Requested");
       resetRequestMessage.setBody("If you requsted a password reset, visit the page at the following URL:  http://" + resetUrl +
-          ".   If you did not request a password reset, ignore this message.");
+          ".   If you did not request a password reset, please reply to this email to report the error.");
 
       // hack:  create a temp Caller in order to invoke email service
       Caller adminRecipient = new Caller();
