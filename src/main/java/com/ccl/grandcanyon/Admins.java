@@ -362,7 +362,7 @@ public class Admins {
       // TODO: replace this message body with HTML email template.
       ReminderService reminderService = ReminderService.getInstance();
 
-      String resetUrl = reminderService.getApplicationBaseUrl() + "/finish_password_reset?token=" + token;
+      String resetUrl = reminderService.getAdminApplicationBaseUrl() + "/finish_password_reset?token=" + token;
       Message resetRequestMessage = new Message();
       resetRequestMessage.setSubject("Password Reset Requested");
       resetRequestMessage.setBody("If you requsted a password reset, visit the page at the following URL:  http://" + resetUrl +
