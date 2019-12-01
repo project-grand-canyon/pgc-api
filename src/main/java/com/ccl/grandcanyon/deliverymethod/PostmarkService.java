@@ -16,6 +16,8 @@ public class PostmarkService implements DeliveryService {
 
     private final static String API_KEY_PROP = "postmark.APIKey";
     private final static String FROM_ADDRESS_PROP ="emailFromAddress";
+    // Space out email sends to smooth out traffic
+    private final static Long SEND_FREQUENCY = 30L;
 
     private static final Logger logger = Logger.getLogger(PostmarkService.class.getName());
 
@@ -38,7 +40,7 @@ public class PostmarkService implements DeliveryService {
         // Postmark rate limit
         messageQueue = new LinkedList();
         this.sendingTask = Executors.newSingleThreadScheduledExecutor().
-                scheduleAtFixedRate(new PostmarkSender(), 10, 5, TimeUnit.SECONDS);
+                scheduleAtFixedRate(new PostmarkSender(), 10, SEND_FREQUENCY, TimeUnit.SECONDS);
     }
 
     public void tearDown() {
