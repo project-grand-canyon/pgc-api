@@ -16,8 +16,8 @@ public class PostmarkService implements DeliveryService {
 
     private final static String API_KEY_PROP = "postmark.APIKey";
     private final static String FROM_ADDRESS_PROP ="emailFromAddress";
-    // Space out email sends to smooth out traffic
-    private final static Long SEND_FREQUENCY = 30L;
+    // They rate limit
+    private final static Long SEND_FREQUENCY = 5L;
 
     private static final Logger logger = Logger.getLogger(PostmarkService.class.getName());
 
