@@ -40,8 +40,10 @@ public class Callers {
           Caller.EMAIL + ", " +
           Caller.DISTRICT_ID + ", " +
           Caller.ZIPCODE + ", " +
+          Caller.CCL_ID + ", " +
+          Caller.REFERRER + ", " +
           Caller.PAUSED +
-          ") VALUES (?, ?, ?, ?, ?, ?, ?)";
+          ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
   private static final String SQL_INSERT_CALLER_CONTACT_METHODS =
       "INSERT INTO callers_contact_methods (" +
@@ -56,6 +58,8 @@ public class Callers {
           Caller.EMAIL + " = ?, " +
           Caller.DISTRICT_ID + " = ?, " +
           Caller.ZIPCODE + " = ?, " +
+          Caller.CCL_ID + " = ?, " +
+          Caller.REFERRER + " = ?, " +
           Caller.PAUSED + " = ? " +
           "WHERE " + Caller.CALLER_ID + " = ?";
 
@@ -95,6 +99,8 @@ public class Callers {
       insertStatement.setString(idx++, caller.getEmail());
       insertStatement.setInt(idx++, caller.getDistrictId());
       insertStatement.setString(idx++, caller.getZipCode());
+      insertStatement.setString(idx++, caller.getCclId());
+      insertStatement.setString(idx++, caller.getReferrer());
       insertStatement.setBoolean(idx++, caller.isPaused());
       insertStatement.executeUpdate();
 
@@ -154,6 +160,8 @@ public class Callers {
       statement.setString(idx++, caller.getEmail());
       statement.setInt(idx++, caller.getDistrictId());
       statement.setString(idx++, caller.getZipCode());
+      statement.setString(idx++, caller.getCclId());
+      statement.setString(idx++, caller.getReferrer());
       statement.setBoolean(idx++, caller.isPaused());
       statement.setInt(idx++, callerId);
       statement.executeUpdate();

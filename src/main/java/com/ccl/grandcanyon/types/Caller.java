@@ -22,6 +22,8 @@ public class Caller extends GCBase {
   public static final String DISTRICT_ID = "district_id";
   public static final String ZIPCODE = "zipcode";
   public static final String PAUSED = "paused";
+  public static final String CCL_ID = "ccl_id";
+  public static final String REFERRER = "referrer";
   public static final String DAY_OF_MONTH = Reminder.DAY_OF_MONTH;
   public static final String LAST_REMINDER_TIMESTAMP = Reminder.LAST_REMINDER_TIMESTAMP;
   public static final String LAST_CALL_TIMESTAMP = "last_call_timestamp";
@@ -36,6 +38,8 @@ public class Caller extends GCBase {
   private String zipCode;
   private boolean paused;
   private int reminderDayOfMonth;
+  private String cclId;
+  private String referrer;
   private Timestamp lastReminderTimestamp;
   private Timestamp lastCallTimestamp;
 
@@ -59,6 +63,8 @@ public class Caller extends GCBase {
     reminderDayOfMonth = rs.getInt(DAY_OF_MONTH);
     lastReminderTimestamp = rs.getTimestamp(LAST_REMINDER_TIMESTAMP);
     lastCallTimestamp = rs.getTimestamp(LAST_CALL_TIMESTAMP);
+    cclId = rs.getString(CCL_ID);
+    referrer = rs.getString(REFERRER);
     this.contactMethods = new ArrayList<>();
     do {
       String cm = rs.getString(CONTACT_METHOD);
@@ -152,6 +158,14 @@ public class Caller extends GCBase {
   public void setReminderDayOfMonth(int reminderDayOfMonth) {
     this.reminderDayOfMonth = reminderDayOfMonth;
   }
+
+  public String getCclId() { return cclId; }
+
+  public  void setCclId(String cclId) { this.cclId = cclId; }
+
+  public String getReferrer() { return referrer; }
+
+  public  void setReferrer(String referrer) { this.referrer= referrer; }
 
   @JsonSerialize(using = TimestampSerializer.class)
   public Timestamp getLastReminderTimestamp() {
