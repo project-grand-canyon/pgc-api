@@ -151,7 +151,6 @@ public class Callers {
     try {
       // use transaction
       conn.setAutoCommit(false);
-
       PreparedStatement statement = conn.prepareStatement(SQL_UPDATE_CALLER);
       int idx = 1;
       statement.setString(idx++, caller.getFirstName());

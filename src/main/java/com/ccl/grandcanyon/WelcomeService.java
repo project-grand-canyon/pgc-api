@@ -85,7 +85,7 @@ public class WelcomeService {
 
   private void sendWelcomeSMS(Reminder reminder, Caller caller) {
     Message message = new Message();
-    message.setBody(String.format("You're signed up for Project Grand Canyon. You'll get your call-in guide on the %s of the month. Thanks for joining!", DayOfMonthFormatter.getAdjective(reminder.getDayOfMonth())));
+    message.setBody(String.format("You're signed up for Project Grand Canyon. We have randomized your call to the %s of the month. Thanks for joining!", DayOfMonthFormatter.getAdjective(reminder.getDayOfMonth())));
     try {
       ReminderService.getInstance().getSmsDeliveryService().sendTextMessage(caller, message);
     }
