@@ -11,13 +11,15 @@ import java.util.logging.Logger;
 public class EventAlertingService {
 
   private final static String EVENT_SERVICE_ADDRESS_PROP = "eventService.address";
+  private final static String EVENT_SERVICE_NEW_ADMIN_ADDRESS_PROP = "eventService.newAdminAddress";
 
   private static final Logger logger = Logger.getLogger(EventAlertingService.class.getName());
 
   private static EventAlertingService instance;
 
   // Not really a "Caller", actually contains the alert recipient address
-  private Caller recipient;
+  private Caller generalRecipient;
+  private Caller newAdminRecipient;
 
   public static void init(Properties config) {
     assert (instance == null);
@@ -30,11 +32,16 @@ public class EventAlertingService {
 
   private EventAlertingService(Properties config) {
     logger.info("Init EventAlertingService");
-    recipient = new Caller();
-    recipient.setEmail(config.getProperty(EVENT_SERVICE_ADDRESS_PROP));
+    generalRecipient = new Caller();
+    newAdminRecipient = new Caller();
+    generalRecipient.setEmail(config.getProperty(EVENT_SERVICE_ADDRESS_PROP));
+    newAdminRecipient.setEmail(config.getProperty(EVENT_SERVICE_NEW_ADMIN_ADDRESS_PROP));
   }
 
   public void handleEvent(String name, String details) {
+
+    Caller recipient = name.equals("New Admin Sign Up") ? newAdminRecipient : generalRecipient;
+
     logger.info("New event: " + name);
     Executors.newSingleThreadExecutor().submit(() -> {
       try {

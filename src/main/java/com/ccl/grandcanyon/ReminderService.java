@@ -32,6 +32,7 @@ public class ReminderService {
   private final static String EMAIL_DELIVERY_SERVICE = "emailDeliveryService";
   private final static String STALE_SCRIPT_WARNING_INTERVAL = "staleScriptWarningInterval";
   private final static String APPLICATION_BASE_URL = "applicationBaseUrl";
+  private final static String ADMIN_APPLICATION_BASE_URL = "adminApplicationBaseUrl";
 
   private final static String SQL_SELECT_REMINDER =
       "SELECT * FROM reminders WHERE " +
@@ -100,6 +101,7 @@ public class ReminderService {
   private long staleScriptWarningInterval;
 
   private String applicationBaseUrl;
+  private String adminApplicationBaseUrl;
 
   private static int dayOfMonthCounter = 1;
 
@@ -129,6 +131,7 @@ public class ReminderService {
     this.serviceIntervalMinutes = Integer.parseInt(config.getProperty(REMINDER_SERVICE_INTERVAL, "60"));
     this.secondReminderInterval = Integer.parseInt(config.getProperty(SECOND_REMINDER_INTERVAL, "4"));
     this.applicationBaseUrl = config.getProperty(APPLICATION_BASE_URL);
+    this.adminApplicationBaseUrl = config.getProperty(ADMIN_APPLICATION_BASE_URL);
 
     try {
       this.earliestReminder = OffsetTime.parse(config.getProperty(EARLIEST_REMINDER_TIME));
@@ -233,10 +236,11 @@ public class ReminderService {
     boolean emailReminderSent = false;
 
     District targetDistrict = getDistrictToCall(conn, caller);
+    District callerDistrict = Districts.retrieveDistrictById(conn, caller.getDistrictId());
     String trackingId = RandomStringUtils.randomAlphanumeric(8);
 
     String callInPageUrl = applicationBaseUrl + "/call/" + targetDistrict.getState() + "/" +
-        targetDistrict.getNumber() + "?t=" + trackingId + "&c=" + caller.getCallerId();
+        targetDistrict.getNumber() + "?t=" + trackingId + "&c=" + caller.getCallerId() + "&d=" + callerDistrict.getNumber();
 
     if (caller.getContactMethods().contains(ContactMethod.sms)) {
 
@@ -263,8 +267,8 @@ public class ReminderService {
     if (caller.getContactMethods().contains(ContactMethod.email)) {
 
       Message reminderMessage = new Message();
-      reminderMessage.setSubject("It's your day to call!");
-      reminderMessage.setBody(this.regularCallInReminderHTML.replaceAll("projectgrandcanyon.com/call/", callInPageUrl));
+      reminderMessage.setSubject("It's time to call about climate change");
+      reminderMessage.setBody(this.regularCallInReminderHTML.replaceAll("cclcalls.org/call/", callInPageUrl));
       try {
         emailReminderSent = emailDeliveryService.sendHtmlMessage(caller, reminderMessage);
         if (emailReminderSent) {
@@ -297,6 +301,10 @@ public class ReminderService {
 
   public String getApplicationBaseUrl() {
     return applicationBaseUrl;
+  }
+
+  public String getAdminApplicationBaseUrl() {
+    return adminApplicationBaseUrl;
   }
 
   private void updateReminderStatus(

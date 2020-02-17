@@ -38,17 +38,14 @@ twilio.SID=
 twilio.AuthToken=
 
 # Java class that will provide Email message delivery
-emailDeliveryService=com.ccl.grandcanyon.deliverymethod.MailgunService
+emailDeliveryService=com.ccl.grandcanyon.deliverymethod.PostmarkService
 
 emailFromAddress=Bla <bla@bla.bla>
 
 eventService.address=bla@bla.bla
 
-#Mailgun API Key
-mailgun.APIKey=
-
-#Mailgun base URL
-mailgun.baseURL=
+# Postmark API Key
+postmark.APIKey=
 
 #Lifetime of a password reset token, in minutes
 passwordResetTokenLifetime=10

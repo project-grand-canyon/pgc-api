@@ -1,38 +1,63 @@
 <mjml>
+  <mj-head>
+    <mj-style>
+            .box-shadow td {
+                box-shadow: 0 4px 6px hsla(0,0%,46%,0.2), 0 1px 3px hsla(0,0%,46%,0.2);
+            }
+    </mj-style>
+  </mj-head>
   <mj-body>
     <mj-section>
       <mj-column width="100px" vertical-align="middle">
-        <mj-image src="https://projectgrandcanyon.com/img/ccl-logo-thumbnail.png"></mj-image>
+        <mj-image src="https://cclcalls.org/img/ccl-logo-thumbnail.png"></mj-image>
       </mj-column>
-      <mj-column width="66%" vertical-align="middle">
-        <mj-text font-size="24px">CCL's Project Grand Canyon</mj-text>
+      <mj-column width="100%" vertical-align="middle">
+        <mj-text font-size="24px">CCL's Monthly Calling Campaign</mj-text>
       </mj-column>
       <mj-column width="100%">
         <mj-divider border-color="#000"></mj-divider>
       </mj-column>
     </mj-section>
-    <mj-hero mode="fluid-height" background-width="600px" background-height="469px" background-url="https://projectgrandcanyon.com/img/canyon-photo.jpg" background-color="#2a3448" padding="100px 0px">
-      <mj-text padding="20px" color="#ffffff" align="center" font-size="35px" line-height="55px" font-weight="900">
-        Today is your day to call your Member of Congress!
+    <mj-hero background-color="#1382c4" padding="30px">
+      <mj-text align="center" padding="20px" color="white" font-size="20px" line-height="24px">
+        It's time to call your Member of Congress about climate change. Please find 5 minutes in the next day or two to urge climate action.
       </mj-text>
-      <mj-button font-size="25px" background-color="#1382c4" color="white" href="https://projectgrandcanyon.com/call/">
+      <mj-button font-size="24px" color="#1382c4" background-color="white" href="https://cclcalls.org/call/" css-class="box-shadow">
         View Call-In Guide
       </mj-button>
     </mj-hero>
     <mj-section>
       <mj-column>
-        <mj-text font-size="24px">
-          What is Project Grand Canyon?
+         <mj-text font-size="18px">
+           Comments, questions, moved districts?
+         </mj-text>
+        <mj-text font-size="14px">
+          Reply to this email with your feedback, questions, and/or district change request.
         </mj-text>
-        <mj-text font-size="20px">
-          Project Grand Canyon is an effort by volunteers from Citizens' Climate Lobby to inspire as many people as possible to call their Member of Congress and express their concern about climate change.
+        <mj-text font-size="18px">
+          What is the Monthly Calling Campaign?
+        </mj-text>
+        <mj-text font-size="14px">
+          The Monthly Calling Campaign is an effort by Citizens' Climate Lobby to inspire as many people as possible to call their Member of Congress and express their concern about climate change.
           <br/><br/> Congressional staffers and representatives have told us nothing is more powerful in helping a representative know what their constituents want than written letters and phone calls.
-          <br/>
-          <br/> Based on this fact, we created Project Grand Canyon. Just as the Grand Canyon was excavated one water drop at a time, our Members of Congress' resistance to climate solutions will be worn down by the drip, drip, drip of thousands of phone
-          calls per month.</mj-text>
-        <mj-button font-size="25px" background-color="#1382c4" color="white" href="https://projectgrandcanyon.com/call/">
+          </mj-text>
+          <mj-text font-size="18px">
+          What is CCL?
+        </mj-text>
+        <mj-text font-size="14px">
+        CCL exists to create the political will for climate solutions by enabling individual breakthroughs in the exercise of personal and political power.
+              <br /><br />You can learn more at <a href="https://citizensclimatelobby.org/about-ccl/">citizensclimatelobby.org</a>
+        </mj-text>
+        <mj-button font-size="25px" background-color="#1382c4" color="white" href="https://cclcalls.org/call/">
           View Call-In Guide
         </mj-button>
+      </mj-column>
+    </mj-section>
+    <mj-section>
+    	<mj-column>
+      	<mj-text align="center">
+        	From your friends at <a href="citizensclimatelobby.org">CCL</a>. To unsubscribe, simply reply to this email with "unsubscribe" in the body.
+        </mj-text>
       </mj-column>
     </mj-section>
   </mj-body>
