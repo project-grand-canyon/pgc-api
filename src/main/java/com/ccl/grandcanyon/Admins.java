@@ -166,6 +166,7 @@ public class Admins {
               sb.toString());
 
       EventAlertingService.getInstance().handleEvent("New Admin Sign Up", newAdminEmailBody);
+      AdminWelcomeService.getInstance().handleNewAdmin(newAdmin);
       conn.commit();
 
       URI location = uriInfo.getAbsolutePathBuilder().path(Integer.toString(adminId)).build();

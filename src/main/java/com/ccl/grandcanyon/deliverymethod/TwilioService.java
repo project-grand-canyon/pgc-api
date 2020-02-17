@@ -1,5 +1,6 @@
 package com.ccl.grandcanyon.deliverymethod;
 
+import com.ccl.grandcanyon.types.Admin;
 import com.ccl.grandcanyon.types.Caller;
 import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;
@@ -20,7 +21,6 @@ public class TwilioService implements DeliveryService {
         config.getProperty(AUTH_TOKEN_PROP));
   }
 
-
   public boolean sendTextMessage(
       Caller caller,
       com.ccl.grandcanyon.types.Message message) {
@@ -40,6 +40,12 @@ public class TwilioService implements DeliveryService {
         new PhoneNumber(formattedNumber.toString()),
         new PhoneNumber(fromPhoneNumber), message.getBody()).create();
     return !(twilioMessage.getStatus().equals(Message.Status.FAILED));
+  }
+
+
+  @Override
+  public boolean sendTextMessage(Admin admin, com.ccl.grandcanyon.types.Message message) throws Exception {
+    throw new Exception("Twilio service::sendTextMessage(admin, message)-Not Implemented!");
   }
 
 
