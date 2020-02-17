@@ -72,7 +72,7 @@ public class WelcomeService {
         District district = new District(rs);
         Reminder reminder = new Reminder(rs);
         if (caller.getContactMethods().contains(ContactMethod.sms)) {
-          sendWelcomeSMS(reminder, caller);
+          sendWelcomeSMS(reminder, district, caller);
         }
         if (caller.getContactMethods().contains(ContactMethod.email)) {
           sendWelcomeEmail(reminder, district, caller);
@@ -83,11 +83,14 @@ public class WelcomeService {
     });
   }
 
-  private void sendWelcomeSMS(Reminder reminder, Caller caller) {
-    Message message = new Message();
-    message.setBody(String.format("You're signed up for Project Grand Canyon. We have randomized your call to the %s of the month. Thanks for joining!", DayOfMonthFormatter.getAdjective(reminder.getDayOfMonth())));
+  private void sendWelcomeSMS(Reminder reminder, District district, Caller caller) {
+    Message message1 = new Message();
+    message1.setBody(String.format("You're signed up for the Monthly Calling Campaign. We have randomized your call to the %s of the month. Thanks for joining!", DayOfMonthFormatter.getAdjective(reminder.getDayOfMonth())));
+    Message message2 = new Message();
+    message2.setBody(String.format("Want to start calling now? Check out the current call-in guide at https://cclcalls.org/call/%s/%s", district.getState(), district.getNumber()));
     try {
-      ReminderService.getInstance().getSmsDeliveryService().sendTextMessage(caller, message);
+      ReminderService.getInstance().getSmsDeliveryService().sendTextMessage(caller, message1);
+      ReminderService.getInstance().getSmsDeliveryService().sendTextMessage(caller, message2);
     }
     catch (Exception e) {
       logger.severe(String.format("Failed to send welcome SMS to caller {id: %d}: %s", caller.getCallerId(), e.getMessage()));
@@ -97,7 +100,7 @@ public class WelcomeService {
   private void sendWelcomeEmail(Reminder reminder, District district, Caller caller) {
     try {
       Message message = new Message();
-      message.setSubject("Welcome to Project Grand Canyon!");
+      message.setSubject("Welcome to CCL's Monthly Calling Campaign!");
       String personalizedHtml = this.welcomeHtml
               .replaceAll("\\{state\\}", district.getState())
               .replaceAll("\\{district_number\\}", String.valueOf(district.getNumber()))

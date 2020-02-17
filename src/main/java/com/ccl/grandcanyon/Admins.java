@@ -27,6 +27,11 @@ public class Admins {
       "SELECT a.*, d.district_id FROM admins a " +
       "LEFT JOIN admins_districts AS d ON a.admin_id = d.admin_id";
 
+  private static final String SQL_SELECT_DISTRICTS =
+          "SELECT d.* FROM districts d " +
+          "LEFT JOIN admins_districts ad ON ad.district_id = d.district_id " +
+          "WHERE ad.admin_id = ?";
+
   private static final String SQL_CREATE_ADMIN =
       "INSERT INTO admins (" +
           Admin.USER_NAME + ", " +
@@ -143,7 +148,24 @@ public class Admins {
 
       insertDistricts(conn, adminId, admin);
       Admin newAdmin = retrieveById(conn, adminId);
-      EventAlertingService.getInstance().handleEvent("New Admin Sign Up", newAdmin.getEmail());
+
+      PreparedStatement selectDistricts = conn.prepareStatement(SQL_SELECT_DISTRICTS);
+      selectDistricts.setInt(1, adminId);
+
+      ResultSet rs1 = selectDistricts.executeQuery();
+      StringBuilder sb = new StringBuilder();
+      while (rs1.next()) {
+        District d = new District(rs1);
+        sb.append(String.format("%s-%s ", d.getState(), d.getNumber()));
+      }
+
+      String newAdminEmailBody = String.format(
+              "New admin. Email: %s, Username: %s, Districts: %s",
+              newAdmin.getEmail(),
+              newAdmin.getUserName(),
+              sb.toString());
+
+      EventAlertingService.getInstance().handleEvent("New Admin Sign Up", newAdminEmailBody);
       conn.commit();
 
       URI location = uriInfo.getAbsolutePathBuilder().path(Integer.toString(adminId)).build();
