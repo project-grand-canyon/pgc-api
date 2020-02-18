@@ -43,6 +43,7 @@ emailDeliveryService=com.ccl.grandcanyon.deliverymethod.PostmarkService
 emailFromAddress=Bla <bla@bla.bla>
 
 eventService.address=bla@bla.bla
+eventService.newAdminAddress=newadmin@bla.bla
 
 # Postmark API Key
 postmark.APIKey=
