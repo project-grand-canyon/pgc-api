@@ -66,6 +66,14 @@ public class GCContextListener implements ServletContextListener {
     }
 
     try {
+      AdminWelcomeService.init();
+    }
+    catch (Exception e) {
+      throw new RuntimeException(
+              "Initialization failed: error initializing Admin Welcome service", e);
+    }
+
+    try {
       EventAlertingService.init(properties);
     }
     catch (Exception e) {

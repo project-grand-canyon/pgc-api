@@ -98,6 +98,9 @@ public class ReminderService {
   private String regularCallInReminderHTML;
   private String callReminderEmailResource = "callNotificationEmail.html";
 
+  private String staleScriptHTML;
+  private String staleScriptEmailResource = "staleScriptEmail.html";
+
   private long staleScriptWarningInterval;
 
   private String applicationBaseUrl;
@@ -183,6 +186,19 @@ public class ReminderService {
     }
     catch (Exception e) {
       throw new RuntimeException("Unable to load regular call-in notification email template: " + e.getLocalizedMessage());
+    }
+
+    try {
+      URL resource = getClass().getClassLoader().getResource(staleScriptEmailResource);
+      if (resource == null) {
+        throw new FileNotFoundException("File '" + staleScriptHTML + "' not found.");
+      }
+      File file = new File(resource.getFile());
+      BufferedReader br = new BufferedReader(new FileReader(file));
+      this.staleScriptHTML = br.lines().collect(Collectors.joining());
+    }
+    catch (Exception e) {
+      throw new RuntimeException("Unable to load stale script email template: " + e.getLocalizedMessage());
     }
 
 
@@ -379,11 +395,7 @@ public class ReminderService {
           String.format(
               "The call in script for %s district %d has not yet been created.",
               district.getState(), district.getNumber()) :
-          String.format(
-              "The call in script for %s district %d has not been updated since %s. " +
-                  "It's time to consider refreshing the talking points.  Thank you!",
-              district.getState(), district.getNumber(), dateFormat.format(district.getScriptModifiedTime())));
-
+          staleScriptHTML.replace("$district$", district.readableName()).replace("$updateDate$", dateFormat.format(district.getScriptModifiedTime())));
       Caller adminAsCaller = new Caller();
       adminAsCaller.setEmail(adminEmail);
       success = emailDeliveryService.sendTextMessage(adminAsCaller, message);

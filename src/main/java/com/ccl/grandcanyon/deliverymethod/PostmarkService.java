@@ -51,21 +51,26 @@ public class PostmarkService implements DeliveryService {
 
     @Override
     public boolean sendTextMessage(Caller caller, com.ccl.grandcanyon.types.Message message) throws Exception {
-        return sendMessage(caller, message);
+        return sendMessage(caller.getEmail(), message);
     }
 
     @Override
     public boolean sendHtmlMessage(Caller caller, com.ccl.grandcanyon.types.Message message) throws Exception {
-        return sendMessage(caller, message);
+        return sendMessage(caller.getEmail(), message);
+    }
+
+    @Override
+    public boolean sendTextMessage(Admin admin, com.ccl.grandcanyon.types.Message message) throws Exception {
+        return sendMessage(admin.getEmail(), message);
     }
 
     public boolean sendMessage(
-            Caller caller,
+            String recipientEmailAddress,
             com.ccl.grandcanyon.types.Message message) {
 
         Message postmarkMessage = new Message(
                 fromAddress,
-                caller.getEmail(),
+                recipientEmailAddress,
                 message.getSubject(),
                 message.getBody());
         postmarkMessage.setTrackLinks(Message.TRACK_LINKS.HtmlAndText);

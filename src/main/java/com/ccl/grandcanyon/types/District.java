@@ -165,4 +165,13 @@ public class District extends GCBase {
   public void setLastStaleScriptNotification(Timestamp lastStaleScriptNotification) {
     this.lastStaleScriptNotification = lastStaleScriptNotification;
   }
+
+  public String readableName() {
+    switch (this.getNumber()){
+      case 0: return this.getState();
+      case -1: return String.format("%s Sr. Senator", this.getState());
+      case -2: return String.format("%s Jr. Senator", this.getState());
+      default: return String.format("%s-%s", this.getState(), this.getNumber());
+    }
+  }
 }
