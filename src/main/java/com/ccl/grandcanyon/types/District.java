@@ -174,4 +174,9 @@ public class District extends GCBase {
       default: return String.format("%s-%s", this.getState(), this.getNumber());
     }
   }
+
+  public boolean isSenatorDistrict(){
+    return getNumber() < 0;
+  }
+
 }
