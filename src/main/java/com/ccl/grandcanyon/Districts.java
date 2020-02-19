@@ -1,6 +1,7 @@
 package com.ccl.grandcanyon;
 
 import com.ccl.grandcanyon.types.*;
+import com.ccl.grandcanyon.types.District;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
@@ -12,6 +13,7 @@ import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.sql.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Path("/districts")
 public class Districts {
@@ -507,7 +509,39 @@ public class Districts {
     return rs;
   }
 
+  static List<District> retrieveSenatorDistrictsByState(Connection conn,
+                                                String state) throws SQLException {
+    List<District> districts = retrieveDistrictsByState(conn, state);
+    return districts.stream().filter(District::isSenatorDistrict).collect(Collectors.toList());
+  }
 
+  static List<District> retrieveDistrictsByState(
+          Connection conn,
+          String state)
+          throws SQLException {
+    List<District> districts = new ArrayList<>();
+    ResultSet rs = getResultSetForState(conn, state);
+    districts.add(new District(rs));
+    while(rs.next()){
+      districts.add(new District(rs));
+    }
+
+    return districts;
+  }
+
+  static private ResultSet getResultSetForState(
+          Connection conn,
+          String state)
+          throws SQLException {
+    String whereClause = " WHERE d." + District.STATE + " = ?";
+    PreparedStatement statement = conn.prepareStatement(SQL_SELECT_DISTRICT + whereClause);
+    statement.setString(1, state);
+    ResultSet rs = statement.executeQuery();
+    if (!rs.next()) {
+      throw new NotFoundException("No district found with state '" + state + "'");
+    }
+    return rs;
+  }
 
   private List<Integer> getScriptTalkingPointIds(
       Connection conn,

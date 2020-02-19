@@ -3,6 +3,7 @@ package com.ccl.grandcanyon;
 import com.ccl.grandcanyon.types.Admin;
 import com.ccl.grandcanyon.types.Call;
 import com.ccl.grandcanyon.types.Caller;
+import com.ccl.grandcanyon.types.District;
 import com.ccl.grandcanyon.types.Reminder;
 
 import javax.annotation.security.RolesAllowed;
@@ -34,7 +35,8 @@ public class Calls {
       SQL_SELECT_CALLS + " WHERE " +
           Call.CALLER_ID + " = ? AND " +
           Call.MONTH + " = ? AND " +
-          Call.YEAR + " = ?";
+          Call.YEAR + " = ? AND " +
+          Call.DISTRICT_ID + " = ?";
 
   private static final String SQL_CREATE_CALL =
       "INSERT INTO calls (" +
@@ -67,18 +69,20 @@ public class Calls {
         throw new BadRequestException("Unknown or expired call tracking Id");
       }
 
-      // see if a call was already recorded for this tracking Id
+      // see if a call was already recorded for this tracking Id and districtId
       LocalDateTime callDateTime = reminder.getLastReminderTimestamp().toLocalDateTime();
       PreparedStatement query = conn.prepareStatement(SQL_SEARCH_CALL);
       query.setInt(1, reminder.getCallerId());
       query.setInt(2, callDateTime.getMonthValue());
       query.setInt(3, callDateTime.getYear());
+      query.setInt(4, call.getDistrictId());
       ResultSet rs = query.executeQuery();
       if (rs.next()) {
         // call already recorded for this ID
         // todo:  treat this call as anonymous?  Or just ignore it?
       }
       else {
+        checkEligibleDistrict(conn, reminder.getCallerId(), call.getDistrictId());
         // save the call record
         PreparedStatement insert = conn.prepareStatement(SQL_CREATE_CALL);
         int idx = 1;
@@ -165,4 +169,17 @@ public class Calls {
     }
   }
 
+  private void checkEligibleDistrict(Connection conn, int callerId, int districtId) throws SQLException, ForbiddenException{
+    Caller caller = Callers.retrieveById(conn, callerId);
+    if(caller.getDistrictId() == districtId){
+      return;
+    }
+    District homeDistrict = Districts.retrieveDistrictById(conn, caller.getDistrictId());
+    List<District> senatorDistricts = Districts.retrieveSenatorDistrictsByState(conn, homeDistrict.getState());
+    boolean isSenatorDistrict = senatorDistricts.stream().anyMatch(district -> district.getDistrictId() == districtId);
+    if(!isSenatorDistrict){
+      throw new ForbiddenException(String.format(
+              "Caller with caller_id %s is does not have representative or senator with distric_id %d", callerId, districtId));
+    }
+  }
 }
