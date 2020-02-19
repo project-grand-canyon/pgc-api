@@ -521,7 +521,6 @@ public class Districts {
           throws SQLException {
     List<District> districts = new ArrayList<>();
     ResultSet rs = getResultSetForState(conn, state);
-    districts.add(new District(rs));
     while(rs.next()){
       districts.add(new District(rs));
     }
@@ -540,6 +539,7 @@ public class Districts {
     if (!rs.next()) {
       throw new NotFoundException("No district found with state '" + state + "'");
     }
+    rs.previous();
     return rs;
   }
 
