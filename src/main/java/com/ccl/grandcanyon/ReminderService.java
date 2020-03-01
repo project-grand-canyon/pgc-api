@@ -154,7 +154,7 @@ public class ReminderService {
 
     try {
       this.smsDeliveryService = (DeliveryService)Class.forName(
-          config.getProperty(SMS_DELIVERY_SERVICE)).newInstance();
+          config.getProperty(SMS_DELIVERY_SERVICE)).getDeclaredConstructor().newInstance();
       this.smsDeliveryService.init(config);
     }
     catch (Exception e) {
@@ -164,7 +164,7 @@ public class ReminderService {
 
     try {
       this.emailDeliveryService = (DeliveryService)Class.forName(
-          config.getProperty(EMAIL_DELIVERY_SERVICE)).newInstance();
+          config.getProperty(EMAIL_DELIVERY_SERVICE)).getDeclaredConstructor().newInstance();
       this.emailDeliveryService.init(config);
     }
     catch (Exception e) {
