@@ -262,7 +262,7 @@ public class ReminderService {
 
       Message reminderMessage = new Message();
 
-      String legislatorTitle = targetDistrict.getNumber() > 0 ? "Rep." : "Senator";
+      String legislatorTitle = targetDistrict.getNumber() >= 0 ? "Rep." : "Senator";
 
       reminderMessage.setBody("It's your day to call " + legislatorTitle + " " + targetDistrict.getRepLastName() +
           ". http://" + callInPageUrl);
