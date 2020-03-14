@@ -47,8 +47,8 @@ public class ReminderService {
   private final static String SQL_UPDATE_REMINDER =
       "UPDATE reminders SET " +
           Reminder.LAST_REMINDER_TIMESTAMP + " = ?, " +
-          Reminder.TRACKING_ID + " = ? " +
-          Reminder.REMINDER_YEAR + " = ? " +
+          Reminder.TRACKING_ID + " = ?, " +
+          Reminder.REMINDER_YEAR + " = ?, " +
           Reminder.REMINDER_MONTH + " = ? " +
           "WHERE " + Reminder.CALLER_ID + " = ?";
 
@@ -337,9 +337,9 @@ public class ReminderService {
     int idx = 1;
     update.setTimestamp(idx++, timestamp);
     update.setString(idx++, reminderStatus.getTrackingId());
-    update.setInt(idx++, reminderStatus.getCaller().getCallerId());
     update.setInt(idx++, reminderDate.getYear());
-    update.setInt(idx, reminderDate.getMonth());
+    update.setInt(idx++, reminderDate.getMonth());
+    update.setInt(idx, reminderStatus.getCaller().getCallerId());
     update.executeUpdate();
 
     // add history record
