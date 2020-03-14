@@ -53,6 +53,11 @@ public class ReminderDate {
         return Objects.hash(year, month, day);
     }
 
+    @Override
+    public String toString() {
+        return year.toString() + "-" + month.toString() + "-" + day.toString();
+    }
+
     public static class Builder {
         Integer year;
         Integer month;
