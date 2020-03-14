@@ -48,6 +48,8 @@ public class ReminderService {
       "UPDATE reminders SET " +
           Reminder.LAST_REMINDER_TIMESTAMP + " = ?, " +
           Reminder.TRACKING_ID + " = ? " +
+          Reminder.REMINDER_YEAR + " = ? " +
+          Reminder.REMINDER_MONTH + " = ? " +
           "WHERE " + Reminder.CALLER_ID + " = ?";
 
 
@@ -113,7 +115,7 @@ public class ReminderService {
   // TODO: Instead of distributing all callers across the month, do so for each district
   private static int getNewDayOfMonth() {
     int dayToReturn = dayOfMonthCounter;
-    dayOfMonthCounter = dayOfMonthCounter == 31 ? 1 : dayOfMonthCounter + 1;
+    dayOfMonthCounter = dayOfMonthCounter == ReminderDate.MAX_DAY ? ReminderDate.MIN_DAY : dayOfMonthCounter + 1;
     return dayToReturn;
   }
 
@@ -246,7 +248,8 @@ public class ReminderService {
 
   ReminderStatus sendReminder(
       Connection conn,
-      Caller caller) throws SQLException {
+      Caller caller,
+      ReminderDate reminderDate) throws SQLException {
 
     boolean smsReminderSent = false;
     boolean emailReminderSent = false;
@@ -301,7 +304,7 @@ public class ReminderService {
 
     ReminderStatus status = new ReminderStatus(caller, targetDistrict, smsReminderSent, emailReminderSent, trackingId);
     if (status.success()) {
-      updateReminderStatus(conn, status);
+      updateReminderStatus(conn, status, reminderDate);
     }
     return status;
   }
@@ -325,7 +328,8 @@ public class ReminderService {
 
   private void updateReminderStatus(
       Connection conn,
-      ReminderStatus reminderStatus)
+      ReminderStatus reminderStatus,
+      ReminderDate reminderDate)
       throws SQLException {
 
     Timestamp timestamp = new Timestamp(System.currentTimeMillis());
@@ -333,7 +337,9 @@ public class ReminderService {
     int idx = 1;
     update.setTimestamp(idx++, timestamp);
     update.setString(idx++, reminderStatus.getTrackingId());
-    update.setInt(idx, reminderStatus.getCaller().getCallerId());
+    update.setInt(idx++, reminderStatus.getCaller().getCallerId());
+    update.setInt(idx++, reminderDate.getYear());
+    update.setInt(idx, reminderDate.getMonth());
     update.executeUpdate();
 
     // add history record
@@ -413,8 +419,6 @@ public class ReminderService {
     return success;
   }
 
-
-
   class ReminderSender implements Runnable {
 
     private boolean isAfterHours = true;
@@ -424,7 +428,7 @@ public class ReminderService {
 
       logger.info("Running reminder sender");
 
-      OffsetDateTime currentDateTime = OffsetDateTime.now();
+      OffsetDateTime currentDateTime = OffsetDateTime.now(); //TODO: base this off each user's timezone?
 
       DayOfWeek dayOfWeek = currentDateTime.getDayOfWeek();
       if (dayOfWeek.equals(DayOfWeek.SATURDAY) || dayOfWeek.equals(DayOfWeek.SUNDAY)) {
@@ -432,9 +436,15 @@ public class ReminderService {
         return;
       }
 
+      HolidayService.init();
+      if (HolidayService.getInstance().isHoliday(currentDateTime)) {
+        logger.info("It's a holiday. Do nothing.");
+        return;
+      }
+
       OffsetTime currentTime = currentDateTime.toOffsetTime();
       if (currentTime.isBefore(earliestReminder) ||
-          currentTime.isAfter(latestReminder)) {
+          currentTime.isAfter(latestReminder)) { //TODO: base this off each user's timezone?
         logger.info("It's after hours. Do nothing.");
         isAfterHours = true;
         return;
@@ -442,36 +452,21 @@ public class ReminderService {
 
       // In order to select all callers who might get a reminder today, first
       // determine what days of the month are in play.  Today is always included.
-      Set<Integer> daysToQuery = new HashSet<>();
+      Set<ReminderDate> datesToQuery = new HashSet<>();
+      datesToQuery.add(new ReminderDate(currentDateTime.toLocalDate()));
 
-      int todaysDayOfMonth = currentDateTime.getDayOfMonth();
-      daysToQuery.add(todaysDayOfMonth);
-
-      // If today is the last day of a short month, include callers whose
-      // reminder day is greater than today.
-      int numberofDaysInMonth = currentDateTime.toLocalDate().lengthOfMonth();
-      if (todaysDayOfMonth == numberofDaysInMonth && todaysDayOfMonth < 31) {
-        for (int i=todaysDayOfMonth+1; i<=31; i++) {
-          daysToQuery.add(i);
-        }
-      }
-
-      // since no reminders are sent on the weekend, include callers who
-      // would have been called on those days.
-      if (dayOfWeek.equals(DayOfWeek.MONDAY)) {
-        daysToQuery.add(currentDateTime.minusDays(1).getDayOfMonth());
-        daysToQuery.add(currentDateTime.minusDays(2).getDayOfMonth());
-      }
+      Set<ReminderDate> missedDates = getMissedDaysBefore(currentDateTime.toLocalDate());
+      datesToQuery.addAll(missedDates);
 
       StringBuilder whereClause = new StringBuilder(" WHERE " + Reminder.DAY_OF_MONTH);
-      if (daysToQuery.size() == 1) {
+      if (datesToQuery.size() == 1) {
         whereClause.append(" = ").
-            append(daysToQuery.iterator().next());
+            append(datesToQuery.iterator().next().getDay());
       }
       else {
         whereClause.append(" IN (");
-        for (Integer day : daysToQuery) {
-          whereClause.append(day).append(",");
+        for (ReminderDate date : datesToQuery) {
+          whereClause.append(date.getDay()).append(",");
         }
         whereClause.deleteCharAt(whereClause.length()-1);
         whereClause.append(")");
@@ -492,20 +487,13 @@ public class ReminderService {
         String query = SQL_SELECT_CALLERS + whereClause.toString();
         logger.info(query);
         ResultSet rs = conn.createStatement().executeQuery(query);
-        Month currentMonth = currentDateTime.getMonth();
-        int currentYear = currentDateTime.getYear();
         while (rs.next()) {
           Reminder reminder = new Reminder(rs);
-          LocalDateTime lastReminderTime = (reminder.getLastReminderTimestamp() == null) ?
-              null : reminder.getLastReminderTimestamp().toLocalDateTime();
-
-          if (lastReminderTime == null ||
-              lastReminderTime.getMonth() != currentMonth ||
-              lastReminderTime.getYear() != currentYear) {
-
+          ReminderDate correspondingReminderDate = getCorrespondingReminderDate(reminder, datesToQuery);
+          if (correspondingReminderDate != null && reminder.isDueToBeSent(correspondingReminderDate)) {
             Caller caller = new Caller(rs);
             if (!caller.isPaused()) {
-              ReminderStatus reminderStatus = sendReminder(conn, caller);
+              ReminderStatus reminderStatus = sendReminder(conn, caller, correspondingReminderDate);
               if (reminderStatus.success()) {
                 sentCount++;
               }
@@ -533,6 +521,44 @@ public class ReminderService {
           }
         }
       }
+    }
+
+    // Assumes number of missed days < 1 month
+    private Set<ReminderDate> getMissedDaysBefore(LocalDate startingDate) {
+      Set<ReminderDate> missedDays = new HashSet<>();
+      LocalDate date = startingDate.minusDays(1);
+      for (; !isValidCallDate(date); date = date.minusDays(1)) {
+        missedDays.add(new ReminderDate(date));
+      }
+      if (!date.getMonth().equals(startingDate.getMonth())) {
+        for (int i = date.lengthOfMonth() + 1; i <= ReminderDate.MAX_DAY; i++) {
+          ReminderDate reminderDate = new ReminderDate.Builder()
+                  .year(date.getYear())
+                  .month(date.getMonth())
+                  .day(i)
+                  .build();
+          missedDays.add(reminderDate);
+        }
+      }
+      return missedDays;
+    }
+
+    private Boolean isValidCallDate(LocalDate date){
+      DayOfWeek dayOfWeek = date.getDayOfWeek();
+      return !dayOfWeek.equals(DayOfWeek.SATURDAY) &&
+              !dayOfWeek.equals(DayOfWeek.SUNDAY) &&
+              !HolidayService.getInstance().isHoliday(date);
+    }
+
+    // Assumes unique day of month across all ReminderDates
+    private ReminderDate getCorrespondingReminderDate(Reminder reminder, Collection<ReminderDate> reminderDates){
+      for(ReminderDate reminderDate : reminderDates){
+        if(reminder.getDayOfMonth() == reminderDate.getDay()){
+          return reminderDate;
+        }
+      }
+      logger.warning("no matching ReminderDate found for reminder");
+      return null;
     }
 
 

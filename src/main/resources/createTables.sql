@@ -178,6 +178,8 @@ CREATE TABLE `reminders` (
   `last_reminder_timestamp` datetime DEFAULT NULL,
   `second_reminder_timestamp` datetime DEFAULT NULL,
   `tracking_id` varchar(32) DEFAULT NULL,
+  `reminder_year` int(11) DEFAULT NULL,
+  `reminder_month` int(11) DEFAULT NULL,
   PRIMARY KEY (`caller_id`),
   CONSTRAINT `reminders_ibfk_1` FOREIGN KEY (`caller_id`) REFERENCES `callers` (`caller_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

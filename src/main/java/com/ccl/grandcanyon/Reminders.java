@@ -2,6 +2,7 @@ package com.ccl.grandcanyon;
 
 import com.ccl.grandcanyon.types.Admin;
 import com.ccl.grandcanyon.types.Caller;
+import com.ccl.grandcanyon.types.ReminderDate;
 import com.ccl.grandcanyon.types.ReminderHistory;
 import com.ccl.grandcanyon.types.ReminderStatus;
 import com.fasterxml.jackson.databind.node.BooleanNode;
@@ -15,6 +16,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -44,7 +46,8 @@ public class Reminders {
     try {
       Caller caller = Callers.retrieveById(conn, callerId);
       checkPermissions(caller.getDistrictId(), "send a call notification");
-      ReminderStatus status = ReminderService.getInstance().sendReminder(conn, caller);
+      ReminderDate reminderDate = new ReminderDate(LocalDate.now());
+      ReminderStatus status = ReminderService.getInstance().sendReminder(conn, caller, reminderDate);
       return Response.ok(BooleanNode.valueOf(status.success())).build();
     }
     finally {

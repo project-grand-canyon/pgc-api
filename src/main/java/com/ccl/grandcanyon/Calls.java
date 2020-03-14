@@ -70,7 +70,7 @@ public class Calls {
       }
 
       // see if a call was already recorded for this tracking Id and districtId
-      LocalDateTime callDateTime = reminder.getLastReminderTimestamp().toLocalDateTime();
+      LocalDateTime callDateTime = reminder.getLastReminderTimestamp().toLocalDateTime(); //TODO: should this be OffsetDateTime or Instant?
       PreparedStatement query = conn.prepareStatement(SQL_SEARCH_CALL);
       query.setInt(1, reminder.getCallerId());
       query.setInt(2, callDateTime.getMonthValue());

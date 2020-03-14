@@ -13,11 +13,18 @@ public class Reminder {
   public static final String SECOND_REMINDER_SENT = "second_reminder_timestamp";
   public static final String TRACKING_ID = "tracking_id";
 
+  // These are the year/month that the reminder is for and don't necessarily reflect
+  // the reminder timestamps
+  public static final String REMINDER_YEAR = "reminder_year";
+  public static final String REMINDER_MONTH = "reminder_month";
+
   private int callerId;
   private int dayOfMonth;
   private Timestamp lastReminderTimestamp;
   private Timestamp secondReminderTimestamp;
   private String trackingId;
+  private int reminderYear;
+  private int reminderMonth;
 
   public Reminder(ResultSet rs) throws SQLException {
     this.callerId = rs.getInt(CALLER_ID);
@@ -25,6 +32,8 @@ public class Reminder {
     this.lastReminderTimestamp = rs.getTimestamp(LAST_REMINDER_TIMESTAMP);
     this.secondReminderTimestamp = rs.getTimestamp(SECOND_REMINDER_SENT);
     this.trackingId = rs.getString(TRACKING_ID);
+    this.reminderYear = rs.getInt(REMINDER_YEAR);
+    this.reminderMonth = rs.getInt(REMINDER_MONTH);
   }
 
   public int getCallerId() {
@@ -65,5 +74,29 @@ public class Reminder {
 
   public void setTrackingId(String trackingId) {
     this.trackingId = trackingId;
+  }
+
+  public int getReminderYear() {
+    return reminderYear;
+  }
+
+  public void setReminderYear(int reminderYear) {
+    this.reminderYear = reminderYear;
+  }
+
+  public int getReminderMonth() {
+    return reminderMonth;
+  }
+
+  public void setReminderMonth(int reminderMonth) {
+    this.reminderMonth = reminderMonth;
+  }
+
+  public Boolean isDueToBeSent(ReminderDate reminderDate) {
+    assert(reminderDate != null);
+    if (getLastReminderTimestamp() == null) {
+      return true;
+    }
+    return getReminderYear() != reminderDate.getYear() || getReminderMonth() != reminderDate.getMonth();
   }
 }
