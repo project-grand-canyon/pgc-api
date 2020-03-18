@@ -12,9 +12,9 @@ public class ReminderDate {
     public final static Integer MIN_DAY = 1;
     public final static Integer MAX_DAY = 31;
 
-    Integer year;
-    Integer month;
-    Integer day; // Doesn't have to be a valid day in this year/month
+    private Integer year;
+    private Integer month;
+    private Integer day; // Doesn't have to be a valid day in this year/month
 
     private ReminderDate(Builder builder) {
         this.year = builder.year;
@@ -59,9 +59,9 @@ public class ReminderDate {
     }
 
     public static class Builder {
-        Integer year;
-        Integer month;
-        Integer day; // Doesn't have to be a valid day in this year/month
+        private Integer year;
+        private Integer month;
+        private Integer day; // Doesn't have to be a valid day in this year/month
 
         public Builder year(Integer year) {
             this.year = year;

@@ -108,6 +108,8 @@ public class ReminderService {
   private String applicationBaseUrl;
   private String adminApplicationBaseUrl;
 
+  private HolidayService holidayService;
+
   private static int dayOfMonthCounter = 1;
 
   private DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -172,6 +174,15 @@ public class ReminderService {
     catch (Exception e) {
       logger.warning("Failed to initialize Email deliver service: " + e.getMessage());
       this.emailDeliveryService = null;
+    }
+
+    try {
+      HolidayService.init();
+      this.holidayService = HolidayService.getInstance();
+    }
+    catch (Exception e) {
+      logger.warning("Failed to initialize Holiday service: " + e.getMessage());
+      this.holidayService = null;
     }
 
     int staleScriptWarningInDays = Integer.parseInt(config.getProperty(STALE_SCRIPT_WARNING_INTERVAL, "30"));
@@ -436,8 +447,8 @@ public class ReminderService {
         return;
       }
 
-      HolidayService.init();
-      if (HolidayService.getInstance().isHoliday(currentDateTime)) {
+      holidayService.refresh();
+      if (holidayService.isHoliday(currentDateTime)) {
         logger.info("It's a holiday. Do nothing.");
         return;
       }
@@ -490,7 +501,7 @@ public class ReminderService {
         while (rs.next()) {
           Reminder reminder = new Reminder(rs);
           ReminderDate correspondingReminderDate = getCorrespondingReminderDate(reminder, datesToQuery);
-          if (correspondingReminderDate != null && reminder.isDueToBeSent(correspondingReminderDate)) {
+          if (correspondingReminderDate != null && !reminder.hasBeenSent(correspondingReminderDate)) {
             Caller caller = new Caller(rs);
             if (!caller.isPaused()) {
               ReminderStatus reminderStatus = sendReminder(conn, caller, correspondingReminderDate);
@@ -527,9 +538,13 @@ public class ReminderService {
     private Set<ReminderDate> getMissedDaysBefore(LocalDate startingDate) {
       Set<ReminderDate> missedDays = new HashSet<>();
       LocalDate date = startingDate.minusDays(1);
+      // Go back 1 day at a time and add it to `missedDays` if the day isn't a
+      // valid call day e.g. weekend, holiday, etc.
       for (; !isValidCallDate(date); date = date.minusDays(1)) {
         missedDays.add(new ReminderDate(date));
       }
+      // If we have gone back to a previous month and that previous month is shorter than 31 days,
+      // add all days up to and including day 31
       if (!date.getMonth().equals(startingDate.getMonth())) {
         for (int i = date.lengthOfMonth() + 1; i <= ReminderDate.MAX_DAY; i++) {
           ReminderDate reminderDate = new ReminderDate.Builder()
@@ -547,7 +562,7 @@ public class ReminderService {
       DayOfWeek dayOfWeek = date.getDayOfWeek();
       return !dayOfWeek.equals(DayOfWeek.SATURDAY) &&
               !dayOfWeek.equals(DayOfWeek.SUNDAY) &&
-              !HolidayService.getInstance().isHoliday(date);
+              !holidayService.isHoliday(date);
     }
 
     // Assumes unique day of month across all ReminderDates

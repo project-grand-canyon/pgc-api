@@ -92,11 +92,16 @@ public class Reminder {
     this.reminderMonth = reminderMonth;
   }
 
-  public Boolean isDueToBeSent(ReminderDate reminderDate) {
-    assert(reminderDate != null);
+  public Boolean hasBeenSent(ReminderDate reminderDate) {
+    assert (reminderDate != null);
+    // This will only be null if a reminder has never been sent
     if (getLastReminderTimestamp() == null) {
-      return true;
+      return false;
     }
-    return getReminderYear() != reminderDate.getYear() || getReminderMonth() != reminderDate.getMonth();
+
+    // Note that REMINDER_YEAR and REMINDER_MONTH are updated when the reminder is sent,
+    // so this won't result in duplicate reminders being sent
+    return reminderDate.getYear() < getReminderYear() ||
+            reminderDate.getYear() == getReminderYear() && reminderDate.getMonth() < getReminderMonth();
   }
 }
