@@ -177,7 +177,6 @@ public class ReminderService {
     }
 
     try {
-      HolidayService.init();
       this.holidayService = HolidayService.getInstance();
     }
     catch (Exception e) {

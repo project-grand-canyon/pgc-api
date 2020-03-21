@@ -26,11 +26,6 @@ public class HolidayService {
         refresh();
     }
 
-    public static void init(){
-        assert(instance == null);
-        instance = new HolidayService();
-    }
-
     public void refresh(){
         try {
             Yaml yaml = new Yaml();
@@ -43,7 +38,9 @@ public class HolidayService {
     }
 
     public static HolidayService getInstance() {
-        assert(instance != null);
+        if(instance == null) {
+            instance = new HolidayService();
+        }
         return instance;
     }
 
