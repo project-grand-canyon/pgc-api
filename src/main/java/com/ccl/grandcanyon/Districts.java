@@ -163,7 +163,8 @@ public class Districts {
       statement.setString(idx++, district.getRepLastName());
       statement.setString(idx++, district.getRepImageUrl());
       statement.setString(idx++, district.getInfo());
-      statement.setString(idx++, district.getStatus().name());
+      String status = district.getStatus() == null ? null : district.getStatus().name();
+      statement.setString(idx++, status);
       statement.setInt(idx, districtId);
       statement.executeUpdate();
 
