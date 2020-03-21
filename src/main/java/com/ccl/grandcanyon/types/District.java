@@ -23,6 +23,7 @@ public class District extends GCBase {
   public static final String INFO = "info";
   public static final String SCRIPT_MODIFIED_TIME = "script_modified_time";
   public static final String LAST_STALE_SCRIPT_NOTIFICATION = "last_stale_script_notification";
+  public static final String STATUS = "status";
 
   private int districtId;
   private String state;
@@ -33,6 +34,7 @@ public class District extends GCBase {
   private List<CallTarget> callTargets;
   private Timestamp scriptModifiedTime;
   private Timestamp lastStaleScriptNotification;
+  private Status status;
 
   private String info;
 
@@ -53,6 +55,7 @@ public class District extends GCBase {
     this.scriptModifiedTime = rs.getTimestamp(SCRIPT_MODIFIED_TIME);
     this.lastStaleScriptNotification = rs.getTimestamp(LAST_STALE_SCRIPT_NOTIFICATION);
     this.callTargets = new ArrayList<>();
+    this.status = Status.valueOf(rs.getString(STATUS));
 
     boolean retrieveCallTargets = false;
     ResultSetMetaData metaData = rs.getMetaData();
@@ -164,6 +167,14 @@ public class District extends GCBase {
 
   public void setLastStaleScriptNotification(Timestamp lastStaleScriptNotification) {
     this.lastStaleScriptNotification = lastStaleScriptNotification;
+  }
+
+  public Status getStatus() {
+    return status;
+  }
+
+  public void setStatus(Status status) {
+    this.status = status;
   }
 
   public String readableName() {
