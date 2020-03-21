@@ -131,6 +131,11 @@
       <artifactId>postmark</artifactId>
       <version>1.2.1</version>
     </dependency>
+    <dependency>
+      <groupId>org.yaml</groupId>
+      <artifactId>snakeyaml</artifactId>
+      <version>1.26</version>
+    </dependency>
     <!-- [END gae_flex_mysql_dependencies] -->
   </dependencies>
   <build>
