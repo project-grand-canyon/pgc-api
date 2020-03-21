@@ -23,7 +23,7 @@ public class HolidayService {
 
     private HolidayService() {
         logger.info("Init HolidayService");
-        loadHolidays();
+        refresh();
     }
 
     public static void init(){
@@ -32,7 +32,14 @@ public class HolidayService {
     }
 
     public void refresh(){
-        loadHolidays();
+        try {
+            Yaml yaml = new Yaml();
+            String holidaysYaml = getHolidaysYaml();
+            List<Date> holidayDates = yaml.load(holidaysYaml);
+            holidays = holidayDates.stream().map(it -> it.toInstant().atOffset(ZoneOffset.UTC).toLocalDate()).collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to load holiday yaml file: " + e.getLocalizedMessage());
+        }
     }
 
     public static HolidayService getInstance() {
@@ -50,17 +57,6 @@ public class HolidayService {
 
     public List<LocalDate> getHolidays() {
         return holidays;
-    }
-
-    private void loadHolidays(){
-        try {
-            Yaml yaml = new Yaml();
-            String holidaysYaml = getHolidaysYaml();
-            List<Date> holidayDates = yaml.load(holidaysYaml);
-            holidays = holidayDates.stream().map(it -> it.toInstant().atOffset(ZoneOffset.UTC).toLocalDate()).collect(Collectors.toList());
-        } catch (Exception e) {
-            throw new RuntimeException("Unable to load holiday yaml file: " + e.getLocalizedMessage());
-        }
     }
 
     private String getHolidaysYaml() throws IOException, InterruptedException {
