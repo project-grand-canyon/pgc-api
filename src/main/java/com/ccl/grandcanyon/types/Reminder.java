@@ -102,6 +102,6 @@ public class Reminder {
     // Note that REMINDER_YEAR and REMINDER_MONTH are updated when the reminder is sent,
     // so this won't result in duplicate reminders being sent
     return reminderDate.getYear() < getReminderYear() ||
-            reminderDate.getYear() == getReminderYear() && reminderDate.getMonth() < getReminderMonth();
+            reminderDate.getYear() == getReminderYear() && reminderDate.getMonth() <= getReminderMonth();
   }
 }
