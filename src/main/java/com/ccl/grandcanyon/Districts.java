@@ -42,7 +42,8 @@ public class Districts {
           District.REP_FIRST_NAME + " = ?, " +
           District.REP_LAST_NAME + " = ?, " +
           District.REP_IMAGE_URL + " = ?, " +
-          District.INFO + " = ? " +
+          District.INFO + " = ?, " +
+          District.STATUS + " = ? " +
           "WHERE " + District.DISTRICT_ID + " = ?";
 
   private static final String SQL_DELETE_DISTRICT =
@@ -162,7 +163,9 @@ public class Districts {
       statement.setString(idx++, district.getRepLastName());
       statement.setString(idx++, district.getRepImageUrl());
       statement.setString(idx++, district.getInfo());
-      statement.setInt(idx++, districtId);
+      String status = district.getStatus() == null ? null : district.getStatus().name();
+      statement.setString(idx++, status);
+      statement.setInt(idx, districtId);
       statement.executeUpdate();
 
       deleteCallTargets(conn, districtId);

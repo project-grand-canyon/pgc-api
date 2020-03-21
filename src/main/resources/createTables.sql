@@ -29,6 +29,7 @@ CREATE TABLE `districts` (
   `rep_image_url` varchar(512) DEFAULT NULL,
   `script_modified_time` timestamp NULL DEFAULT NULL,
   `last_stale_script_notification` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `status` enum('active','covid_paused') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`district_id`),
   UNIQUE KEY `state` (`state`,`district_number`)
 ) ENGINE=InnoDB AUTO_INCREMENT=959 DEFAULT CHARSET=utf8;
