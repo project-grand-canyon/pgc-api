@@ -5,12 +5,14 @@ import com.nimbusds.jose.JOSEException;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
+import java.io.IOException;
+import java.util.Properties;
+import java.util.logging.Logger;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
-import java.io.IOException;
-import java.util.Properties;
 
 
 @WebListener
@@ -23,6 +25,7 @@ public class GCContextListener implements ServletContextListener {
   final static String jwtLifetime = "jwtLifetime";
   final static String jwtRefreshInterval = "jwtRefreshInterval";
 
+  private static final Logger logger = Logger.getLogger(GCContextListener.class.getName());
 
   @Override
   public void contextInitialized(ServletContextEvent sce) {
@@ -113,17 +116,36 @@ public class GCContextListener implements ServletContextListener {
       sqlHelper.tearDown();
     }
 
-    ReminderService reminderService = ReminderService.getInstance();
-    if (reminderService != null) {
-      reminderService.tearDown();
+    try {
+      AuthenticationService.getInstance().tearDown();
+    } catch (Exception e) {
+      logger.warning("Failed to teardown AuthenticationService: " + e.getMessage());
     }
 
-    AuthenticationService authService = AuthenticationService.getInstance();
-    if (authService != null) {
-      authService.tearDown();
+    try {
+      EventAlertingService.getInstance().tearDown();
+    } catch (Exception e) {
+      logger.warning("Failed to teardown EventAlertingService: " + e.getMessage());
     }
 
+    try {
+      AdminWelcomeService.getInstance().tearDown();
+    } catch (Exception e) {
+      logger.warning("Failed to teardown AdminWelcomeService: " + e.getMessage());
+    }
+
+    try {
+      WelcomeService.getInstance().tearDown();
+    } catch (Exception e) {
+      logger.warning("Failed to teardown WelcomeService: " + e.getMessage());
+    }
+
+    try {
+      ReminderService.getInstance().tearDown();
+    } catch (Exception e) {
+      logger.warning("Failed to teardown ReminderService: " + e.getMessage());
+    }
+
+    DistrictStatusChangeService.getInstance().tearDown();
   }
-
-
 }

@@ -10,16 +10,18 @@ import com.ccl.grandcanyon.utils.HtmlUtils;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
 public class DistrictStatusChangeService {
-    private static final Logger logger = Logger.getLogger(WelcomeService.class.getName());
+    private static final Logger logger = Logger.getLogger(DistrictStatusChangeService.class.getName());
     private static DistrictStatusChangeService instance;
     private DeliveryService smsDeliveryService;
     private DeliveryService emailDeliveryService;
     private static final String covidPauseEmailResource = "covidPause.html";
     private String covidPauseHtmlBody;
+    private final ExecutorService executorService = Executors.newFixedThreadPool(100);
 
     public static DistrictStatusChangeService getInstance() {
         if (instance == null) {
@@ -28,8 +30,11 @@ public class DistrictStatusChangeService {
         return instance;
     }
 
+    public void tearDown(){
+        executorService.shutdown();
+    }
+
     private DistrictStatusChangeService() {
-        // Assumes reminder service init() has already been called
         ReminderService reminderService = ReminderService.getInstance();
         emailDeliveryService = reminderService.getEmailDeliveryService();
         smsDeliveryService = reminderService.getSmsDeliveryService();
@@ -46,15 +51,12 @@ public class DistrictStatusChangeService {
     }
 
     private void sendCovidPausedMessages(Caller caller) {
-        // do this asynchronously so as not to delay response to end-user
-        Executors.newSingleThreadExecutor().submit(() -> {
-            if (caller.getContactMethods().contains(ContactMethod.sms)) {
-                sendCovidPausedSms(caller);
-            }
-            if (caller.getContactMethods().contains(ContactMethod.email)) {
-                sendCovidPausedEmail(caller);
-            }
-        });
+        if (caller.getContactMethods().contains(ContactMethod.sms)) {
+            executorService.execute(() -> sendCovidPausedSms(caller));
+        }
+        if (caller.getContactMethods().contains(ContactMethod.email)) {
+            executorService.execute(() -> sendCovidPausedEmail(caller));
+        }
     }
 
     private void sendCovidPausedSms(Caller caller) {
