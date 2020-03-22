@@ -268,6 +268,11 @@ public class ReminderService {
     District callerDistrict = Districts.retrieveDistrictById(conn, caller.getDistrictId());
     String trackingId = RandomStringUtils.randomAlphanumeric(8);
 
+    if (callerDistrict.getStatus() != Status.active) {
+      logger.info("Skipping caller with id " + caller.getCallerId() + " because their district status is " + callerDistrict.getStatus().toString());
+      return new ReminderStatus(caller, targetDistrict, false, false, trackingId);
+    }
+
     String callInPageUrl = applicationBaseUrl + "/call/" + targetDistrict.getState() + "/" +
         targetDistrict.getNumber() + "?t=" + trackingId + "&c=" + caller.getCallerId() + "&d=" + callerDistrict.getNumber();
 
