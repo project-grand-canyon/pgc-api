@@ -21,7 +21,9 @@ public class DistrictStatusChangeService {
     private DeliveryService emailDeliveryService;
     private static final String covidPauseEmailResource = "covidPause.html";
     private String covidPauseHtmlBody;
-    private final ExecutorService executorService = Executors.newFixedThreadPool(100);
+
+    private static final int THREAD_POOL_SIZE = 100;
+    private final ExecutorService executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
 
     public static DistrictStatusChangeService getInstance() {
         if (instance == null) {
