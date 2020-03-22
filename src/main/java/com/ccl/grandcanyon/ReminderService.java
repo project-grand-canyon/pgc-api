@@ -14,6 +14,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
+import com.ccl.grandcanyon.utils.FileReader;
 
 public class ReminderService {
 
@@ -182,14 +183,14 @@ public class ReminderService {
     this.staleScriptWarningInterval = TimeUnit.DAYS.toMillis(staleScriptWarningInDays);
 
     try {
-      this.regularCallInReminderHTML = com.ccl.grandcanyon.utils.FileReader.getInstance().read(callReminderEmailResource);
+      this.regularCallInReminderHTML = FileReader.getInstance().read(callReminderEmailResource);
     }
     catch (Exception e) {
       throw new RuntimeException("Unable to load regular call-in notification email template: " + e.getLocalizedMessage());
     }
 
     try {
-      this.staleScriptHTML = com.ccl.grandcanyon.utils.FileReader.getInstance().read(staleScriptEmailResource);
+      this.staleScriptHTML = FileReader.getInstance().read(staleScriptEmailResource);
     }
     catch (Exception e) {
       throw new RuntimeException("Unable to load stale script email template: " + e.getLocalizedMessage());

@@ -6,8 +6,6 @@ import com.ccl.grandcanyon.utils.FileReader;
 
 import javax.ws.rs.NotFoundException;
 import java.sql.*;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
@@ -84,44 +82,48 @@ public class WelcomeService {
   }
 
   private void sendWelcomeSMS(Reminder reminder, District district, Caller caller) {
-    for (Message message: getWelcomeSMSMessages(reminder, district)) {
-        try {
-            ReminderService.getInstance().getSmsDeliveryService().sendTextMessage(caller, message);
-        }
-        catch (Exception e) {
-            logger.severe(String.format("Failed to send welcome SMS to caller {id: %d}: %s", caller.getCallerId(), e.getMessage()));
-            break;
-        }
+    try {
+        ReminderService.getInstance().getSmsDeliveryService().sendTextMessage(caller, getWelcomeSMSMessage(reminder, district));
+    }
+    catch (Exception e) {
+        logger.severe(String.format("Failed to send welcome SMS to caller {id: %d}: %s", caller.getCallerId(), e.getMessage()));
     }
   }
 
-  private List<Message> getWelcomeSMSMessages(Reminder reminder, District district) {
-      List<Message> messages = null;
+  private Message getWelcomeSMSMessage(Reminder reminder, District district) {
+      Message message = null;
       switch (district.getStatus()) {
           case active:
-              messages = getActiveWelcomeSMSMessages(reminder, district);
+              message = getActiveWelcomeSMSMessage(reminder, district);
               break;
           case covid_paused:
-              messages = getCovidWelcomeSMSMessages(reminder);
+              message = getCovidWelcomeSMSMessage(reminder);
               break;
       }
-      return messages;
+      return message;
   }
 
-    private List<Message> getActiveWelcomeSMSMessages(Reminder reminder, District district) {
-        Message message1 = new Message();
-        message1.setBody(String.format("You're signed up for the Monthly Calling Campaign. We have randomized your call to the %s of the month. Thanks for joining!", DayOfMonthFormatter.getAdjective(reminder.getDayOfMonth())));
-        Message message2 = new Message();
-        message2.setBody(String.format("Want to start calling now? Check out the current call-in guide at https://cclcalls.org/call/%s/%s", district.getState(), district.getNumber()));
-        return Arrays.asList(message1, message2);
+    private Message getActiveWelcomeSMSMessage(Reminder reminder, District district) {
+        Message message = new Message();
+        message.setBody(
+            String.format(
+                "You're signed up for the Monthly Calling Campaign. We have randomized your call to the %s of the month. Thanks for joining!\nWant to start calling now? Check out the current call-in guide at https://cclcalls.org/call/%s/%s",
+                DayOfMonthFormatter.getAdjective(reminder.getDayOfMonth()),
+                district.getState(),
+                district.getNumber()
+            )
+        );
+        return message;
     }
 
-    private List<Message> getCovidWelcomeSMSMessages(Reminder reminder) {
-        Message message1 = new Message();
-        message1.setBody(String.format("You're signed up for the Monthly Calling Campaign. We have randomized your call to the %s of the month. Thanks for joining!", DayOfMonthFormatter.getAdjective(reminder.getDayOfMonth())));
-        Message message2 = new Message();
-        message2.setBody("NOTE: the campaign is temporarily paused in order to give your Congressional Office time to respond to the COVID-19 crisis. Your notifications will begin when the crisis abates.");
-        return Arrays.asList(message1, message2);
+    private Message getCovidWelcomeSMSMessage(Reminder reminder) {
+        Message message = new Message();
+        message.setBody(
+            String.format(
+                "You're signed up for the Monthly Calling Campaign. We have randomized your call to the %s of the month. Thanks for joining!\nNOTE: the campaign is temporarily paused in order to give your Congressional Office time to respond to the COVID-19 crisis. Your notifications will begin when the crisis abates.",
+                DayOfMonthFormatter.getAdjective(reminder.getDayOfMonth())
+        ));
+        return message;
     }
 
   private void sendWelcomeEmail(Reminder reminder, District district, Caller caller) {
