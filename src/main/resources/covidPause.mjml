@@ -1,0 +1,49 @@
+<mjml>
+  <mj-head>
+    <mj-style>
+            .box-shadow td {
+                box-shadow: 0 4px 6px hsla(0,0%,46%,0.2), 0 1px 3px hsla(0,0%,46%,0.2);
+            }
+    </mj-style>
+  </mj-head>
+  <mj-body>
+    <mj-section>
+      <mj-column width="100px" vertical-align="middle">
+        <mj-image src="https://cclcalls.org/img/ccl-logo-thumbnail.png"></mj-image>
+      </mj-column>
+      <mj-column width="100%" vertical-align="middle">
+        <mj-text font-size="24px">CCL's Monthly Calling Campaign:            Pausing Due to COVID-19</mj-text>
+      </mj-column>
+      <mj-column width="100%">
+        <mj-divider border-color="#000"></mj-divider>
+      </mj-column>
+    </mj-section>
+    <mj-section>
+      <mj-column width="100%">
+        <mj-text font-size="14px">
+          Dear Caller,
+        </mj-text>
+        <mj-text font-size="14px">
+          CCL is temporarily pausing the Monthly Calling Campaign in your district due to the COVID-19 crisis. We have received feedback from Congressional Offices that they are overwhelmed dealing with COVID-19, and our calls are distracting them from that effort.
+        </mj-text>
+        <mj-text font-size="14px">
+          Your monthly call-in notifications will resume when the crisis abates. In the meantime, we wish you comfort and safety during this turbulent time.
+        </mj-text>
+        <mj-spacer />
+        <mj-text font-size="14px">
+          Thank you for your climate change advocacy,
+        </mj-text>
+        <mj-text font-size="14px">
+          The Monthly Calling Campaign Team
+        </mj-text>
+      </mj-column>
+     </mj-section>
+    <mj-section>
+    	<mj-column>
+      	<mj-text align="center">
+        	From your friends at <a href="citizensclimatelobby.org">CCL</a>. To unsubscribe, simply reply to this email with "unsubscribe" in the body.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>
