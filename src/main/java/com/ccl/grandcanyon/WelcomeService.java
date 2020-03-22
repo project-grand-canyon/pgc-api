@@ -128,14 +128,14 @@ public class WelcomeService {
     try {
       Message message = new Message();
       message.setSubject("Welcome to CCL's Monthly Calling Campaign!");
-      message.setBody(getWelcomeEmailMessage(reminder, district));
+      message.setBody(getWelcomeEmailBody(reminder, district));
       ReminderService.getInstance().getEmailDeliveryService().sendHtmlMessage(caller, message);
     } catch (Exception e) {
       logger.severe(String.format("Failed to send welcome email to caller {id: %d}: %s", caller.getCallerId(), e.getMessage()));
     }
   }
 
-    private String getWelcomeEmailMessage(Reminder reminder, District district) {
+    private String getWelcomeEmailBody(Reminder reminder, District district) {
         String emailHtml = null;
         switch (district.getStatus()) {
             case active:
