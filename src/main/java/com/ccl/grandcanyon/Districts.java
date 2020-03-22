@@ -184,7 +184,7 @@ public class Districts {
       Status newStatus = updatedDistrict.getStatus();
       if(oldStatus != newStatus){
         logger.info("Status for district with id " + districtId + " changed from " + oldStatus.toString() + " to " + newStatus.toString());
-        alertCallersStatusChange(conn, districtId, oldStatus, newStatus);
+        DistrictStatusChangeService.getInstance().handleStatusChange(districtId, oldStatus, newStatus);
       }
 
       return Response.ok(updatedDistrict).build();
@@ -199,23 +199,7 @@ public class Districts {
     }
   }
 
-  private void alertCallersStatusChange(Connection conn, int districtId, Status oldStatus, Status newStatus) throws SQLException {
-    ReminderService reminderService = ReminderService.getInstance();
-    DeliveryService emailDeliveryService = reminderService.getEmailDeliveryService();
-    DeliveryService smsDeliveryService = reminderService.getSmsDeliveryService();
-    if (oldStatus == Status.active && newStatus == Status.covid_paused) {
-      List<Caller> callers = Callers.getCallers(conn, districtId);
-      for (Caller caller : callers) {
-        if (!caller.isPaused()) {
-          sendCovidPausedMessages(caller, emailDeliveryService, smsDeliveryService);
-        }
-      }
-    }
-  }
 
-  private void sendCovidPausedMessages(Caller caller, DeliveryService emailDeliveryService, DeliveryService smsDeliveryService) {
-    // TODO
-  }
 
   @GET
   @RolesAllowed(GCAuth.ANONYMOUS)

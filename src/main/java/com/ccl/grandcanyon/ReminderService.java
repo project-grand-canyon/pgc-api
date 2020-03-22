@@ -196,7 +196,6 @@ public class ReminderService {
       throw new RuntimeException("Unable to load stale script email template: " + e.getLocalizedMessage());
     }
 
-
     if (Boolean.parseBoolean(config.getProperty(REMINDER_SERVICE_ENABLED))) {
       logger.info("Booting up the reminder task");
       // start the background task that will send reminders to callers

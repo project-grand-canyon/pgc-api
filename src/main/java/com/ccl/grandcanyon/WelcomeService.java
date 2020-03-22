@@ -38,22 +38,18 @@ public class WelcomeService {
     }
 
   private WelcomeService(Properties config) {
-
-    logger.info("Init Welcome Service");
+      logger.info("Init Welcome Service");
 
       try {
           this.welcomeHtml = FileReader.create().read(welcomeResource);
-      }
-      catch (Exception e) {
+      } catch (Exception e) {
           throw new RuntimeException("Unable to load welcome email template: " + e.getLocalizedMessage());
       }
       try {
           this.welcomeHtmlCovid = FileReader.create().read(welcomeResourceCovid);
-      }
-      catch (Exception e) {
+      } catch (Exception e) {
           throw new RuntimeException("Unable to load covid welcome email template: " + e.getLocalizedMessage());
       }
-
   }
 
   public void handleNewCaller(Caller caller) {
