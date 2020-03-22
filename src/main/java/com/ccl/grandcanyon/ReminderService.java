@@ -4,11 +4,6 @@ import com.ccl.grandcanyon.deliverymethod.DeliveryService;
 import com.ccl.grandcanyon.types.*;
 import org.apache.commons.lang3.RandomStringUtils;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.net.URL;
 import java.sql.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -19,7 +14,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 public class ReminderService {
 
@@ -188,26 +182,14 @@ public class ReminderService {
     this.staleScriptWarningInterval = TimeUnit.DAYS.toMillis(staleScriptWarningInDays);
 
     try {
-      URL resource = getClass().getClassLoader().getResource(callReminderEmailResource);
-      if (resource == null) {
-        throw new FileNotFoundException("File '" + callReminderEmailResource + "' not found.");
-      }
-      File file = new File(resource.getFile());
-      BufferedReader br = new BufferedReader(new FileReader(file));
-      this.regularCallInReminderHTML = br.lines().collect(Collectors.joining());
+      this.regularCallInReminderHTML = com.ccl.grandcanyon.utils.FileReader.getInstance().read(callReminderEmailResource);
     }
     catch (Exception e) {
       throw new RuntimeException("Unable to load regular call-in notification email template: " + e.getLocalizedMessage());
     }
 
     try {
-      URL resource = getClass().getClassLoader().getResource(staleScriptEmailResource);
-      if (resource == null) {
-        throw new FileNotFoundException("File '" + staleScriptHTML + "' not found.");
-      }
-      File file = new File(resource.getFile());
-      BufferedReader br = new BufferedReader(new FileReader(file));
-      this.staleScriptHTML = br.lines().collect(Collectors.joining());
+      this.staleScriptHTML = com.ccl.grandcanyon.utils.FileReader.getInstance().read(staleScriptEmailResource);
     }
     catch (Exception e) {
       throw new RuntimeException("Unable to load stale script email template: " + e.getLocalizedMessage());
