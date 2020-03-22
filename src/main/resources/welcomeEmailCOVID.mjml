@@ -30,6 +30,9 @@
             <mj-text font-size="14px">
               We have randomized your call to the {day_of_month} day of each month asking you to call your Member of Congress. Your notification will include a call-in guide to help you make your call. You can check out a preview <a href="https://cclcalls.org/call/{state}/{district_number}">here</a>.
             </mj-text>
+            <mj-text font-size="14px">
+              *NOTE*: Because of the ongoing COVID-19 crisis, call notifications are temporarily paused for your district. This is to give your congressional office time to respond to the pandemic. Once the crisis abates, your notifications will begin.
+            </mj-text>
             <mj-text font-size="16px">
 							What is the Monthly Calling Campaign?
             </mj-text>
