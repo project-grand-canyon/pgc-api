@@ -2,18 +2,13 @@ package com.ccl.grandcanyon;
 
 import com.ccl.grandcanyon.types.*;
 import com.ccl.grandcanyon.utils.DayOfMonthFormatter;
+import com.ccl.grandcanyon.utils.FileReader;
 
 import javax.ws.rs.NotFoundException;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.net.URL;
 import java.sql.*;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 public class WelcomeService {
 
@@ -30,6 +25,9 @@ public class WelcomeService {
   private String welcomeHtml;
   private String welcomeResource = "welcomeEmail.html";
 
+  private String welcomeHtmlCovid;
+  private String welcomeResourceCovid = "welcomeEmailCovid.html";
+
   public static void init(Properties config) {
     assert (instance == null);
     instance = new WelcomeService(config);
@@ -43,18 +41,18 @@ public class WelcomeService {
 
     logger.info("Init Welcome Service");
 
-    try {
-      URL resource = getClass().getClassLoader().getResource(welcomeResource);
-      if (resource == null) {
-        throw new FileNotFoundException("File '" + welcomeResource + "' not found.");
+      try {
+          this.welcomeHtml = FileReader.create().read(welcomeResource);
       }
-      File file = new File(resource.getFile());
-      BufferedReader br = new BufferedReader(new FileReader(file));
-      this.welcomeHtml = br.lines().collect(Collectors.joining());
-    }
-    catch (Exception e) {
-      throw new RuntimeException("Unable to load welcome email template: " + e.getLocalizedMessage());
-    }
+      catch (Exception e) {
+          throw new RuntimeException("Unable to load welcome email template: " + e.getLocalizedMessage());
+      }
+      try {
+          this.welcomeHtmlCovid = FileReader.create().read(welcomeResourceCovid);
+      }
+      catch (Exception e) {
+          throw new RuntimeException("Unable to load covid welcome email template: " + e.getLocalizedMessage());
+      }
 
   }
 
@@ -84,31 +82,74 @@ public class WelcomeService {
   }
 
   private void sendWelcomeSMS(Reminder reminder, District district, Caller caller) {
-    Message message1 = new Message();
-    message1.setBody(String.format("You're signed up for the Monthly Calling Campaign. We have randomized your call to the %s of the month. Thanks for joining!", DayOfMonthFormatter.getAdjective(reminder.getDayOfMonth())));
-    Message message2 = new Message();
-    message2.setBody(String.format("Want to start calling now? Check out the current call-in guide at https://cclcalls.org/call/%s/%s", district.getState(), district.getNumber()));
     try {
-      ReminderService.getInstance().getSmsDeliveryService().sendTextMessage(caller, message1);
-      ReminderService.getInstance().getSmsDeliveryService().sendTextMessage(caller, message2);
+        ReminderService.getInstance().getSmsDeliveryService().sendTextMessage(caller, getWelcomeSMSMessage(reminder, district));
     }
     catch (Exception e) {
-      logger.severe(String.format("Failed to send welcome SMS to caller {id: %d}: %s", caller.getCallerId(), e.getMessage()));
+        logger.severe(String.format("Failed to send welcome SMS to caller {id: %d}: %s", caller.getCallerId(), e.getMessage()));
     }
   }
+
+  private Message getWelcomeSMSMessage(Reminder reminder, District district) {
+      Message message = null;
+      switch (district.getStatus()) {
+          case active:
+              message = getActiveWelcomeSMSMessage(reminder, district);
+              break;
+          case covid_paused:
+              message = getCovidWelcomeSMSMessage(reminder);
+              break;
+      }
+      return message;
+  }
+
+    private Message getActiveWelcomeSMSMessage(Reminder reminder, District district) {
+        Message message = new Message();
+        message.setBody(
+            String.format(
+                "You're signed up for the Monthly Calling Campaign. We have randomized your call to the %s of the month. Thanks for joining!\nWant to start calling now? Check out the current call-in guide at https://cclcalls.org/call/%s/%s",
+                DayOfMonthFormatter.getAdjective(reminder.getDayOfMonth()),
+                district.getState(),
+                district.getNumber()
+            )
+        );
+        return message;
+    }
+
+    private Message getCovidWelcomeSMSMessage(Reminder reminder) {
+        Message message = new Message();
+        message.setBody(
+            String.format(
+                "You're signed up for the Monthly Calling Campaign. We have randomized your call to the %s of the month. Thanks for joining!\nNOTE: the campaign is temporarily paused in order to give your Congressional Office time to respond to the COVID-19 crisis. Your notifications will begin when the crisis abates.",
+                DayOfMonthFormatter.getAdjective(reminder.getDayOfMonth())
+        ));
+        return message;
+    }
 
   private void sendWelcomeEmail(Reminder reminder, District district, Caller caller) {
     try {
       Message message = new Message();
       message.setSubject("Welcome to CCL's Monthly Calling Campaign!");
-      String personalizedHtml = this.welcomeHtml
-              .replaceAll("\\{state\\}", district.getState())
-              .replaceAll("\\{district_number\\}", String.valueOf(district.getNumber()))
-              .replaceAll("\\{day_of_month\\}", DayOfMonthFormatter.getAdjective(reminder.getDayOfMonth()));
-      message.setBody(personalizedHtml);
+      message.setBody(getWelcomeEmailBody(reminder, district));
       ReminderService.getInstance().getEmailDeliveryService().sendHtmlMessage(caller, message);
     } catch (Exception e) {
       logger.severe(String.format("Failed to send welcome email to caller {id: %d}: %s", caller.getCallerId(), e.getMessage()));
     }
   }
+
+    private String getWelcomeEmailBody(Reminder reminder, District district) {
+        String emailHtml = null;
+        switch (district.getStatus()) {
+            case active:
+                emailHtml = this.welcomeHtml;
+                break;
+            case covid_paused:
+                emailHtml = this.welcomeHtmlCovid;
+                break;
+        }
+        return emailHtml
+                .replaceAll("\\{state\\}", district.getState())
+                .replaceAll("\\{district_number\\}", String.valueOf(district.getNumber()))
+                .replaceAll("\\{day_of_month\\}", DayOfMonthFormatter.getAdjective(reminder.getDayOfMonth()));
+    }
 }
