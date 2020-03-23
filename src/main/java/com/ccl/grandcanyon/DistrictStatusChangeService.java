@@ -5,8 +5,9 @@ import com.ccl.grandcanyon.types.Caller;
 import com.ccl.grandcanyon.types.ContactMethod;
 import com.ccl.grandcanyon.types.Message;
 import com.ccl.grandcanyon.types.Status;
-import com.ccl.grandcanyon.utils.HtmlUtils;
+import com.ccl.grandcanyon.utils.FileReader;
 
+import java.io.FileNotFoundException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -22,7 +23,7 @@ public class DistrictStatusChangeService {
     private static final String covidPauseEmailResource = "covidPause.html";
     private String covidPauseHtmlBody;
 
-    private static final int THREAD_POOL_SIZE = 100;
+    private static final int THREAD_POOL_SIZE = 2;
     private final ExecutorService executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
 
     public static DistrictStatusChangeService getInstance() {
@@ -40,7 +41,11 @@ public class DistrictStatusChangeService {
         ReminderService reminderService = ReminderService.getInstance();
         emailDeliveryService = reminderService.getEmailDeliveryService();
         smsDeliveryService = reminderService.getSmsDeliveryService();
-        covidPauseHtmlBody = HtmlUtils.ReadHtmlFile(getClass().getClassLoader(), covidPauseEmailResource);
+        try {
+            covidPauseHtmlBody = FileReader.create().read(covidPauseEmailResource);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     public void handleStatusChange(int districtId, Status oldStatus, Status newStatus) throws SQLException {
