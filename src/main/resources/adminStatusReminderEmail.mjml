@@ -1,0 +1,48 @@
+<mjml>
+  <mj-head>
+    <mj-style>
+            .box-shadow td {
+                box-shadow: 0 4px 6px hsla(0,0%,46%,0.2), 0 1px 3px hsla(0,0%,46%,0.2);
+            }
+    </mj-style>
+  </mj-head>
+  <mj-body>
+    <mj-section>
+      <mj-column width="100px" vertical-align="middle">
+        <mj-image src="https://cclcalls.org/img/ccl-logo-thumbnail.png"></mj-image>
+      </mj-column>
+      <mj-column width="100%" vertical-align="middle">
+        <mj-text font-size="24px">CCL's Monthly Calling Campaign:            Districts Paused Due to COVID-19</mj-text>
+      </mj-column>
+      <mj-column width="100%">
+        <mj-divider border-color="#000"></mj-divider>
+      </mj-column>
+    </mj-section>
+    <mj-section>
+      <mj-column width="100%">
+        <mj-text font-size="14px">
+          Hello,
+        </mj-text>
+        <mj-text font-size="14px">
+            You are receiving this email from the Monthly Calling Campaign as a reminder that {districts_plural_form} {district_names}, have their status "paused for COVID-19."
+        </mj-text>
+        <mj-text font-size="14px">
+            If that is still appropriate, then no action is needed from you. If the situation has improved enough to start calling about climate change, please re-enable your district by logging into the admin portal at admin.cclcalls.org, and navigating to the "Representatives" tab. If there are multiple admins for a district you oversee, don't forget to coordinate with them when making this decision. You can see a list of admins by district by navigating to the "Admins" tab.
+        </mj-text>
+        <mj-text font-size="14px">
+          Thank you,
+        </mj-text>
+        <mj-text font-size="14px">
+          The MCC team
+        </mj-text>
+      </mj-column>
+     </mj-section>
+    <mj-section>
+    	<mj-column>
+      	<mj-text align="center">
+        	From your friends at <a href="citizensclimatelobby.org">CCL</a>. To unsubscribe, simply reply to this email with "unsubscribe" in the body.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

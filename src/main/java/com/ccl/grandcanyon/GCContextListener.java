@@ -107,10 +107,25 @@ public class GCContextListener implements ServletContextListener {
       }
 
     });
+
+    try {
+      DistrictStatusReminderService.init();
+    }
+    catch (Exception e) {
+      throw new RuntimeException(
+              "Initialization failed: error initializing DistrictStatusReminderService", e);
+    }
   }
 
   @Override
   public void contextDestroyed(ServletContextEvent sce) {
+
+    try {
+      DistrictStatusReminderService.getInstance().tearDown();
+    } catch (Exception e) {
+      logger.warning("Failed to tear down DistrictStatusReminderService: " + e.getMessage());
+    }
+
     SQLHelper sqlHelper = SQLHelper.getInstance();
     if (sqlHelper != null) {
       sqlHelper.tearDown();
