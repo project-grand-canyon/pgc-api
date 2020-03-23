@@ -11,6 +11,7 @@ import java.time.*;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -109,6 +110,8 @@ public class ReminderService {
 
   private DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
+  private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+
   // TODO: Instead of distributing all callers across the month, do so for each district
   private static int getNewDayOfMonth() {
     int dayToReturn = dayOfMonthCounter;
@@ -122,9 +125,9 @@ public class ReminderService {
   }
 
   public static ReminderService getInstance() {
+    assert(instance != null);
     return instance;
   }
-
 
   private ReminderService(Properties config) {
 
@@ -196,12 +199,10 @@ public class ReminderService {
       throw new RuntimeException("Unable to load stale script email template: " + e.getLocalizedMessage());
     }
 
-
     if (Boolean.parseBoolean(config.getProperty(REMINDER_SERVICE_ENABLED))) {
       logger.info("Booting up the reminder task");
       // start the background task that will send reminders to callers
-      this.reminderTask = Executors.newSingleThreadScheduledExecutor().
-          scheduleAtFixedRate(new ReminderSender(), 10, serviceIntervalMinutes * 60, TimeUnit.SECONDS);
+      this.reminderTask = executorService.scheduleAtFixedRate(new ReminderSender(), 10, serviceIntervalMinutes * 60, TimeUnit.SECONDS);
     }
   }
 
@@ -209,6 +210,15 @@ public class ReminderService {
   public void tearDown() {
     if (reminderTask != null) {
       reminderTask.cancel(true);
+    }
+    executorService.shutdown();
+
+    if(emailDeliveryService != null){
+      emailDeliveryService.tearDown();
+    }
+
+    if(smsDeliveryService != null){
+      smsDeliveryService.tearDown();
     }
   }
 

@@ -65,6 +65,7 @@ public class AuthenticationService {
    * return the singleton Authentication Service instance.
    */
   public static AuthenticationService getInstance() {
+    assert(instance != null);
     return instance;
   }
 

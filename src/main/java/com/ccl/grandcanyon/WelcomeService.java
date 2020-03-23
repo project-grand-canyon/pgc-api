@@ -7,6 +7,7 @@ import com.ccl.grandcanyon.utils.FileReader;
 import javax.ws.rs.NotFoundException;
 import java.sql.*;
 import java.util.Properties;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
@@ -24,42 +25,44 @@ public class WelcomeService {
 
   private String welcomeHtml;
   private String welcomeResource = "welcomeEmail.html";
-
   private String welcomeHtmlCovid;
   private String welcomeResourceCovid = "welcomeEmailCovid.html";
+
+  private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
   public static void init(Properties config) {
     assert (instance == null);
     instance = new WelcomeService(config);
   }
 
+  public void tearDown(){
+    executorService.shutdown();
+  }
+
   public static WelcomeService getInstance() {
+        assert(instance != null);
         return instance;
     }
 
   private WelcomeService(Properties config) {
-
-    logger.info("Init Welcome Service");
+      logger.info("Init Welcome Service");
 
       try {
           this.welcomeHtml = FileReader.create().read(welcomeResource);
-      }
-      catch (Exception e) {
+      } catch (Exception e) {
           throw new RuntimeException("Unable to load welcome email template: " + e.getLocalizedMessage());
       }
       try {
           this.welcomeHtmlCovid = FileReader.create().read(welcomeResourceCovid);
-      }
-      catch (Exception e) {
+      } catch (Exception e) {
           throw new RuntimeException("Unable to load covid welcome email template: " + e.getLocalizedMessage());
       }
-
   }
 
   public void handleNewCaller(Caller caller) {
     logger.info("New Caller");
     // do this asynchronously so as not to delay response to end-user
-    Executors.newSingleThreadExecutor().submit(() -> {
+    executorService.submit(() -> {
       try (Connection conn = SQLHelper.getInstance().getConnection()) {
         PreparedStatement selectStatement = conn.prepareStatement(SQL_SELECT_CALL_IN_INFO);
         selectStatement.setInt(1, caller.getCallerId());

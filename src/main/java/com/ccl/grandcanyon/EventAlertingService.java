@@ -4,6 +4,7 @@ import com.ccl.grandcanyon.types.Caller;
 import com.ccl.grandcanyon.types.Message;
 
 import java.util.Properties;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
@@ -16,6 +17,7 @@ public class EventAlertingService {
   private static final Logger logger = Logger.getLogger(EventAlertingService.class.getName());
 
   private static EventAlertingService instance;
+  private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
   // Not really a "Caller", actually contains the alert recipient address
   private Caller generalRecipient;
@@ -26,7 +28,12 @@ public class EventAlertingService {
     instance = new EventAlertingService(config);
   }
 
+  public void tearDown(){
+    executorService.shutdown();
+  }
+
   public static EventAlertingService getInstance() {
+        assert(instance != null);
         return instance;
     }
 
@@ -43,7 +50,7 @@ public class EventAlertingService {
     Caller recipient = name.equals("New Admin Sign Up") ? newAdminRecipient : generalRecipient;
 
     logger.info("New event: " + name);
-    Executors.newSingleThreadExecutor().submit(() -> {
+    executorService.submit(() -> {
       try {
         Message alert = new Message();
         alert.setSubject(name);

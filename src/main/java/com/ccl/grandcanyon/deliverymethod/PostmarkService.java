@@ -1,13 +1,17 @@
 package com.ccl.grandcanyon.deliverymethod;
 
-import com.ccl.grandcanyon.types.*;
+import com.ccl.grandcanyon.types.Admin;
+import com.ccl.grandcanyon.types.Caller;
 import com.wildbit.java.postmark.Postmark;
 import com.wildbit.java.postmark.client.ApiClient;
 import com.wildbit.java.postmark.client.data.model.message.Message;
 import com.wildbit.java.postmark.client.data.model.message.MessageResponse;
 
-import java.util.*;
+import java.util.Properties;
+import java.util.Queue;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -25,6 +29,9 @@ public class PostmarkService implements DeliveryService {
     private String fromAddress;
     private Queue<Message> messageQueue;
     private ScheduledFuture sendingTask;
+    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+
+    private PostmarkService(){}
 
     @Override
     public void init(Properties config) {
@@ -38,15 +45,16 @@ public class PostmarkService implements DeliveryService {
         apiClient = Postmark.getApiClient(apiKey);
 
         // Postmark rate limit
-        messageQueue = new LinkedList<>();
-        this.sendingTask = Executors.newSingleThreadScheduledExecutor().
-                scheduleAtFixedRate(new PostmarkSender(), 10, SEND_FREQUENCY, TimeUnit.SECONDS);
+        messageQueue = new LinkedBlockingQueue<>();
+        this.sendingTask = executorService.scheduleAtFixedRate(new PostmarkSender(), 10, SEND_FREQUENCY, TimeUnit.SECONDS);
     }
 
+    @Override
     public void tearDown() {
         if (sendingTask != null) {
             sendingTask.cancel(true);
         }
+        executorService.shutdown();
     }
 
     @Override
@@ -76,7 +84,7 @@ public class PostmarkService implements DeliveryService {
         postmarkMessage.setTrackLinks(Message.TRACK_LINKS.HtmlAndText);
         postmarkMessage.setTrackOpens(true);
         messageQueue.add(postmarkMessage);
-        return true;
+        return true; //TODO: this is misleading b/c it hasn't actually succeeded yet
     }
 
     class PostmarkSender implements Runnable {

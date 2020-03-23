@@ -1,5 +1,6 @@
 package com.ccl.grandcanyon;
 
+import com.ccl.grandcanyon.deliverymethod.DeliveryService;
 import com.ccl.grandcanyon.types.*;
 import com.ccl.grandcanyon.types.District;
 
@@ -13,10 +14,12 @@ import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.sql.*;
 import java.util.*;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @Path("/districts")
 public class Districts {
+  private static final Logger logger = Logger.getLogger(Callers.class.getName());
 
   private static final String ORDERING = "ordering";
 
@@ -154,6 +157,8 @@ public class Districts {
 
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
+      District oldDistrict = retrieveDistrictById(conn, districtId);
+
       conn.setAutoCommit(false);
       PreparedStatement statement = conn.prepareStatement(SQL_UPDATE_DISTRICT);
       int idx = 1;
@@ -173,6 +178,15 @@ public class Districts {
 
       District updatedDistrict = retrieveDistrictById(conn, districtId);
       conn.commit();
+
+      // alert callers about status change only after commit
+      Status oldStatus = oldDistrict.getStatus();
+      Status newStatus = updatedDistrict.getStatus();
+      if(oldStatus != newStatus){
+        logger.info("Status for district with id " + districtId + " changed from " + oldStatus.toString() + " to " + newStatus.toString());
+        DistrictStatusChangeService.getInstance().handleStatusChange(districtId, oldStatus, newStatus);
+      }
+
       return Response.ok(updatedDistrict).build();
     }
     catch (SQLException e) {
@@ -184,6 +198,7 @@ public class Districts {
       conn.close();
     }
   }
+
 
 
   @GET

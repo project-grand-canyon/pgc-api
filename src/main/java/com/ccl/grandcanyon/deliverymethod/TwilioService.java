@@ -70,6 +70,10 @@ public class TwilioService implements DeliveryService {
     return formattedNumber.toString();
   }
 
+  @Override
+  public void tearDown(){
+    // Do nothing
+  }
 
   @Override
   public boolean sendTextMessage(Admin admin, com.ccl.grandcanyon.types.Message message) throws Exception {

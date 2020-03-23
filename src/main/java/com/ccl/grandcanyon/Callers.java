@@ -353,7 +353,7 @@ public class Callers {
 
 
 
-  private List<Caller> getCallers(
+  static List<Caller> getCallers(
       Connection conn,
       Integer districtId) throws SQLException {
 

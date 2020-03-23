@@ -15,4 +15,6 @@ public interface DeliveryService {
   boolean sendTextMessage(Caller caller, Message message) throws Exception;
 
   boolean sendHtmlMessage(Caller caller, Message message) throws Exception;
+
+  void tearDown();
 }
