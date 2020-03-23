@@ -183,14 +183,14 @@ public class ReminderService {
     this.staleScriptWarningInterval = TimeUnit.DAYS.toMillis(staleScriptWarningInDays);
 
     try {
-      this.regularCallInReminderHTML = FileReader.getInstance().read(callReminderEmailResource);
+      this.regularCallInReminderHTML = FileReader.create().read(callReminderEmailResource);
     }
     catch (Exception e) {
       throw new RuntimeException("Unable to load regular call-in notification email template: " + e.getLocalizedMessage());
     }
 
     try {
-      this.staleScriptHTML = FileReader.getInstance().read(staleScriptEmailResource);
+      this.staleScriptHTML = FileReader.create().read(staleScriptEmailResource);
     }
     catch (Exception e) {
       throw new RuntimeException("Unable to load stale script email template: " + e.getLocalizedMessage());

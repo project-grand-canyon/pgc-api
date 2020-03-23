@@ -306,7 +306,7 @@ public class Districts {
 
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
-      // make sure each talking point is valid for this district
+      // create sure each talking point is valid for this district
       Map<Integer,TalkingPoint> tpMap = TalkingPoints.getSelectedTalkingPoints(
           conn, orderedTalkingPoints);
       for (TalkingPoint tp : tpMap.values()) {

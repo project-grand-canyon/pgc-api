@@ -42,13 +42,13 @@ public class WelcomeService {
     logger.info("Init Welcome Service");
 
       try {
-          this.welcomeHtml = FileReader.getInstance().read(welcomeResource);
+          this.welcomeHtml = FileReader.create().read(welcomeResource);
       }
       catch (Exception e) {
           throw new RuntimeException("Unable to load welcome email template: " + e.getLocalizedMessage());
       }
       try {
-          this.welcomeHtmlCovid = FileReader.getInstance().read(welcomeResourceCovid);
+          this.welcomeHtmlCovid = FileReader.create().read(welcomeResourceCovid);
       }
       catch (Exception e) {
           throw new RuntimeException("Unable to load covid welcome email template: " + e.getLocalizedMessage());

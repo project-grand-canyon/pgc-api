@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 public class FileReader {
 
-    public static FileReader getInstance() {
+    public static FileReader create() {
         return new FileReader();
     }
 
