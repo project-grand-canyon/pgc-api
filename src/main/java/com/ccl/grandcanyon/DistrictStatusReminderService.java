@@ -90,7 +90,7 @@ public class DistrictStatusReminderService {
     private void sendCovidPausedReminderEmail(Admin admin, List<District> districts) {
         assert (!districts.isEmpty());
         final String districtsPhrase = createDistrictsPhrase(districts);
-        final String messageSubject = "Districts Paused Due to COVID-19";
+        final String messageSubject = "Auto-reminder: Time to re-enable MCC?";
         final String messageBody = this.reminderHtmlBody
                 .replaceAll("\\{districts_phrase}", districtsPhrase);
         Message message = new Message();
