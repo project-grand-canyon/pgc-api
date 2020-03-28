@@ -12,8 +12,11 @@ public final class StringUtils {
         if(input.size() == 1){
             return input.get(0);
         }
+        if(input.size() == 2){
+            return input.get(0) + " and " + input.get(1);
+        }
         String firstPart = String.join(", ", input.subList(0, input.size() - 1));
-        String lastPart = "and " + input.get(input.size() - 1);
+        String lastPart = ", and " + input.get(input.size() - 1);
         return firstPart + lastPart;
     }
 }

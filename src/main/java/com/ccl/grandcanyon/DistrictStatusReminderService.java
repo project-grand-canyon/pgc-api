@@ -35,14 +35,12 @@ public class DistrictStatusReminderService {
     private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
     private ScheduledFuture<?> reminderTask;
 
-
     private static final String SQL_SELECT_ADMINS =
-            "SELECT a.*, ad.district_id FROM admins a " +
+            "SELECT a.*, d.* FROM admins a " +
                     "JOIN admins_districts AS ad ON a.admin_id = ad.admin_id " +
                     "JOIN districts AS d ON ad.district_id = d.district_id " +
-                    "WHERE d.status != active " +
+                    "WHERE d.status != 'active' " +
                     "ORDER BY a.admin_id";
-
 
     private DistrictStatusReminderService() {
         ReminderService reminderService = ReminderService.getInstance();
@@ -90,16 +88,10 @@ public class DistrictStatusReminderService {
 
     private void sendCovidPausedReminderEmail(Admin admin, List<District> districts) {
         assert (!districts.isEmpty());
-        final String districtsPluralForm = districts.size() > 1 ? "districts" : "district";
-        // TODO: handle senators
-        List<String> districtNames = districts.stream()
-                .map(district -> district.getState() + "-" + district.getNumber())
-                .collect(Collectors.toList());
-        final String districtNamesCommaSeparated = StringUtils.createCommaSeparatedList(districtNames);
+        final String districtsPhrase = createDistrictsPhrase(districts);
         final String messageSubject = "Districts Paused Due to COVID-19";
         final String messageBody = this.reminderHtmlBody
-                .replaceAll("\\{districts_plural_form\\}", districtsPluralForm)
-                .replaceAll("\\{district_names\\}", districtNamesCommaSeparated);
+                .replaceAll("\\{districts_phrase}", districtsPhrase);
         Message message = new Message();
         message.setSubject(messageSubject);
         message.setBody(messageBody);
@@ -113,6 +105,18 @@ public class DistrictStatusReminderService {
         }
     }
 
+
+    private String createDistrictsPhrase(List<District> districts){
+        assert (!districts.isEmpty());
+        final String firstPart = districts.size() > 1 ? "districts " : "district ";
+        final String lastPart = districts.size() > 1 ? " have their " : " has its ";
+        List<String> districtNames = districts.stream()
+                .map(District::toString)
+                .collect(Collectors.toList());
+        final String districtNamesCommaSeparated = StringUtils.createCommaSeparatedList(districtNames);
+        return firstPart + districtNamesCommaSeparated + lastPart;
+    }
+
     // Returns pairs of admins and their associated districts which don't have an active status
     private List<Pair<Admin, List<District>>> getAdminsAndDistricts() {
         List<Pair<Admin, List<District>>> result = new ArrayList<>();
@@ -121,7 +125,7 @@ public class DistrictStatusReminderService {
             conn = SQLHelper.getInstance().getConnection();
             ResultSet rs = conn.createStatement().executeQuery(SQL_SELECT_ADMINS);
             while (rs.next()) {
-                Admin admin = new Admin(rs);
+                Admin admin = new Admin(rs, false);
                 if (result.isEmpty() || admin.getAdminId() != result.get(result.size() - 1).getKey().getAdminId()) {
                     result.add(new Pair<>(admin, new ArrayList<>()));
                 }

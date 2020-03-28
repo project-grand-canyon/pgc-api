@@ -24,7 +24,7 @@
           Hello,
         </mj-text>
         <mj-text font-size="14px">
-            You are receiving this email from the Monthly Calling Campaign as a reminder that {districts_plural_form} {district_names}, have their status "paused for COVID-19."
+            You are receiving this email from the Monthly Calling Campaign as a reminder that {districts_phrase} status "paused for COVID-19."
         </mj-text>
         <mj-text font-size="14px">
             If that is still appropriate, then no action is needed from you. If the situation has improved enough to start calling about climate change, please re-enable your district by logging into the admin portal at admin.cclcalls.org, and navigating to the "Representatives" tab. If there are multiple admins for a district you oversee, don't forget to coordinate with them when making this decision. You can see a list of admins by district by navigating to the "Admins" tab.

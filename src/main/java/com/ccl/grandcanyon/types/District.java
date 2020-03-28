@@ -190,4 +190,24 @@ public class District extends GCBase {
     return getNumber() < 0;
   }
 
+  public String getOfficialTitle() {
+    if (getNumber() == -1) {
+      return "Senior Senator";
+    }
+    if (getNumber() == -2) {
+      return "Junior Senator";
+    }
+    return "Representative";
+  }
+
+  @Override
+  public String toString() {
+    String result = getState() + '-';
+    if(isSenatorDistrict()) {
+      result += getOfficialTitle();
+    } else {
+      result += getNumber();
+    }
+    return result;
+  }
 }
