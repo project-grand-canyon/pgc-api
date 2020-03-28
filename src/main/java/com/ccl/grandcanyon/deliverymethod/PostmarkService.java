@@ -31,8 +31,6 @@ public class PostmarkService implements DeliveryService {
     private ScheduledFuture sendingTask;
     private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 
-    private PostmarkService(){}
-
     @Override
     public void init(Properties config) {
         String apiKey = config.getProperty(API_KEY_PROP);
