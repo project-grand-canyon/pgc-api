@@ -2,6 +2,7 @@ package com.ccl.grandcanyon;
 
 import com.ccl.grandcanyon.deliverymethod.DeliveryService;
 import com.ccl.grandcanyon.types.Admin;
+import com.ccl.grandcanyon.types.Admin.IncludeDistricts;
 import com.ccl.grandcanyon.types.District;
 import com.ccl.grandcanyon.types.Message;
 import com.ccl.grandcanyon.types.Status;
@@ -125,7 +126,7 @@ public class DistrictStatusReminderService {
             conn = SQLHelper.getInstance().getConnection();
             ResultSet rs = conn.createStatement().executeQuery(SQL_SELECT_ADMINS);
             while (rs.next()) {
-                Admin admin = new Admin(rs, false);
+                Admin admin = new Admin(rs, IncludeDistricts.NO);
                 if (result.isEmpty() || admin.getAdminId() != result.get(result.size() - 1).getKey().getAdminId()) {
                     result.add(new Pair<>(admin, new ArrayList<>()));
                 }
