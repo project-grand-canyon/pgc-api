@@ -16,6 +16,7 @@ import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -159,7 +160,7 @@ public class DistrictStatusReminderService {
         while (nextRunDateTime.getDayOfWeek() != REMINDER_DAY) {
             nextRunDateTime = nextRunDateTime.plusDays(1);
         }
-        nextRunDateTime = nextRunDateTime.withHour(REMINDER_HOUR).withMinute(0).withSecond(0);
+        nextRunDateTime = nextRunDateTime.withHour(REMINDER_HOUR).truncatedTo(ChronoUnit.HOURS);
 
         if (nextRunDateTime.toLocalDate().equals(currentDateTime.toLocalDate()) && currentDateTime.getHour() >= REMINDER_HOUR) {
             nextRunDateTime = nextRunDateTime.plusWeeks(1);
