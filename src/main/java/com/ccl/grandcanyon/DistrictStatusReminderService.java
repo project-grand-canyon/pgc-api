@@ -162,7 +162,7 @@ public class DistrictStatusReminderService {
         }
         nextRunDateTime = nextRunDateTime.withHour(REMINDER_HOUR).truncatedTo(ChronoUnit.HOURS);
 
-        if (nextRunDateTime.toLocalDate().equals(currentDateTime.toLocalDate()) && currentDateTime.getHour() >= REMINDER_HOUR) {
+        if (nextRunDateTime.isBefore(currentDateTime)) {
             nextRunDateTime = nextRunDateTime.plusWeeks(1);
         }
 
