@@ -156,11 +156,10 @@ public class DistrictStatusReminderService {
         final DayOfWeek REMINDER_DAY = DayOfWeek.SUNDAY;
 
         OffsetDateTime currentDateTime = OffsetDateTime.now(ZoneId.of("EST"));
-        OffsetDateTime nextRunDateTime = currentDateTime;
+        OffsetDateTime nextRunDateTime = currentDateTime.withHour(REMINDER_HOUR).truncatedTo(ChronoUnit.HOURS);
         while (nextRunDateTime.getDayOfWeek() != REMINDER_DAY) {
             nextRunDateTime = nextRunDateTime.plusDays(1);
         }
-        nextRunDateTime = nextRunDateTime.withHour(REMINDER_HOUR).truncatedTo(ChronoUnit.HOURS);
 
         if (nextRunDateTime.isBefore(currentDateTime)) {
             nextRunDateTime = nextRunDateTime.plusWeeks(1);
