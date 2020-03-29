@@ -151,7 +151,7 @@ public class DistrictStatusReminderService {
 
 
     private ScheduledFuture<?> createReminderTask() {
-        final int REMINDER_HOUR = 8;
+        final int REMINDER_HOUR = 20;
         final DayOfWeek REMINDER_DAY = DayOfWeek.SUNDAY;
 
         OffsetDateTime currentDateTime = OffsetDateTime.now(ZoneId.of("EST"));
