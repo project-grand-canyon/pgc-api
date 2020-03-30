@@ -1,6 +1,7 @@
 package com.ccl.grandcanyon;
 
 import com.ccl.grandcanyon.auth.AuthenticationService;
+import com.ccl.grandcanyon.types.Admin.IncludeDistricts;
 import com.ccl.grandcanyon.auth.PasswordUtil;
 import com.ccl.grandcanyon.types.*;
 import com.fasterxml.jackson.databind.node.TextNode;
@@ -254,7 +255,7 @@ public class Admins {
       ResultSet rs = conn.createStatement().executeQuery(SQL_SELECT_ADMIN +
           " ORDER BY a." + Admin.ADMIN_ID);
       while (rs.next()) {
-        admins.add(new Admin(rs));
+        admins.add(new Admin(rs, IncludeDistricts.YES));
       }
       return Response.ok(admins).build();
     }
@@ -361,7 +362,7 @@ public class Admins {
       ResultSet rs = queryAdmin.executeQuery();
       Admin admin = null;
       if (rs.next()) {
-        admin = new Admin(rs);
+        admin = new Admin(rs, IncludeDistricts.YES);
       }
       else {
         throw new NotFoundException("Unknown email address");
@@ -500,7 +501,7 @@ public class Admins {
       PreparedStatement statement = conn.prepareStatement(SQL_SELECT_ADMIN + whereClause);
       statement.setString(1, userName);
       ResultSet rs = statement.executeQuery();
-      return rs.next() ? new Admin(rs) : null;
+      return rs.next() ? new Admin(rs, IncludeDistricts.YES) : null;
     }
     finally {
       conn.close();
@@ -520,7 +521,7 @@ public class Admins {
     if (!rs.next()) {
       throw new NotFoundException("No admin found with ID '" + adminId + "'");
     }
-    return new Admin(rs);
+    return new Admin(rs, IncludeDistricts.YES);
   }
 
   private void insertDistricts(

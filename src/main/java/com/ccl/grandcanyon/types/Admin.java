@@ -38,8 +38,8 @@ public class Admin extends GCBase {
 
   public Admin() {}
 
-
-  public Admin(ResultSet rs) throws SQLException {
+  public enum IncludeDistricts{YES, NO}
+  public Admin(ResultSet rs, IncludeDistricts includeDistricts) throws SQLException {
     super(rs);
     this.adminId = rs.getInt(ADMIN_ID);
     this.userName = rs.getString(USER_NAME);
@@ -48,15 +48,18 @@ public class Admin extends GCBase {
     this.token = rs.getString(TOKEN);
     this.loginEnabled = rs.getBoolean(LOGIN_ENABLED);
     this.password = null;  // always
-    this.districts = new ArrayList<>();
-    do {
-      int districtId = rs.getInt(DISTRICT_ID);
-      if (districtId != 0) {
-        districts.add(districtId);
-      }
-    } while (rs.next() && rs.getInt(ADMIN_ID) == this.adminId);
-    // undo the last result set row since it doesn't belong to this admin
-    rs.previous();
+    if(includeDistricts == IncludeDistricts.YES){
+      this.districts = new ArrayList<>();
+      do {
+        int districtId = rs.getInt(DISTRICT_ID);
+        if (districtId != 0) {
+          districts.add(districtId);
+        }
+      } while (rs.next() && rs.getInt(ADMIN_ID) == this.adminId);
+      // undo the last result set row since it doesn't belong to this admin
+      rs.previous();
+    }
+
   }
 
 
