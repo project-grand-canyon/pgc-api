@@ -32,15 +32,15 @@
     <password>myPassword</password>
     <database>sqldemo</database>
 <!-- [START_EXCLUDE] -->
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <maven.compiler.source>1.8</maven.compiler.source>
     <failOnMissingWebXml>false</failOnMissingWebXml> <!-- REQUIRED -->
 
-    <jetty>9.4.27.v20200227</jetty>
+    <jetty>9.4.4.v20170414</jetty>
 <!-- [END_EXCLUDE] -->
     <sqlURL>jdbc:mysql://google/${database}?cloudSqlInstance=${INSTANCE_CONNECTION_NAME}&amp;socketFactory=com.google.cloud.sql.mysql.SocketFactory&amp;user=${user}&amp;password=${password}&amp;useSSL=false</sqlURL>
 
     <build.sourceEncoding>UTF-8</build.sourceEncoding>
-    <maven.compiler.source>11</maven.compiler.source>
-    <maven.compiler.target>11</maven.compiler.target>
 
   </properties>
 <!-- [END gae_flex_mysql_properties] -->
@@ -138,6 +138,11 @@
       <artifactId>snakeyaml</artifactId>
       <version>1.26</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>4.5.10</version>
+    </dependency>
     <!-- [END gae_flex_mysql_dependencies] -->
   </dependencies>
   <build>
@@ -155,7 +160,7 @@
       <plugin>
         <groupId>com.google.cloud.tools</groupId>
         <artifactId>appengine-maven-plugin</artifactId>
-        <version>2.2.0</version>
+        <version>1.3.1</version>
       </plugin>
       <plugin>
         <groupId>org.eclipse.jetty</groupId>

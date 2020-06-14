@@ -31,7 +31,7 @@ public class PostmarkService implements DeliveryService {
     private ScheduledFuture sendingTask;
     private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 
-    private PostmarkService(){}
+    public PostmarkService(){}
 
     @Override
     public void init(Properties config) {

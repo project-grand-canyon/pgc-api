@@ -21,7 +21,7 @@
     <mj-section background-color="#fffbe6" border="1px solid #ffe58f" padding="20px">
       <mj-column>
         <mj-text align="center" font-size="20px">Calling During The COVID-19 Crisis</mj-text>
-        <mj-text font-size="14px">&emsp;Many parts of the country are currently overwhelmed by this public health crisis. Please use your best judgement to decide whether the Member of Congress that represents your part of the country is receptive to our message during this sensitive time.</mj-text>
+        <mj-text font-size="14px">&emsp;Many parts of the country are currently overwhelmed by this public health crisis. Please use your best judgment to decide whether the Member of Congress that represents your part of the country is receptive to our message during this sensitive time.</mj-text>
       </mj-column>
       </mj-section>
       <mj-raw>
