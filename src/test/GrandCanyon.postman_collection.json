@@ -32,7 +32,10 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n        \"state\": \"TX\",\n        \"number\": 1,\n        \"repFirstName\": \"District\",\n        \"repLastName\": \"0\",\n        \"info\": \"Useless rep from Texas\",\n        \"callTargets\":\n        [\n        \t{\"targetDistrictId\":0, \"percentage\":50}, \n        \t{\"targetDistrictId\":5, \"percentage\":25}, \n        \t{\"targetDistrictId\":7, \"percentage\":25}\n       \t]\n}"
+							"raw": "{\n        \"state\": \"TX\",\n        \"number\": 1,\n        \"repFirstName\": \"Louie\",\n        \"repLastName\": \"Gomert\",\n        \"info\": \"Useless rep from Texas\",\n        \"callTargets\":\n        [\n        \t{\"targetDistrictId\":0, \"percentage\":50}, \n        \t{\"targetDistrictId\":5, \"percentage\":25}, \n        \t{\"targetDistrictId\":7, \"percentage\":25}\n       \t]\n}",
+							"options": {
+								"raw": {}
+							}
 						},
 						"url": {
 							"raw": "http://localhost:8080/api/districts",
@@ -1123,7 +1126,10 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\"userName\":\"testAlert\", \"password\":\"password\", \"root\":false, \"districts\":[], \"loginEnabled\": true, \"email\":\"testAlert@pgc.com\"}"
+							"raw": "{\"userName\":\"testAlert\", \"password\":\"password\", \"root\":false, \"districts\":[1], \"loginEnabled\": true, \"email\":\"testAlert@pgc.com\"}",
+							"options": {
+								"raw": {}
+							}
 						},
 						"url": {
 							"raw": "{{baseUrl}}/admins",
@@ -2010,31 +2016,31 @@
 	],
 	"variable": [
 		{
-			"id": "6688eb37-c7f5-4b3d-a677-b61f44a71bda",
+			"id": "4a9b41eb-543d-4337-94ec-617b10bb0f65",
 			"key": "baseUrl",
 			"value": "http://localhost:8080/api",
 			"type": "string"
 		},
 		{
-			"id": "8e218491-f8cd-4301-a7a3-fc43c090f8e7",
+			"id": "f6aff3fd-8820-4945-bebd-756dc11b082d",
 			"key": "cloudBaseUrl",
 			"value": "https://grandcanyon-222321.appspot.com/api",
 			"type": "string"
 		},
 		{
-			"id": "bd6567ce-06c4-4c54-99cb-e9ec9697ab68",
+			"id": "b61edb76-17e3-4773-bb99-2caaaa0597da",
 			"key": "rootToken",
 			"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlzcyI6ImxvY2FsaG9zdCIsImV4cCI6MTU0ODI5NDc1NywiaWF0IjoxNTQ4MjgwMzU3fQ.r2C7ka8lIOYIKIeW3Zz75IiPAlgfrLaJXqx2dkR4NE4",
 			"type": "string"
 		},
 		{
-			"id": "2610cec2-9c9c-4ea6-ab91-bfc20a833502",
+			"id": "54ed0735-7986-45d1-83d3-19b64db6ce24",
 			"key": "districtId",
 			"value": "1",
 			"type": "string"
 		},
 		{
-			"id": "ecc34ada-5512-4b20-9edf-21a7dd62157d",
+			"id": "53301bac-524f-4e4f-b90b-d1033a65769d",
 			"key": "districtToken",
 			"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzZW5hdG9yQWRtaW4iLCJpc3MiOiJsb2NhbGhvc3QiLCJleHAiOjE1NTAwOTMxMTQsImlhdCI6MTU1MDA3ODcxNH0.ylNH_UOKCCC9JZ3PNhb-qTA5vur-F7r96u1C7P5jzj4",
 			"type": "string"
