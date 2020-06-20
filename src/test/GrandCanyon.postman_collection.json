@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "609d7934-854d-4660-97d8-9cb4bf75d93f",
+		"_postman_id": "8d167a81-e92a-44e8-a10e-32c3060ba218",
 		"name": "GrandCanyon",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -32,7 +32,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n        \"state\": \"TX\",\n        \"number\": 1,\n        \"repFirstName\": \"Louie\",\n        \"repLastName\": \"Gomert\",\n        \"info\": \"Useless rep from Texas\",\n        \"callTargets\":\n        [\n        \t{\"targetDistrictId\":0, \"percentage\":50}, \n        \t{\"targetDistrictId\":5, \"percentage\":25}, \n        \t{\"targetDistrictId\":7, \"percentage\":25}\n       \t]\n    }"
+							"raw": "{\n        \"state\": \"TX\",\n        \"number\": 1,\n        \"repFirstName\": \"District\",\n        \"repLastName\": \"0\",\n        \"info\": \"Useless rep from Texas\",\n        \"callTargets\":\n        [\n        \t{\"targetDistrictId\":0, \"percentage\":50}, \n        \t{\"targetDistrictId\":5, \"percentage\":25}, \n        \t{\"targetDistrictId\":7, \"percentage\":25}\n       \t]\n}"
 						},
 						"url": {
 							"raw": "http://localhost:8080/api/districts",
@@ -238,7 +238,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Callers",
@@ -516,7 +517,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Themes",
@@ -641,7 +643,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Talking Points",
@@ -796,7 +799,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Offices",
@@ -961,7 +965,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Calls",
@@ -1052,7 +1057,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Admins",
@@ -1061,7 +1067,7 @@
 					"name": "Create Initial Super Admin",
 					"request": {
 						"auth": {
-							"type": "basic"
+							"type": "noauth"
 						},
 						"method": "POST",
 						"header": [
@@ -1117,7 +1123,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\"userName\":\"testAlert\", \"password\":\"password\", \"root\":false, \"districts\":[1], \"loginEnabled\": true, \"email\":\"testAlert@pgc.com\"}"
+							"raw": "{\"userName\":\"testAlert\", \"password\":\"password\", \"root\":false, \"districts\":[], \"loginEnabled\": true, \"email\":\"testAlert@pgc.com\"}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/admins",
@@ -1455,13 +1461,27 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Login",
 			"item": [
 				{
 					"name": "SuperAdmin Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "344dd025-73bd-426c-aa53-e4bc0373c0e3",
+								"exec": [
+									"let token = JSON.parse(responseBody)\r",
+									"pm.collectionVariables.set('rootToken', token.accessToken);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -1562,7 +1582,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Scripts",
@@ -1636,7 +1657,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Reminders",
@@ -1698,7 +1720,8 @@
 					"response": []
 				}
 			],
-			"description": "Currently for testing only"
+			"description": "Currently for testing only",
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Requests",
@@ -1863,7 +1886,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Stats",
@@ -1958,14 +1982,15 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		}
 	],
 	"event": [
 		{
 			"listen": "prerequest",
 			"script": {
-				"id": "ad03dbb1-e83c-41d5-81e5-f8a80e81be93",
+				"id": "53565ae9-edb7-492b-a2c7-fceecc9e9c15",
 				"type": "text/javascript",
 				"exec": [
 					""
@@ -1975,7 +2000,7 @@
 		{
 			"listen": "test",
 			"script": {
-				"id": "031f258a-f900-4c1d-b4da-4616df9a382e",
+				"id": "ff6b9ae8-91a5-4150-87c8-3b4c59a62097",
 				"type": "text/javascript",
 				"exec": [
 					""
@@ -1985,31 +2010,31 @@
 	],
 	"variable": [
 		{
-			"id": "8b1d725e-a28e-49f0-a581-f0c8c7df7e97",
+			"id": "cff0e236-de18-42a0-b051-a1c5edf4cc34",
 			"key": "baseUrl",
 			"value": "http://localhost:8080/api",
 			"type": "string"
 		},
 		{
-			"id": "b7b5c7ad-0a4e-4f3c-ad57-511e5f8f9fca",
+			"id": "330b53d2-e3e4-46b7-bcc4-cda633b69bd2",
 			"key": "cloudBaseUrl",
 			"value": "https://grandcanyon-222321.appspot.com/api",
 			"type": "string"
 		},
 		{
-			"id": "906cbe8e-ce1d-4d25-b7da-a88312b572d5",
+			"id": "189afec5-5c27-4e41-90c6-d328de0a36ab",
 			"key": "rootToken",
 			"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlzcyI6ImxvY2FsaG9zdCIsImV4cCI6MTU0ODI5NDc1NywiaWF0IjoxNTQ4MjgwMzU3fQ.r2C7ka8lIOYIKIeW3Zz75IiPAlgfrLaJXqx2dkR4NE4",
 			"type": "string"
 		},
 		{
-			"id": "48b124fb-0b8d-426d-8c90-b0786f91da89",
+			"id": "6736dd74-0b0f-422c-b41a-94d66bfa29a9",
 			"key": "districtId",
 			"value": "1",
 			"type": "string"
 		},
 		{
-			"id": "343aff69-1996-445b-9ca4-f06681f7e8aa",
+			"id": "ffb2a340-b8af-4c69-b73d-b27f6e690f3e",
 			"key": "districtToken",
 			"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzZW5hdG9yQWRtaW4iLCJpc3MiOiJsb2NhbGhvc3QiLCJleHAiOjE1NTAwOTMxMTQsImlhdCI6MTU1MDA3ODcxNH0.ylNH_UOKCCC9JZ3PNhb-qTA5vur-F7r96u1C7P5jzj4",
 			"type": "string"
