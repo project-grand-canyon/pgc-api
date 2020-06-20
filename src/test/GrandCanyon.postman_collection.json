@@ -2010,31 +2010,31 @@
 	],
 	"variable": [
 		{
-			"id": "cff0e236-de18-42a0-b051-a1c5edf4cc34",
+			"id": "6688eb37-c7f5-4b3d-a677-b61f44a71bda",
 			"key": "baseUrl",
 			"value": "http://localhost:8080/api",
 			"type": "string"
 		},
 		{
-			"id": "330b53d2-e3e4-46b7-bcc4-cda633b69bd2",
+			"id": "8e218491-f8cd-4301-a7a3-fc43c090f8e7",
 			"key": "cloudBaseUrl",
 			"value": "https://grandcanyon-222321.appspot.com/api",
 			"type": "string"
 		},
 		{
-			"id": "189afec5-5c27-4e41-90c6-d328de0a36ab",
+			"id": "bd6567ce-06c4-4c54-99cb-e9ec9697ab68",
 			"key": "rootToken",
 			"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlzcyI6ImxvY2FsaG9zdCIsImV4cCI6MTU0ODI5NDc1NywiaWF0IjoxNTQ4MjgwMzU3fQ.r2C7ka8lIOYIKIeW3Zz75IiPAlgfrLaJXqx2dkR4NE4",
 			"type": "string"
 		},
 		{
-			"id": "6736dd74-0b0f-422c-b41a-94d66bfa29a9",
+			"id": "2610cec2-9c9c-4ea6-ab91-bfc20a833502",
 			"key": "districtId",
 			"value": "1",
 			"type": "string"
 		},
 		{
-			"id": "ffb2a340-b8af-4c69-b73d-b27f6e690f3e",
+			"id": "ecc34ada-5512-4b20-9edf-21a7dd62157d",
 			"key": "districtToken",
 			"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzZW5hdG9yQWRtaW4iLCJpc3MiOiJsb2NhbGhvc3QiLCJleHAiOjE1NTAwOTMxMTQsImlhdCI6MTU1MDA3ODcxNH0.ylNH_UOKCCC9JZ3PNhb-qTA5vur-F7r96u1C7P5jzj4",
 			"type": "string"
