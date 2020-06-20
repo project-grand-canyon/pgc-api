@@ -1,3 +1,6 @@
+CREATE DATABASE core;
+USE core;
+
 -- note that order is important due to fk constraints
 DROP TABLE IF EXISTS `talking_points_scopes`, `requests`, `reminders`, `reminder_history`, `district_scripts`, `talking_points`, `themes`, `district_offices`, `calls`, `callers_contact_methods`, `callers`, `call_targets`, `admins_districts`, `admins`, `districts`, `addresses`;
 
