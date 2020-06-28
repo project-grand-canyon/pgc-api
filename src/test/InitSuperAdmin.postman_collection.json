@@ -1,0 +1,70 @@
+{
+	"info": {
+		"_postman_id": "7b2ed58d-7412-4177-a6c8-9caa7e4094c6",
+		"name": "InitSuperAdmin",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create Initial Super Admin",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"userName\":\"admin\", \"password\":\"password\", \"root\":true}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/admins",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"admins"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "a4ae632d-9069-44e6-a554-030ce6e04de3",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "5fd73f65-ce67-4c87-acca-0868094ac27a",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "92131d25-3e49-4f23-8437-99edff9485ac",
+			"key": "baseUrl",
+			"value": "http://localhost:8080/api"
+		}
+	],
+	"protocolProfileBehavior": {}
+}

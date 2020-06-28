@@ -1,0 +1,2004 @@
+{
+	"info": {
+		"_postman_id": "88d6aa78-30e6-4801-ba99-0c5200996306",
+		"name": "DummyData",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "SuperAdmin Login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "9b4aa052-2b7c-464b-b78b-1770a553cb4a",
+						"exec": [
+							"let token = JSON.parse(responseBody)\r",
+							"pm.collectionVariables.set('rootToken', token.accessToken);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"userName\":\"admin\", \"password\":\"password\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/login",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Init AA1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "312c9dd8-49d3-4967-9c7d-f1804482ee44",
+						"exec": [
+							"let token = JSON.parse(responseBody)\r",
+							"pm.environment.set(\"AA1\", token.districtId);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{rootToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n        \"state\": \"AA\",\n        \"number\": 1,\n        \"repFirstName\": \"AA1FirstName\",\n        \"repLastName\": \"AA1LastName\",\n        \"info\": \"AA1Info\",\n        \"status\": \"active\"\n}",
+					"options": {
+						"raw": {}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/districts",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"districts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Init AA2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c8fcbfaf-eea7-45f4-a1e0-14ca95eb7953",
+						"exec": [
+							"let token = JSON.parse(responseBody)\r",
+							"pm.environment.set(\"AA2\", token.districtId);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{rootToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n        \"state\": \"AA\",\n        \"number\": 2,\n        \"repFirstName\": \"AA2FirstName\",\n        \"repLastName\": \"AA2LastName\",\n        \"info\": \"AA2Info\",\n        \"status\": \"active\"\n}",
+					"options": {
+						"raw": {}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/districts",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"districts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Init AA3",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1f3bcbe6-f4fd-44b4-9f94-9fd4cd0c0414",
+						"exec": [
+							"let token = JSON.parse(responseBody)\r",
+							"pm.environment.set(\"AA3\", token.districtId);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{rootToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n        \"state\": \"AA\",\n        \"number\": 3,\n        \"repFirstName\": \"AA3FirstName\",\n        \"repLastName\": \"AA3LastName\",\n        \"info\": \"AA3Info\",\n        \"status\": \"active\"\n}",
+					"options": {
+						"raw": {}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/districts",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"districts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Init AA4",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "037248ec-7855-4c3b-8fdd-57529cb8b188",
+						"exec": [
+							"let token = JSON.parse(responseBody)\r",
+							"pm.environment.set(\"AA4\", token.districtId);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{rootToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n        \"state\": \"AA\",\n        \"number\": 4,\n        \"repFirstName\": \"AA4FirstName\",\n        \"repLastName\": \"AA4LastName\",\n        \"info\": \"AA4Info\",\n        \"status\": \"active\"\n}",
+					"options": {
+						"raw": {}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/districts",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"districts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Init AA5",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "2aa5a2e3-3aca-468f-9777-3d66e3f25f8a",
+						"exec": [
+							"let token = JSON.parse(responseBody)\r",
+							"pm.environment.set(\"AA5\", token.districtId);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{rootToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n        \"state\": \"AA\",\n        \"number\": 5,\n        \"repFirstName\": \"AA5FirstName\",\n        \"repLastName\": \"AA5LastName\",\n        \"info\": \"AA5Info\",\n        \"status\": \"active\"\n}",
+					"options": {
+						"raw": {}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/districts",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"districts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Init AA6",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a9dd3263-0df5-4420-8c13-467ffa769e9a",
+						"exec": [
+							"let token = JSON.parse(responseBody)\r",
+							"pm.environment.set(\"AA6\", token.districtId);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{rootToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n        \"state\": \"AA\",\n        \"number\": 6,\n        \"repFirstName\": \"AA6FirstName\",\n        \"repLastName\": \"AA6LastName\",\n        \"info\": \"AA6Info\",\n        \"status\": \"active\"\n}",
+					"options": {
+						"raw": {}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/districts",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"districts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Init BB1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d4b35ea5-0fa1-4b7e-8771-c6b6d71827fa",
+						"exec": [
+							"let token = JSON.parse(responseBody)\r",
+							"pm.environment.set(\"BB1\", token.districtId);\r",
+							"pm.collectionVariables.set(\"districtId\", token.districtId);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{rootToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n        \"state\": \"BB\",\n        \"number\": 1,\n        \"repFirstName\": \"BB1FirstName\",\n        \"repLastName\": \"BB1LastName\",\n        \"info\": \"BB1Info\",\n        \"status\": \"active\"\n}",
+					"options": {
+						"raw": {}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/districts",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"districts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Init BB2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "14f9da50-b0c5-48d2-b2f8-954277d3b7ba",
+						"exec": [
+							"let token = JSON.parse(responseBody)\r",
+							"pm.environment.set(\"BB2\", token.districtId);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{rootToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n        \"state\": \"BB\",\n        \"number\": 2,\n        \"repFirstName\": \"BB2FirstName\",\n        \"repLastName\": \"BB2LastName\",\n        \"info\": \"BB2Info\",\n        \"status\": \"active\"\n}",
+					"options": {
+						"raw": {}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/districts",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"districts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Init BB3",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "011ec331-a7b6-4df0-bc2b-25f8205ac26d",
+						"exec": [
+							"let token = JSON.parse(responseBody)\r",
+							"pm.environment.set(\"BB3\", token.districtId);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{rootToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n        \"state\": \"BB\",\n        \"number\": 3,\n        \"repFirstName\": \"BB3FirstName\",\n        \"repLastName\": \"BB3LastName\",\n        \"info\": \"BB3Info\",\n        \"status\": \"active\"\n}",
+					"options": {
+						"raw": {}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/districts",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"districts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Init BB4",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "e7838b2f-4583-4c54-929e-55fedbfee500",
+						"exec": [
+							"let token = JSON.parse(responseBody)\r",
+							"pm.environment.set(\"BB4\", token.districtId);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{rootToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n        \"state\": \"BB\",\n        \"number\": 4,\n        \"repFirstName\": \"BB4FirstName\",\n        \"repLastName\": \"B4LastName\",\n        \"info\": \"BB4Info\",\n        \"status\": \"active\"\n}",
+					"options": {
+						"raw": {}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/districts",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"districts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Init CC1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "fa9e0894-d534-41f5-af9d-cef80fc6ce17",
+						"exec": [
+							"let token = JSON.parse(responseBody)\r",
+							"pm.environment.set(\"CC1\", token.districtId);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{rootToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n        \"state\": \"CC\",\n        \"number\": 1,\n        \"repFirstName\": \"CC1FirstName\",\n        \"repLastName\": \"AA4LastName\",\n        \"info\": \"AA4Info\",\n        \"status\": \"active\"\n}",
+					"options": {
+						"raw": {}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/districts",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"districts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Init CC2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "2d883c51-1d26-4673-a88d-e402fd5ca40d",
+						"exec": [
+							"let token = JSON.parse(responseBody)\r",
+							"pm.environment.set(\"CC2\", token.districtId);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{rootToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n        \"state\": \"CC\",\n        \"number\": 2,\n        \"repFirstName\": \"CC2FirstName\",\n        \"repLastName\": \"CC2LastName\",\n        \"info\": \"CC2Info\",\n        \"status\": \"active\"\n}",
+					"options": {
+						"raw": {}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/districts",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"districts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Init CC3",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "722d879e-b2a6-47e6-8da9-8e49e32af51a",
+						"exec": [
+							"let token = JSON.parse(responseBody)\r",
+							"pm.environment.set(\"CC3\", token.districtId);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{rootToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n        \"state\": \"CC\",\n        \"number\": 3,\n        \"repFirstName\": \"CC3FirstName\",\n        \"repLastName\": \"CC3LastName\",\n        \"info\": \"CC3Info\",\n        \"status\": \"active\"\n}",
+					"options": {
+						"raw": {}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/districts",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"districts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update AA1",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{rootToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n        \"state\": \"AA\",\n        \"number\": 1,\n        \"repFirstName\": \"AA1FirstName\",\n        \"repLastName\": \"AA1LastName\",\n        \"callTargets\": [\n            {\n                \"targetDistrictId\": \"{{AA1}}\",\n                \"percentage\": 20\n            },\n            {\n                \"targetDistrictId\": \"{{AA4}}\",\n                \"percentage\": 40\n            },\n            {\n                \"targetDistrictId\": \"{{AA6}}\",\n                \"percentage\": 40\n            }\n        ],\n        \"info\": \"AA1Info\",\n        \"status\": \"active\"\n    }"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/districts/{{AA1}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"districts",
+						"{{AA1}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update AA2",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{rootToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n        \"state\": \"AA\",\n        \"number\": 2,\n        \"repFirstName\": \"AA2FirstName\",\n        \"repLastName\": \"AA2LastName\",\n        \"callTargets\": [\n            {\n                \"targetDistrictId\": \"{{AA2}}\",\n                \"percentage\": 30\n            },\n            {\n                \"targetDistrictId\": \"{{AA4}}\",\n                \"percentage\": 30\n            },\n            {\n                \"targetDistrictId\": \"{{AA6}}\",\n                \"percentage\": 40\n            }\n        ],\n        \"info\": \"AA2Info\",\n        \"status\": \"active\"\n    }"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/districts/{{AA2}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"districts",
+						"{{AA2}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update AA3",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{rootToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n        \"state\": \"AA\",\n        \"number\": 3,\n        \"repFirstName\": \"AA3FirstName\",\n        \"repLastName\": \"AA3LastName\",\n        \"callTargets\": [\n            {\n                \"targetDistrictId\": \"{{AA1}}\",\n                \"percentage\": 20\n            },\n            {\n                \"targetDistrictId\": \"{{AA3}}\",\n                \"percentage\": 80\n            }\n        ],\n        \"info\": \"AA3Info\",\n        \"status\": \"active\"\n    }"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/districts/{{AA3}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"districts",
+						"{{AA3}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update AA4",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{rootToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n        \"state\": \"AA\",\n        \"number\": 4,\n        \"repFirstName\": \"AA4FirstName\",\n        \"repLastName\": \"AA4LastName\",\n        \"callTargets\": [\n            {\n                \"targetDistrictId\": \"{{AA1}}\",\n                \"percentage\": 20\n            },\n            {\n                \"targetDistrictId\": \"{{AA4}}\",\n                \"percentage\": 40\n            },\n            {\n                \"targetDistrictId\": \"{{AA6}}\",\n                \"percentage\": 40\n            }\n        ],\n        \"info\": \"AA4Info\",\n        \"status\": \"active\"\n    }"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/districts/{{AA4}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"districts",
+						"{{AA4}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update AA5",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{rootToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n        \"state\": \"AA\",\n        \"number\": 5,\n        \"repFirstName\": \"AA1FirstName\",\n        \"repLastName\": \"AA1LastName\",\n        \"callTargets\": [\n            {\n                \"targetDistrictId\": \"{{AA1}}\",\n                \"percentage\": 20\n            },\n            {\n                \"targetDistrictId\": \"{{AA2}}\",\n                \"percentage\": 10\n            },\n            {\n                \"targetDistrictId\": \"{{AA4}}\",\n                \"percentage\": 40\n            },\n            {\n                \"targetDistrictId\": \"{{AA5}}\",\n                \"percentage\": 30\n            }\n        ],\n        \"info\": \"AA5Info\",\n        \"status\": \"active\"\n    }"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/districts/{{AA5}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"districts",
+						"{{AA5}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update AA6",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{rootToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n        \"state\": \"AA\",\n        \"number\": 6,\n        \"repFirstName\": \"AA6FirstName\",\n        \"repLastName\": \"AA6LastName\",\n        \"callTargets\": [\n            {\n                \"targetDistrictId\": \"{{AA6}}\",\n                \"percentage\": 100\n            }\n        ],\n        \"info\": \"AA6Info\",\n        \"status\": \"active\"\n    }"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/districts/{{AA6}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"districts",
+						"{{AA6}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update BB1",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{rootToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n        \"state\": \"BB\",\n        \"number\": 1,\n        \"repFirstName\": \"BB1FirstName\",\n        \"repLastName\": \"BB1LastName\",\n        \"callTargets\": [\n            {\n                \"targetDistrictId\": \"{{BB1}}\",\n                \"percentage\": 20\n            },\n            {\n                \"targetDistrictId\": \"{{AA3}}\",\n                \"percentage\": 40\n            },\n            {\n                \"targetDistrictId\": \"{{AA4}}\",\n                \"percentage\": 40\n            }\n        ],\n        \"info\": \"BB1Info\",\n        \"status\": \"covid_paused\"\n    }"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/districts/{{BB1}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"districts",
+						"{{BB1}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update BB2",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{rootToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n        \"state\": \"BB\",\n        \"number\": 2,\n        \"repFirstName\": \"BB2FirstName\",\n        \"repLastName\": \"BB2LastName\",\n        \"callTargets\": [\n            {\n                \"targetDistrictId\": \"{{BB1}}\",\n                \"percentage\": 10\n            },\n            {\n                \"targetDistrictId\": \"{{BB3}}\",\n                \"percentage\": 90\n            }\n        ],\n        \"info\": \"BB2Info\",\n        \"status\": \"active\"\n    }"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/districts/{{BB2}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"districts",
+						"{{BB2}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update BB3",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{rootToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n        \"state\": \"BB\",\n        \"number\": 3,\n        \"repFirstName\": \"BB3FirstName\",\n        \"repLastName\": \"BB3LastName\",\n        \"callTargets\": [\n            {\n                \"targetDistrictId\": \"{{BB1}}\",\n                \"percentage\": 20\n            },\n            {\n                \"targetDistrictId\": \"{{BB3}}\",\n                \"percentage\": 80\n            }\n        ],\n        \"info\": \"BB3Info\",\n        \"status\": \"covid_paused\"\n    }"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/districts/{{BB3}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"districts",
+						"{{BB3}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update BB4",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{rootToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n        \"state\": \"BB\",\n        \"number\": 4,\n        \"repFirstName\": \"BB4FirstName\",\n        \"repLastName\": \"BB4LastName\",\n        \"callTargets\": [\n            {\n                \"targetDistrictId\": \"{{BB4}}\",\n                \"percentage\": 100\n            }\n        ],\n        \"info\": \"BB4Info\",\n        \"status\": \"active\"\n    }"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/districts/{{BB4}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"districts",
+						"{{BB4}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update CC1",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{rootToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n        \"state\": \"CC\",\n        \"number\": 1,\n        \"repFirstName\": \"CC1FirstName\",\n        \"repLastName\": \"CC1LastName\",\n        \"callTargets\": [\n            {\n                \"targetDistrictId\": \"{{CC1}}\",\n                \"percentage\": 20\n            },\n            {\n                \"targetDistrictId\": \"{{CC2}}\",\n                \"percentage\": 40\n            },\n            {\n                \"targetDistrictId\": \"{{CC3}}\",\n                \"percentage\": 40\n            }\n        ],\n        \"info\": \"CC1Info\",\n        \"status\": \"covid_paused\"\n    }"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/districts/{{CC1}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"districts",
+						"{{CC1}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update CC2",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{rootToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n        \"state\": \"CC\",\n        \"number\": 2,\n        \"repFirstName\": \"CC2FirstName\",\n        \"repLastName\": \"CC2LastName\",\n        \"callTargets\": [\n            {\n                \"targetDistrictId\": \"{{CC1}}\",\n                \"percentage\": 20\n            },\n            {\n                \"targetDistrictId\": \"{{CC2}}\",\n                \"percentage\": 40\n            },\n            {\n                \"targetDistrictId\": \"{{CC3}}\",\n                \"percentage\": 40\n            }\n        ],\n        \"info\": \"CC2Info\",\n        \"status\": \"active\"\n    }"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/districts/{{CC2}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"districts",
+						"{{CC2}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update CC3",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{rootToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n        \"state\": \"CC\",\n        \"number\": 3,\n        \"repFirstName\": \"CC3FirstName\",\n        \"repLastName\": \"CC3LastName\",\n        \"callTargets\": [\n            {\n                \"targetDistrictId\": \"{{CC1}}\",\n                \"percentage\": 100\n            }\n        ],\n        \"info\": \"CC3Info\",\n        \"status\": \"active\"\n    }"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/districts/{{CC3}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"districts",
+						"{{CC3}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create caller 1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f8dc360e-b649-4457-ada9-96c8be32b514",
+						"exec": [
+							"let token = JSON.parse(responseBody)\r",
+							"pm.environment.set(\"Caller 1\", token.callerID);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"firstName\":\"Caller1FirstName\",\"lastName\":\"Caller1LastName\",\"contactMethods\":[\"email\",\"sms\"],\"email\":\"caller1@example.net\",\"phone\":\"111-111-1111\",\"districtId\":{{AA1}},\"zipCode\":\"11111\",\"paused\":true}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/callers",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"callers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create caller 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "808badad-bc26-4c31-a2c1-b7cbb459ac9a",
+						"exec": [
+							"let token = JSON.parse(responseBody)\r",
+							"pm.environment.set(\"Caller 2\", token.callerID);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"firstName\":\"Caller2FirstName\",\"lastName\":\"Caller2LastName\",\"contactMethods\":[\"email\",\"sms\"],\"email\":\"caller2@example.net\",\"phone\":\"111-111-1112\",\"districtId\":{{AA1}},\"zipCode\":\"11112\",\"paused\":true}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/callers",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"callers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create caller 3",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "e964b462-b30c-418e-b5bf-9595afab8e55",
+						"exec": [
+							"let token = JSON.parse(responseBody)\r",
+							"pm.environment.set(\"Caller 3\", token.callerID);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"firstName\":\"Caller3FirstName\",\"lastName\":\"Caller3LastName\",\"contactMethods\":[\"sms\"],\"email\":\"caller3@example.net\",\"phone\":\"111-111-1113\",\"districtId\":{{AA1}},\"zipCode\":\"11113\",\"paused\":true}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/callers",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"callers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create caller 4",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"firstName\":\"Caller4FirstName\",\"lastName\":\"Caller4LastName\",\"contactMethods\":[\"email\"],\"email\":\"caller4@example.net\",\"phone\":\"111-111-1114\",\"districtId\":{{AA2}},\"zipCode\":\"11121\",\"paused\":false}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/callers",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"callers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create caller 5",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"firstName\":\"Caller5FirstName\",\"lastName\":\"Caller5LastName\",\"contactMethods\":[\"email\",\"sms\"],\"email\":\"caller5@example.net\",\"phone\":\"111-111-1115\",\"districtId\":{{AA2}},\"zipCode\":\"11122\",\"paused\":false}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/callers",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"callers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create caller 6",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"firstName\":\"Caller6FirstName\",\"lastName\":\"Caller6LastName\",\"contactMethods\":[\"email\",\"sms\"],\"email\":\"caller6@example.net\",\"phone\":\"111-111-1116\",\"districtId\":{{AA3}},\"zipCode\":\"11131\",\"paused\":false}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/callers",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"callers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create caller 7",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"firstName\":\"Caller7FirstName\",\"lastName\":\"Caller7LastName\",\"contactMethods\":[\"email\",\"sms\"],\"email\":\"caller7@example.net\",\"phone\":\"111-111-1117\",\"districtId\":{{AA4}},\"zipCode\":\"11141\",\"paused\":true}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/callers",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"callers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create caller 8",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"firstName\":\"Caller8FirstName\",\"lastName\":\"Caller8LastName\",\"contactMethods\":[\"email\",\"sms\"],\"email\":\"caller8@example.net\",\"phone\":\"111-111-1118\",\"districtId\":{{AA4}},\"zipCode\":\"11142\",\"paused\":false}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/callers",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"callers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create caller 9",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"firstName\":\"Caller9FirstName\",\"lastName\":\"Caller9LastName\",\"contactMethods\":[\"email\",\"sms\"],\"email\":\"caller9@example.net\",\"phone\":\"111-111-1119\",\"districtId\":{{AA4}},\"zipCode\":\"11143\",\"paused\":false}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/callers",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"callers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create caller 10",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"firstName\":\"Caller10FirstName\",\"lastName\":\"Caller10LastName\",\"contactMethods\":[\"email\",\"sms\"],\"email\":\"caller10@example.net\",\"phone\":\"111-111-1010\",\"districtId\":{{AA4}},\"zipCode\":\"11143\",\"paused\":false}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/callers",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"callers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create caller 11",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"firstName\":\"Caller11FirstName\",\"lastName\":\"Caller11LastName\",\"contactMethods\":[\"email\",\"sms\"],\"email\":\"caller11@example.net\",\"phone\":\"111-111-1011\",\"districtId\":{{AA4}},\"zipCode\":\"11145\",\"paused\":true}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/callers",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"callers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create caller 12",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"firstName\":\"Caller12FirstName\",\"lastName\":\"Caller12LastName\",\"contactMethods\":[\"email\",\"sms\"],\"email\":\"caller12@example.net\",\"phone\":\"111-111-1012\",\"districtId\":{{BB1}},\"zipCode\":\"22211\",\"paused\":false}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/callers",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"callers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create caller 13",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"firstName\":\"Caller13FirstName\",\"lastName\":\"Caller13LastName\",\"contactMethods\":[\"email\",\"sms\"],\"email\":\"caller13@example.net\",\"phone\":\"111-111-1013\",\"districtId\":{{BB1}},\"zipCode\":\"22212\",\"paused\":false}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/callers",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"callers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create caller 14",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"firstName\":\"Caller14FirstName\",\"lastName\":\"Caller14LastName\",\"contactMethods\":[\"email\", \"sms\"],\"email\":\"caller14@example.net\",\"phone\":\"111-111-1014\",\"districtId\":{{BB3}},\"zipCode\":\"22213\",\"paused\":true}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/callers",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"callers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Admin",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "admin",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "password",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"userName\":\"bAdmin\", \"password\":\"password\", \"root\":false, \"districts\":[{{BB1}}], \"loginEnabled\": true, \"email\":\"testAlert@pgc.com\"}",
+					"options": {
+						"raw": {}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/admins",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"admins"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "District BB1 Admin Login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1d904815-59af-4dd0-83f6-603a910dc52f",
+						"exec": [
+							"let token = JSON.parse(responseBody)\r",
+							"pm.collectionVariables.set('districtToken', token.accessToken);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"userName\":\"bAdmin\", \"password\":\"password\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/login",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create theme",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "0e898c10-651a-4789-ba97-4a385e20bf6a",
+						"exec": [
+							"let token = JSON.parse(responseBody)\r",
+							"pm.environment.set(\"Theme\", token.themeId);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{rootToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"name\": \"This is the theme\"}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/themes",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"themes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create BB1 talking point 1",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{districtToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"content\":\"BB1 Talking points\", \"themeId\":{{Theme}}, \"enabled\":true, \"scope\":\"district\", \"districts\":[{{BB1}}], \"referenceUrl\":\"http://BB1tp1.stuff\"}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/talkingpoints",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"talkingpoints"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create BB1 talking point 2",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{districtToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"content\":\"BB1 Talking Point 2\", \"themeId\":{{Theme}}, \"enabled\":true, \"scope\":\"district\", \"districts\":[{{BB1}}], \"referenceUrl\":\"http://BB1tp1.stuff\"}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/talkingpoints",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"talkingpoints"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "ed49b352-2b61-4a2b-ab17-8c9a651f3277",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "fc9bad99-ad29-46d8-a0f2-9df5a144a744",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "33335717-01bf-4ab0-ab98-12e5a280f1cb",
+			"key": "baseUrl",
+			"value": "http://localhost:8080/api"
+		},
+		{
+			"id": "6bdc3182-079a-452a-bdf0-2d7c70a023d1",
+			"key": "cloudBaseUrl",
+			"value": "https://grandcanyon-222321.appspot.com/api"
+		},
+		{
+			"id": "8e189c9b-c900-49e6-a896-9435db61312b",
+			"key": "rootToken",
+			"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlzcyI6ImxvY2FsaG9zdCIsImV4cCI6MTU0ODI5NDc1NywiaWF0IjoxNTQ4MjgwMzU3fQ.r2C7ka8lIOYIKIeW3Zz75IiPAlgfrLaJXqx2dkR4NE4"
+		},
+		{
+			"id": "c073eeb2-b6ce-431c-8b2f-62b90a063592",
+			"key": "districtId",
+			"value": ""
+		},
+		{
+			"id": "008284fc-6419-4e7d-a2b2-7438eaa62dc9",
+			"key": "districtToken",
+			"value": ""
+		}
+	],
+	"protocolProfileBehavior": {}
+}
