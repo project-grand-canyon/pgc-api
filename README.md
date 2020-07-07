@@ -54,6 +54,8 @@ The application expects to connect to a Google CloudSQL database. The database U
  * This step requires `npm` to be installed. It should install by default when you download [Node.js](https://nodejs.org/en/)
 3. Create and activate a super admin user by running
 ```
+
+# This results in a 500, but the operation likely worked. Confirm with the below SELECT query. (TODO: have this return 201)
 $ newman run src/test/InitSuperAdmin.postman_collection.json
 $ docker exec -it pgc-mysql mysql -u root -ppw 'USE core; SELECT * FROM admins;' 
 $ docker exec -it pgc-mysql mysql -u root -ppw 'UPDATE admins SET login_enabled = 1 WHERE admin_id = {admin id};'
