@@ -1,5 +1,7 @@
+.DS_Store
 .idea/
 y/
 target
 src/main/resources/config.properties
 src/main/resources/sentry.properties
+node_modules/
