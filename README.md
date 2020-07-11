@@ -20,10 +20,12 @@ API for [projectgrandcanyon.com](projectgrandcanyon.com), a project of [CCL](cit
  * You can verify that the container is there by running `docker ps`
 3. Initialize the database: 
 ```
-$ docker cp src/main/createTables.sql pgc-mysql:/
-$ docker exec -it pgc-mysql
-$ mysql -u root -ppw < createTables.sql
+$ docker cp src/main/resources/createTables.sql pgc-mysql:/
+$ docker exec -it pgc-mysql bash
+  # mysql -u root -ppw < createTables.sql
+  # exit
 ```
+ * You can use `docker start pgc-mysql` to relaunch the database in a future session
 4. Set the app config for running locally `$ cp src/main/resources/config.properties.local src/main/resources/config.properties`
 
 ### Using the CloudSQL Database
@@ -49,18 +51,19 @@ The application expects to connect to a Google CloudSQL database. The database U
 4. You can now run the app: `mvn clean jetty:run`
 
 ### Seed the database with dummy data
-1. Install [Postman](https://www.getpostman.com/)
+1. Install [Postman](https://www.postman.com/downloads/)
 2. Install Newman using `npm install newman`
  * This step requires `npm` to be installed. It should install by default when you download [Node.js](https://nodejs.org/en/)
 3. Create and activate a super admin user by running
 ```
 
 # This results in a 500, but the operation likely worked. Confirm with the below SELECT query. (TODO: have this return 201)
-$ newman run src/test/InitSuperAdmin.postman_collection.json
-$ docker exec -it pgc-mysql mysql -u root -ppw 'USE core; SELECT * FROM admins;' 
-$ docker exec -it pgc-mysql mysql -u root -ppw 'UPDATE admins SET login_enabled = 1 WHERE admin_id = {admin id};'
+$ node_modules/newman/bin/newman.js run src/test/InitSuperAdmin.postman_collection.json
+$ docker exec -it pgc-mysql mysql -u root -ppw -e 'USE core; SELECT * FROM admins;'
+# The query above should list one user called "admin"
+$ docker exec -it pgc-mysql mysql -u root -ppw -e 'USE core; UPDATE admins SET login_enabled = 1'
 ```
-4. Add additional dummy data using `newman run src/test/DummyData.postman_collection.json -e src/test/Data.postman_environment.json`
+4. Add additional dummy data using `node_modules/newman/bin/newman.js run src/test/DummyData.postman_collection.json -e src/test/Data.postman_environment.json`
 5. There will now be an admin user available for your use with username `admin` and password `password`
 
 ## Deployment
