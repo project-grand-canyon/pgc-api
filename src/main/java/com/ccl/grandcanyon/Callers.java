@@ -198,7 +198,6 @@ public class Callers {
   @GET
   @Path("{callerId}")
   @Produces(MediaType.APPLICATION_JSON)
-  @RolesAllowed(GCAuth.ANONYMOUS)
   public Response getById(@PathParam("callerId") int callerId)
       throws SQLException {
 
