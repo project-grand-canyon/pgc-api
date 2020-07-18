@@ -1,0 +1,1 @@
+ALTER TABLE callers ADD COLUMN notes varchar(10000);

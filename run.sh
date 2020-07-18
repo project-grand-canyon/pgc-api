@@ -30,4 +30,8 @@ init-db() {
   setup-dummy-data
 }
 
+start() {
+  mvn clean jetty:run
+}
+
 "$@"
