@@ -16,17 +16,19 @@ API for [projectgrandcanyon.com](projectgrandcanyon.com), a project of [CCL](cit
      * Verify that virtualization is turned on on your computer: Enter Task Manager. Switch to the performance tab at top, and check if Virtualization is enabled. If Virtualization is not enabled, turn off your computer, access your  computer bios (command key may vary by machine). In the bios there should be an option to turn on Virtualization setting in bios.
      * [Download and install Docker Desktop](https://docs.docker.com/get-docker/ "Download and install Docker Desktop"): If you are unable to simply download and run the installer, begin troubleshooting by verifying that your computer meets the system requirements for Docker.
      * Run Docker Desktop: An icon should appear on your taskbar. If you are unable to start docker try opening docker settings by right clicking on the icon and selecting settings then turning on “Expose daemon on tcp://localhost:2375 without TLS” setting. You can verify that docker is working properly by running `docker hello-world`
-2. Create the mysql container by executing `docker run --name pgc-mysql -e MYSQL_ROOT_PASSWORD=pw -d -p 3306:3306 mysql:5`
- * You can verify that the container is there by running `docker ps`
-3. Initialize the database: 
-```
-$ docker cp src/main/resources/createTables.sql pgc-mysql:/
-$ docker exec -it pgc-mysql bash
-  # mysql -u root -ppw < createTables.sql
-  # exit
-```
- * You can use `docker start pgc-mysql` to relaunch the database in a future session
-4. Set the app config for running locally `$ cp src/main/resources/config.properties.local src/main/resources/config.properties`
+
+2. Create and set up the db container by running `./run.sh setup-db` from within the repo directory.  You should see a
+   lot of output followed by "Container created successfully!".  There will now be an admin user available for your use
+   with username `admin` and password `password`.
+   
+   You can use `./run.sh stop-db-container`, to shut it down, and `./run.sh start-db-container` to relaunch it in a
+   future session.
+   
+   To start a mysql shell, use `./run.sh mysql`.
+   
+   To destroy the database in order to start over from scratch, you can use `./run.sh destroy-db`.
+
+3. Set the app config for running locally `$ cp src/main/resources/config.properties.local src/main/resources/config.properties`
 
 ### Using the CloudSQL Database
 1. Create a [GCP](https://cloud.google.com/) account, download gcloud, and authenticate
@@ -50,21 +52,18 @@ The application expects to connect to a Google CloudSQL database. The database U
 3. Confirm that Maven is using Java 8 with `mvn -version`
 4. You can now run the app: `mvn clean jetty:run`
 
-### Seed the database with dummy data
+### Regenerate the database dummy data via API
+Running ./run.sh setup-db will handle everything in normal cases, but in case you want to re-generate dummyData.sql
+using API calls (such as after changing how data is saved in the db) you can follow the process below.
+This will not affect your pgc-mysql database container -- it creates a temporary
+db container, and starts the API service pointing at that.
 1. Install [Postman](https://www.postman.com/downloads/)
 2. Install Newman using `npm install newman`
- * This step requires `npm` to be installed. It should install by default when you download [Node.js](https://nodejs.org/en/)
-3. Create and activate a super admin user by running
-```
+   * This step requires `npm` to be installed. It should install by default when you download [Node.js](https://nodejs.org/en/)
+3. Stop your database container and server if they are running.
+4. Run
+`./run.sh regenerate-dummy-data`
 
-# This results in a 500, but the operation likely worked. Confirm with the below SELECT query. (TODO: have this return 201)
-$ node_modules/newman/bin/newman.js run src/test/InitSuperAdmin.postman_collection.json
-$ docker exec -it pgc-mysql mysql -u root -ppw -e 'USE core; SELECT * FROM admins;'
-# The query above should list one user called "admin"
-$ docker exec -it pgc-mysql mysql -u root -ppw -e 'USE core; UPDATE admins SET login_enabled = 1'
-```
-4. Add additional dummy data using `node_modules/newman/bin/newman.js run src/test/DummyData.postman_collection.json -e src/test/Data.postman_environment.json`
-5. There will now be an admin user available for your use with username `admin` and password `password`
 
 ## Deployment
 Run: `mvn clean appengine:deploy -DINSTANCE_CONNECTION_NAME=instanceConnectionName -Duser=root -Dpassword=myPassword -Ddatabase=myDatabase`
