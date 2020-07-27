@@ -32,7 +32,6 @@ public class GCContextListener implements ServletContextListener {
 
     ServletContext servletContext = sce.getServletContext();
     Properties properties = new Properties();
-    String url;
     try {
       properties.load(servletContext.getResourceAsStream(
           "/WEB-INF/classes/config.properties"));
@@ -46,7 +45,11 @@ public class GCContextListener implements ServletContextListener {
       throw new RuntimeException(
           "Initialization failed: config.properties missing one or more required properties");
     }
-    url = properties.getProperty(sqlUrl);
+
+    String url = System.getenv("PGC_DB_URL");
+    if (url == null) {
+      url = properties.getProperty(sqlUrl);
+    }
     HikariConfig config = new HikariConfig();
     config.setJdbcUrl(url);
     config.setMaximumPoolSize(Integer.parseInt(properties.getProperty(sqlPoolSize, "3")));

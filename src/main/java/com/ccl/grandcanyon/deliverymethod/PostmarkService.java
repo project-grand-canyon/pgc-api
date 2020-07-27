@@ -9,11 +9,7 @@ import com.wildbit.java.postmark.client.data.model.message.MessageResponse;
 
 import java.util.Properties;
 import java.util.Queue;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.logging.Logger;
 
 public class PostmarkService implements DeliveryService {
