@@ -6,8 +6,22 @@ dbcontainer=pgc-mysql
 dbport=3306
 dummy_data_path=db/dummyData.sql
 
-start-db-container() {
+create-db-container() {
   docker run --name "$dbcontainer" -e MYSQL_ROOT_PASSWORD=pw -d -p $dbport:3306 mysql:5
+  cat <<EOF | docker exec -i "$dbcontainer" /bin/sh -c 'cat > /root/mysql-root.cnf'
+[client]
+user=root
+password=pw
+EOF
+}
+
+start-db-container() {
+  if docker container inspect "$dbcontainer" > /dev/null
+  then
+    docker start "$dbcontainer"
+  else
+    create-db-container
+  fi
 }
 
 stop-db-container() {
@@ -52,21 +66,25 @@ regenerate-dummy-data() {
     await-server-startup
 
     seed-database-newman
-    mysql-dump -t > "$dummy_data_path"
+    mysql-dump core -t > "$dummy_data_path"
     echo "Saved to $dummy_data_path"
     stop-db-container
     _destroy-db
   )
 }
 
+_tty_opt() { [ -t 0 ] && printf -- '-t'; }
+
+db-container-shell() {
+  docker exec -i $(_tty_opt) "$dbcontainer" /bin/bash "$@"
+}
+
 mysql() {
-  local tty=
-  if [ -t 0 ]; then tty='-t'; fi
-  docker exec -i $tty "$dbcontainer" mysql -u root -ppw "$@"
+  docker exec -i $(_tty_opt) "$dbcontainer" mysql --defaults-extra-file='~/mysql-root.cnf' "$@"
 }
 
 mysql-dump() {
-  docker exec -i "$dbcontainer" mysqldump -u root -ppw core "$@"
+  docker exec -i "$dbcontainer" mysqldump --defaults-extra-file='~/mysql-root.cnf' "$@"
 }
 
 init-db-schema() {
