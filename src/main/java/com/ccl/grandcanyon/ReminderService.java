@@ -295,7 +295,8 @@ public class ReminderService {
 
       Message reminderMessage = new Message();
       reminderMessage.setSubject("It's time to call about climate change");
-      reminderMessage.setBody(this.regularCallInReminderHTML.replaceAll("cclcalls.org/call/", callInPageUrl));
+      String utmLinkifiesCallInPageUrl = callInPageUrl + "&utm_source=monthly_notification&utm_medium=email&utm_source=mcc";
+      reminderMessage.setBody(this.regularCallInReminderHTML.replaceAll("cclcalls.org/call/", utmLinkifiesCallInPageUrl));
       try {
         emailReminderSent = emailDeliveryService.sendHtmlMessage(caller, reminderMessage);
         if (emailReminderSent) {
