@@ -6,3 +6,6 @@ src/main/resources/config.properties
 src/main/resources/sentry.properties
 node_modules/
 /package-lock.json
+*.iml
+regen-dummy-data.server.log
+saved_state
