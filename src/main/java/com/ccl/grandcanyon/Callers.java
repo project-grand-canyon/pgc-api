@@ -27,7 +27,7 @@ import java.util.logging.Logger;
 public class Callers {
 
   private static final String SQL_SELECT_CALLER =
-      "SELECT c.*, ccm.contact_method, r.day_of_month, r.last_reminder_timestamp, last_call_timestamp FROM callers c " +
+      "SELECT c.*, ccm.contact_method, r.day_of_month, r.last_reminder_timestamp, last_call_timestamp, notes FROM callers c " +
       "LEFT JOIN callers_contact_methods AS ccm ON c.caller_id = ccm.caller_id " +
       "LEFT JOIN reminders AS r ON c.caller_id = r.caller_id " +
       "LEFT JOIN (SELECT caller_id,  MAX(created) as last_call_timestamp FROM calls GROUP by caller_id) cls ON c.caller_id = cls.caller_id";
@@ -60,7 +60,8 @@ public class Callers {
           Caller.ZIPCODE + " = ?, " +
           Caller.CCL_ID + " = ?, " +
           Caller.REFERRER + " = ?, " +
-          Caller.PAUSED + " = ? " +
+          Caller.PAUSED + " = ?, " +
+          Caller.NOTES + " = ? " +
           "WHERE " + Caller.CALLER_ID + " = ?";
 
   private static final String SQL_DELETE_CALLER_CONTACT_METHODS =
@@ -162,6 +163,7 @@ public class Callers {
       statement.setString(idx++, caller.getCclId());
       statement.setString(idx++, caller.getReferrer());
       statement.setBoolean(idx++, caller.isPaused());
+      statement.setString(idx++, caller.getNotes());
       statement.setInt(idx++, callerId);
       statement.executeUpdate();
 
@@ -294,10 +296,7 @@ public class Callers {
     finally {
       conn.close();
     }
-
-
   }
-
 
   private boolean sendOneTimeMessage(
       Caller caller,
@@ -314,7 +313,7 @@ public class Callers {
       catch (Exception e) {
         logger.warning(String.format(
             "Failed to send one-time SMS message to caller {id: %d name %s %s}: %s",
-            caller.getCallerId(), caller.getFirstName(), caller .getLastName(), e.getMessage()));
+            caller.getCallerId(), caller.getFirstName(), caller.getLastName(), e.getMessage()));
         smsMessageSent = false;
       }
     }

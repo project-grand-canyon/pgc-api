@@ -26,6 +26,7 @@ public class Caller extends GCBase {
   public static final String DAY_OF_MONTH = Reminder.DAY_OF_MONTH;
   public static final String LAST_REMINDER_TIMESTAMP = Reminder.LAST_REMINDER_TIMESTAMP;
   public static final String LAST_CALL_TIMESTAMP = "last_call_timestamp";
+  public static final String NOTES = "notes";
 
   private int callerId;
   private String firstName;
@@ -41,6 +42,7 @@ public class Caller extends GCBase {
   private String referrer;
   private Timestamp lastReminderTimestamp;
   private Timestamp lastCallTimestamp;
+  private String notes;
 
 
   /**
@@ -64,6 +66,7 @@ public class Caller extends GCBase {
     lastCallTimestamp = rs.getTimestamp(LAST_CALL_TIMESTAMP);
     cclId = rs.getString(CCL_ID);
     referrer = rs.getString(REFERRER);
+    notes = rs.getString(NOTES);
     this.contactMethods = new ArrayList<>();
     do {
       String cm = rs.getString(CONTACT_METHOD);
@@ -175,4 +178,6 @@ public class Caller extends GCBase {
   public Timestamp getLastCallTimestamp() {
     return lastCallTimestamp;
   }
+
+  public String getNotes() { return notes; }
 }

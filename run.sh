@@ -29,6 +29,7 @@ stop-db-container() {
 }
 
 create-admin() {
+  # creates admin user with credentials "admin" / "password"
   cat <<EOF | mysql core
 INSERT INTO admins (user_name, token, login_enabled, is_root)
 VALUES ('admin', 'OVrhTP2wUe1S8UBKZv9cCr_uVa3ZeSRKEc6RXLSm_HI', true, true);
@@ -89,10 +90,16 @@ mysql-dump() {
 
 init-db-schema() {
   mysql <src/main/resources/createTables.sql
+  for f in db/migrations/*
+  do
+    echo "Running migration: $f"
+    mysql core <"$f"
+  done
 }
 
 init-db() {
   init-db-schema
+  echo "Importing dummy data from $dummy_data_path"
   mysql core <"$dummy_data_path"
 }
 
@@ -117,6 +124,11 @@ setup-db() {
   echo "Database started, initializing..."
   init-db
   echo "Database container created successfully!"
+}
+
+drop-and-reinit-core-db() {
+  echo "DROP DATABASE IF EXISTS core;" | mysql
+  init-db
 }
 
 _destroy-db() {
