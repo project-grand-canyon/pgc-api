@@ -6,8 +6,22 @@ dbcontainer=pgc-mysql
 dbport=3306
 dummy_data_path=db/dummyData.sql
 
-start-db-container() {
+create-db-container() {
   docker run --name "$dbcontainer" -e MYSQL_ROOT_PASSWORD=pw -d -p $dbport:3306 mysql:5
+  cat <<EOF | docker exec -i "$dbcontainer" /bin/sh -c 'cat > /root/mysql-root.cnf'
+[client]
+user=root
+password=pw
+EOF
+}
+
+start-db-container() {
+  if docker container inspect "$dbcontainer" > /dev/null
+  then
+    docker start "$dbcontainer"
+  else
+    create-db-container
+  fi
 }
 
 stop-db-container() {
@@ -15,6 +29,7 @@ stop-db-container() {
 }
 
 create-admin() {
+  # creates admin user with credentials "admin" / "password"
   cat <<EOF | mysql core
 INSERT INTO admins (user_name, token, login_enabled, is_root)
 VALUES ('admin', 'OVrhTP2wUe1S8UBKZv9cCr_uVa3ZeSRKEc6RXLSm_HI', true, true);
@@ -52,29 +67,39 @@ regenerate-dummy-data() {
     await-server-startup
 
     seed-database-newman
-    mysql-dump -t > "$dummy_data_path"
+    mysql-dump core -t > "$dummy_data_path"
     echo "Saved to $dummy_data_path"
     stop-db-container
     _destroy-db
   )
 }
 
+_tty_opt() { [ -t 0 ] && printf -- '-t'; }
+
+db-container-shell() {
+  docker exec -i $(_tty_opt) "$dbcontainer" /bin/bash "$@"
+}
+
 mysql() {
-  local tty=
-  if [ -t 0 ]; then tty='-t'; fi
-  docker exec -i $tty "$dbcontainer" mysql -u root -ppw "$@"
+  docker exec -i $(_tty_opt) "$dbcontainer" mysql --defaults-extra-file='~/mysql-root.cnf' "$@"
 }
 
 mysql-dump() {
-  docker exec -i "$dbcontainer" mysqldump -u root -ppw core "$@"
+  docker exec -i "$dbcontainer" mysqldump --defaults-extra-file='~/mysql-root.cnf' "$@"
 }
 
 init-db-schema() {
   mysql <src/main/resources/createTables.sql
+  for f in db/migrations/*
+  do
+    echo "Running migration: $f"
+    mysql core <"$f"
+  done
 }
 
 init-db() {
   init-db-schema
+  echo "Importing dummy data from $dummy_data_path"
   mysql core <"$dummy_data_path"
 }
 
@@ -99,6 +124,11 @@ setup-db() {
   echo "Database started, initializing..."
   init-db
   echo "Database container created successfully!"
+}
+
+drop-and-reinit-core-db() {
+  echo "DROP DATABASE IF EXISTS core;" | mysql
+  init-db
 }
 
 _destroy-db() {
