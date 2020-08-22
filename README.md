@@ -56,6 +56,11 @@ The application expects to connect to a Google CloudSQL database. The database U
 6. Populate the database with data using `newman run src/test/DummyData.postman_collection.json -e src/test/Data.postman_environment.json`
  * This step also initializes an admin. To login using this admin use  the username 'admin' and the password 'password'
 
+###Modifying Automated Emails
+1. Emails can be found in the `src/main/resources` folder. 
+2. To edit an email, copy the contents of the  `emailName.mjml` into a [convenient mjml editor](https://mjml.io/try-it-live).
+3. Then copy both the modified `emailName.mjml` and the resulting `emailName.html` back into their appropriate files. 
+
 ###Deployment
 Run this command: `mvn clean appengine:deploy -DINSTANCE_CONNECTION_NAME=instanceConnectionName -Duser=root -Dpassword=myPassword -Ddatabase=myDatabase`
  
