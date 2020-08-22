@@ -64,6 +64,10 @@ db container, and starts the API service pointing at that.
 4. Run
 `./run.sh regenerate-dummy-data`
 
+###Modifying Automated Emails
+1. Emails can be found in the `src/main/resources` folder. 
+2. To edit an email, copy the contents of the  `emailName.mjml` into a [convenient mjml editor](https://mjml.io/try-it-live).
+3. Then copy both the modified `emailName.mjml` and the resulting `emailName.html` back into their appropriate files. 
 
 ## Deployment
 Run: `mvn clean appengine:deploy -DINSTANCE_CONNECTION_NAME=instanceConnectionName -Duser=root -Dpassword=myPassword -Ddatabase=myDatabase`
