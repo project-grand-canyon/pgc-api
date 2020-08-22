@@ -69,7 +69,7 @@ public class GCContextListener implements ServletContextListener {
     }
 
     try {
-      AdminWelcomeService.init();
+      AdminWelcomeService.init(properties);
     }
     catch (Exception e) {
       throw new RuntimeException(
