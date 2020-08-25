@@ -1,0 +1,49 @@
+<mjml>
+  <mj-body>
+    <mj-section>
+      <mj-column width="100px" vertical-align="middle">
+        <mj-image src="https://cclcalls.org/img/ccl-logo-thumbnail.png"></mj-image>
+      </mj-column>
+      <mj-column width="66%" vertical-align="middle">
+        <mj-text font-size="24px">CCL's Monthly Calling Campaign</mj-text>
+      </mj-column>
+      <mj-column width="100%">
+        <mj-divider border-color="#000"></mj-divider>
+      </mj-column>
+    </mj-section>
+    <mj-section>
+      <mj-column width="25%" vertical-align="middle">
+        <mj-image width="100px" src="https://cclcalls.org/img/capitol.png" />
+      </mj-column>
+      <mj-column width="75%" vertical-align="middle">
+        <mj-text padding="20px" align="center" font-size="24px" line-height="35px">
+          Thank you for signing up as an admin with the Monthly Calling Campaign.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section>
+      <mj-column>
+        <mj-text font-size="16px">
+          I have signed up as an Admin. When can I expect to be able to login?
+        </mj-text>
+        <mj-text font-size="14px">
+          Before you can login, your admin account must be approved by a CCL staff-member. This might take a few days. We appreciate your patience. We'll be in touch with you with further instructions after your admin account is approved.
+        </mj-text>
+        <mj-text font-size="16px">
+          What else can I do to help the Monthly Calling Campaign?
+        </mj-text>
+        <mj-text font-size="14px">
+          If you have not already signed up as a caller, please do so <a href="cclcalls.org/signup">here</a>. Signing up as a caller will help you to understand the program that you are administering.
+        </mj-text>
+        <mj-text font-size="16px">
+          If you have any additional questions, please to respond to this email.
+        </mj-text>
+        <mj-text font-size="14px">
+          Thank you, </br>
+          The MCC Team
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>
