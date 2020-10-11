@@ -28,13 +28,16 @@ public class Stats {
       "SELECT COUNT(caller_id) as numCallers, MONTH(created) as month, YEAR(created) AS year FROM callers where paused = false";
 
   private static final String SQL_COUNT_ACTIVE_CALLERS =
-      "SELECT COUNT(caller_id) as numCallers, month, year from calls";
+      "SELECT COUNT(c.caller_id) as numCallers, c.month, c.year FROM calls c JOIN callers clr ON c.caller_id = clr.caller_id";
 
   private static final String SQL_COUNT_REMINDERS =
       "SELECT COUNT(*) as numReminders, MONTH(time_sent) as month, YEAR(time_sent) AS year FROM reminder_history";
 
   private static final String GROUP_BY_MONTH =
       " GROUP BY " + Call.MONTH + ", " + Call.YEAR;
+
+  private static final String GROUP_BY_MONTH_ACTIVE_CALLERS =
+      " GROUP BY c." + Call.MONTH + ", c." + Call.YEAR;
 
   // configuration property name
   final static String RECENT_DAY_COUNT = "recentDayCount";
@@ -78,7 +81,7 @@ public class Stats {
       rs2.close();
 
       if (hasPrivilege) {
-        ResultSet rs3 = conn.createStatement().executeQuery(SQL_COUNT_ACTIVE_CALLERS + GROUP_BY_MONTH);
+        ResultSet rs3 = conn.createStatement().executeQuery(SQL_COUNT_ACTIVE_CALLERS + GROUP_BY_MONTH_ACTIVE_CALLERS);
         getActiveCallers(rs3, stats);
         rs3.close();
 
@@ -106,9 +109,10 @@ public class Stats {
     boolean hasPrivilege = requestContext.getProperty(GCAuth.CURRENT_PRINCIPAL) != null;
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
-      String whereClause = " WHERE " + Call.DISTRICT_ID + " = ?";
-      PreparedStatement callStatement = conn.prepareStatement(SQL_SELECT_CALLS + whereClause);
+      String whereClauseCalls = " WHERE " + Call.DISTRICT_ID + " = ?";
+      PreparedStatement callStatement = conn.prepareStatement(SQL_SELECT_CALLS + whereClauseCalls);
       callStatement.setInt(1, districtId);
+
       ResultSet rs = callStatement.executeQuery();
 
       List<Call> calls = new ArrayList<>();
@@ -128,8 +132,9 @@ public class Stats {
       rs2.close();
 
       if (hasPrivilege) {
+        String whereClauseCallers = " WHERE clr." + Caller.DISTRICT_ID + " = ?";
         PreparedStatement activeCallerStatement = conn.prepareStatement(SQL_COUNT_ACTIVE_CALLERS +
-            whereClause + GROUP_BY_MONTH);
+            whereClauseCallers + GROUP_BY_MONTH_ACTIVE_CALLERS);
         activeCallerStatement.setInt(1, districtId);
         ResultSet rs3 = activeCallerStatement.executeQuery();
         getActiveCallers(rs3, stats);
@@ -155,18 +160,13 @@ public class Stats {
   private void getCallStats(
       List<Call> calls,
       GlobalStats stats) {
-
-    Map<Integer, Integer> callsByDistrict = new HashMap<>();
     SortedMap<YearMonth, Integer> callsByMonth = new TreeMap<>();
     int totalRecentCalls = 0;
 
     Timestamp isRecentTime = new Timestamp(System.currentTimeMillis() - recencyInterval);
 
     for (Call call : calls) {
-
       // this increments the value if it exists, otherwise sets it to 1
-      callsByDistrict.merge(call.getDistrictId(), 1, (prev, v) -> prev+v);
-
       YearMonth yearMonth = YearMonth.of(call.getYear(), call.getMonth());
       callsByMonth.merge(yearMonth, 1, (prev, v) -> prev+v);
 
