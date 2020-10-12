@@ -12,6 +12,9 @@ public class GlobalStats {
   private int recentDayCount;
   private int totalRecentCalls;
 
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private Integer totalRecentActiveCallers;
+
   private SortedMap<YearMonth, Integer> callsByMonth;
   private SortedMap<YearMonth, Integer> callersByMonth;
 
@@ -83,5 +86,13 @@ public class GlobalStats {
 
   public void setRemindersByMonth(SortedMap<YearMonth, Integer> remindersByMonth) {
     this.remindersByMonth = remindersByMonth;
+  }
+
+  public Integer getTotalRecentActiveCallers() {
+    return totalRecentActiveCallers;
+  }
+
+  public void setTotalRecentActiveCallers(Integer totalRecentActiveCallers) {
+    this.totalRecentActiveCallers = totalRecentActiveCallers;
   }
 }
