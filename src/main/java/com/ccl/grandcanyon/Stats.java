@@ -27,8 +27,16 @@ public class Stats {
   private static final String SQL_COUNT_CALLERS =
       "SELECT COUNT(caller_id) as numCallers, MONTH(created) as month, YEAR(created) AS year FROM callers where paused = false";
 
-  private static final String SQL_COUNT_ACTIVE_CALLERS =
-      "SELECT COUNT(caller_id) as numCallers, month, year from calls";
+  private static final String SQL_COUNT_ACTIVE_CALLERS_TOTAL =
+      "SELECT count(*) as numCallers FROM " +
+              "(SELECT MAX(c.created) call_time, c.caller_id FROM calls c GROUP BY c.caller_id) lc";
+
+  private static final String SQL_COUNT_ACTIVE_CALLERS_DISTRICT =
+          "SELECT count(*) as numCallers FROM " +
+                  "(SELECT MAX(c.created) call_time, c.caller_id FROM calls c JOIN callers clr on c.caller_id = clr.caller_id WHERE clr.district_id = ? GROUP BY c.caller_id) lc";
+
+  private static final String SQL_COUNT_ACTIVE_CALLERS_BY_MONTH =
+      "SELECT COUNT(c.caller_id) as numCallers, c.month, c.year FROM calls c JOIN callers clr ON c.caller_id = clr.caller_id";
 
   private static final String SQL_COUNT_REMINDERS =
       "SELECT COUNT(*) as numReminders, MONTH(time_sent) as month, YEAR(time_sent) AS year FROM reminder_history";
@@ -36,10 +44,14 @@ public class Stats {
   private static final String GROUP_BY_MONTH =
       " GROUP BY " + Call.MONTH + ", " + Call.YEAR;
 
+  private static final String GROUP_BY_MONTH_ACTIVE_CALLERS =
+      " GROUP BY c." + Call.MONTH + ", c." + Call.YEAR;
+
   // configuration property name
   final static String RECENT_DAY_COUNT = "recentDayCount";
   private static int recentDayCount;
   private static long recencyInterval;
+  private static String whereClauseRecency;
 
   @Context
   UriInfo uriInfo;
@@ -50,8 +62,10 @@ public class Stats {
 
 
   static void init(Properties properties) {
-    recentDayCount = Integer.parseInt(properties.getProperty(RECENT_DAY_COUNT, "30"));
+    String recentDayCountStr = properties.getProperty(RECENT_DAY_COUNT, "30");
+    recentDayCount = Integer.parseInt(recentDayCountStr);
     recencyInterval = TimeUnit.DAYS.toMillis(recentDayCount);
+    whereClauseRecency = " WHERE call_time > DATE_SUB(NOW(), INTERVAL " + recentDayCountStr + " DAY);";
   }
 
 
@@ -78,13 +92,20 @@ public class Stats {
       rs2.close();
 
       if (hasPrivilege) {
-        ResultSet rs3 = conn.createStatement().executeQuery(SQL_COUNT_ACTIVE_CALLERS + GROUP_BY_MONTH);
-        getActiveCallers(rs3, stats);
+        ResultSet rs3 = conn.createStatement().executeQuery(SQL_COUNT_ACTIVE_CALLERS_BY_MONTH + GROUP_BY_MONTH_ACTIVE_CALLERS);
+        getActiveCallersByMonth(rs3, stats);
         rs3.close();
 
         ResultSet rs4 = conn.createStatement().executeQuery(SQL_COUNT_REMINDERS + GROUP_BY_MONTH);
         getReminderStats(rs4, stats);
         rs4.close();
+
+        PreparedStatement recentActiveCallersStatement = conn.prepareStatement(SQL_COUNT_ACTIVE_CALLERS_TOTAL + whereClauseRecency);
+        ResultSet rs5 = recentActiveCallersStatement.executeQuery();
+        if (rs5.next()) {
+          stats.setTotalRecentActiveCallers(rs5.getInt("numCallers"));
+        }
+        rs5.close();
       }
       return Response.ok(stats).build();
 
@@ -106,9 +127,10 @@ public class Stats {
     boolean hasPrivilege = requestContext.getProperty(GCAuth.CURRENT_PRINCIPAL) != null;
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
-      String whereClause = " WHERE " + Call.DISTRICT_ID + " = ?";
-      PreparedStatement callStatement = conn.prepareStatement(SQL_SELECT_CALLS + whereClause);
+      String whereClauseCalls = " WHERE " + Call.DISTRICT_ID + " = ?";
+      PreparedStatement callStatement = conn.prepareStatement(SQL_SELECT_CALLS + whereClauseCalls);
       callStatement.setInt(1, districtId);
+
       ResultSet rs = callStatement.executeQuery();
 
       List<Call> calls = new ArrayList<>();
@@ -128,11 +150,12 @@ public class Stats {
       rs2.close();
 
       if (hasPrivilege) {
-        PreparedStatement activeCallerStatement = conn.prepareStatement(SQL_COUNT_ACTIVE_CALLERS +
-            whereClause + GROUP_BY_MONTH);
+        String whereClauseCallers = " WHERE clr." + Caller.DISTRICT_ID + " = ?";
+        PreparedStatement activeCallerStatement = conn.prepareStatement(SQL_COUNT_ACTIVE_CALLERS_BY_MONTH +
+            whereClauseCallers + GROUP_BY_MONTH_ACTIVE_CALLERS);
         activeCallerStatement.setInt(1, districtId);
         ResultSet rs3 = activeCallerStatement.executeQuery();
-        getActiveCallers(rs3, stats);
+        getActiveCallersByMonth(rs3, stats);
         rs3.close();
 
         String reminderWhereClause = " WHERE " + ReminderStatus.CALLER_DISTRICT_ID + " = ?";
@@ -142,6 +165,14 @@ public class Stats {
         ResultSet rs4 = reminderStatement.executeQuery();
         getReminderStats(rs4, stats);
         rs4.close();
+
+        PreparedStatement recentActiveCallersStatement = conn.prepareStatement(SQL_COUNT_ACTIVE_CALLERS_DISTRICT + whereClauseRecency);
+        recentActiveCallersStatement.setInt(1, districtId);
+        ResultSet rs5 = recentActiveCallersStatement.executeQuery();
+        if (rs5.next()) {
+          stats.setTotalRecentActiveCallers(rs5.getInt("numCallers"));
+        }
+        rs5.close();
       }
       return Response.ok(stats).build();
     }
@@ -155,18 +186,13 @@ public class Stats {
   private void getCallStats(
       List<Call> calls,
       GlobalStats stats) {
-
-    Map<Integer, Integer> callsByDistrict = new HashMap<>();
     SortedMap<YearMonth, Integer> callsByMonth = new TreeMap<>();
     int totalRecentCalls = 0;
 
     Timestamp isRecentTime = new Timestamp(System.currentTimeMillis() - recencyInterval);
 
     for (Call call : calls) {
-
       // this increments the value if it exists, otherwise sets it to 1
-      callsByDistrict.merge(call.getDistrictId(), 1, (prev, v) -> prev+v);
-
       YearMonth yearMonth = YearMonth.of(call.getYear(), call.getMonth());
       callsByMonth.merge(yearMonth, 1, (prev, v) -> prev+v);
 
@@ -216,7 +242,7 @@ public class Stats {
   }
 
 
-  private void getActiveCallers(
+  private void getActiveCallersByMonth(
       ResultSet rs,
       GlobalStats stats) throws SQLException {
 
@@ -233,7 +259,6 @@ public class Stats {
     }
     stats.setActiveCallersByMonth(activeCallersByMonth);
   }
-
 
   private void getReminderStats(
       ResultSet rs,
