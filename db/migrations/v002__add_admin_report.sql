@@ -1,0 +1,1 @@
+ALTER TABLE admins ADD COLUMN `most_recent_report_send_time` datetime DEFAULT null;
