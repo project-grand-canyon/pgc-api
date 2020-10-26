@@ -1,0 +1,50 @@
+<mjml>
+  <mj-body>
+    <mj-section>
+      <mj-column width="100px" vertical-align="middle">
+        <mj-image src="https://cclcalls.org/img/ccl-logo-thumbnail.png"></mj-image>
+      </mj-column>
+      <mj-column width="66%" vertical-align="middle">
+        <mj-text font-size="24px">CCL's Monthly Calling Campaign</mj-text>
+      </mj-column>
+      <mj-column width="100%">
+        <mj-divider border-color="#000"></mj-divider>
+      </mj-column>
+    </mj-section>
+    <mj-section>
+      <mj-column width="25%" vertical-align="middle">
+        <mj-image width="100px" src="https://cclcalls.org/img/capitol.png" />
+      </mj-column>
+      <mj-column width="75%" vertical-align="middle">
+        <mj-text padding="20px" align="center" font-size="24px" line-height="35px">
+          Weekly District Activity Report
+        </mj-text>
+      </mj-column>
+    </mj-section>
+    <mj-section>
+      <mj-column>
+        <mj-text font-size="14px">
+Dear MCC admin,
+        </mj-text>
+        <mj-text font-size="14px">
+Here is a report of the past one week of activity in the congressional district(s) that you administer. Thank you for your efforts helping and encouraging people to lobby Congress about climate change!
+        </mj-text>
+        <mj-text font-family="courier" font-size="14px">
+Past week calls, Past week callers, Total enrolled, Past week enrolled
+        </mj-text>
+				<mj-text font-family="courier" font-size="14px">
+          <pre>
+report_data
+          </pre>
+        </mj-text>
+        <mj-text font-size="14px">
+          "Past week calls" and "Past week callers" will differ when a single caller calls more than one member of Congress (for example, their Representative and both Senators). More data is available in the <a href=admin.cclcalls.org>admin tool</a>. If you have any feedback or questions, you can offer them in a reply to this email.
+        </mj-text>
+        <mj-text font-size="14px">
+          Thank you, </br>
+          The MCC Team
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

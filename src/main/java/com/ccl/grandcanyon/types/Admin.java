@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +22,7 @@ public class Admin extends GCBase {
   public static final String TOKEN = "token";
   public static final String DISTRICT_ID = "district_id";
   public static final String LOGIN_ENABLED = "login_enabled";
+  public static final String MOST_RECENT_REPORT_SEND_TIME = "most_recent_report_send_time";
 
 
   private int adminId;
@@ -29,6 +31,7 @@ public class Admin extends GCBase {
   private List<Integer> districts;
   private boolean isRoot;
   private boolean loginEnabled;
+  private Timestamp mostRecentReportSendTime;
 
   @JsonInclude(JsonInclude.Include.NON_NULL)
   private String password;
@@ -47,6 +50,7 @@ public class Admin extends GCBase {
     this.isRoot = rs.getBoolean(IS_ROOT);
     this.token = rs.getString(TOKEN);
     this.loginEnabled = rs.getBoolean(LOGIN_ENABLED);
+    this.mostRecentReportSendTime = rs.getTimestamp(MOST_RECENT_REPORT_SEND_TIME);
     this.password = null;  // always
     this.districts = new ArrayList<>();
     do {
@@ -124,4 +128,11 @@ public class Admin extends GCBase {
     this.loginEnabled = loginEnabled;
   }
 
+  public Timestamp getMostRecentReportSendTime() {
+    return mostRecentReportSendTime;
+  }
+
+  public void setMostRecentReportSendTime(Timestamp mostRecentReportSendTime) {
+    this.mostRecentReportSendTime = mostRecentReportSendTime;
+  }
 }
