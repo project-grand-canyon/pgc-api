@@ -80,8 +80,6 @@ public class AdminWeeklyUpdater {
 
     private DeliveryService emailDeliveryService;
 
-    private DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
     private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 
     public static void init(Properties config) {
