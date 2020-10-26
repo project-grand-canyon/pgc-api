@@ -54,3 +54,6 @@ passwordResetTokenLifetime=10
 #Base web address of PGC application.  Should NOT include protocol portion (e.g. "http://").
 applicationBaseUrl=cclcalls.org
 adminApplicationBaseUrl=admin.cclcalls.org
+
+# How frequently, in minutes, the Admin Weekly updater should wake up to send reports
+adminWeeklyUpdaterInterval=60

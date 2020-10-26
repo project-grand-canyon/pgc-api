@@ -5,14 +5,13 @@ import com.nimbusds.jose.JOSEException;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
-import java.io.IOException;
-import java.util.Properties;
-import java.util.logging.Logger;
-
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
+import java.io.IOException;
+import java.util.Properties;
+import java.util.logging.Logger;
 
 
 @WebListener
@@ -77,6 +76,14 @@ public class GCContextListener implements ServletContextListener {
     catch (Exception e) {
       throw new RuntimeException(
               "Initialization failed: error initializing Admin Welcome service", e);
+    }
+
+    try {
+      AdminWeeklyUpdater.init(properties);
+    }
+    catch (Exception e) {
+      throw new RuntimeException(
+              "Initialization failed: error initializing Admin Weekly Updater service", e);
     }
 
     try {
