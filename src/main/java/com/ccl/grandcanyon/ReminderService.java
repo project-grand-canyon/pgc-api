@@ -485,8 +485,9 @@ public class ReminderService {
         return;
       }
 
-      if (dateTimeInDistrict.toLocalTime().isBefore(earliestReminder) ||
-              dateTimeInDistrict.toLocalTime().isAfter(latestReminder)) {
+      LocalTime currentTime = dateTimeInDistrict.toLocalTime();
+      if (currentTime.isBefore(earliestReminder) ||
+              currentTime.isAfter(latestReminder)) {
         logger.info("It's after hours in " + district.readableName() + ". Do nothing.");
         return;
       }
