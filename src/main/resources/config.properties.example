@@ -10,13 +10,13 @@ reminderServiceEnabled=true
 # How often, in minutes, the Reminder service should wake up to send reminder notifications to eligible callers.
 reminderServiceInterval=60
 
-# Earliest time of day to send reminders each day (hh:mm:ss-UTC offset).
-# Example: "09:00:00-05:00" is 9 am EST.
-earliestReminderTime=09:00:00-05:00
+# Earliest time of day to send reminders each day (hh:mm:ss).
+# Example: "09:00:00" is 9 am
+earliestReminderTime=09:00:00
 
-# Latest time of day to send reminders each day (hh:mm:ss-UTC offset).
-# Example: "18:00:00-05:00" is 6 pm EST.
-latestReminderTime=18:00:00-05:00
+# Latest time of day to send reminders each day (hh:mm:ss).
+# Example: "18:00:00" is 6 pm.
+latestReminderTime=18:00:00
 
 # How long, in days, before sending a second reminder to a caller if no call has been recorded since the first reminder
 secondReminderInterval=4

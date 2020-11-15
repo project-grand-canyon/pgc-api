@@ -1,0 +1,1 @@
+ALTER TABLE districts ADD COLUMN `time_zone` varchar(128) DEFAULT "US/Eastern";

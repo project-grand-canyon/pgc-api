@@ -4,6 +4,7 @@ y/
 target
 src/main/resources/config.properties
 src/main/resources/sentry.properties
+src/main/resources/config.properties.prod
 node_modules/
 /package-lock.json
 *.iml

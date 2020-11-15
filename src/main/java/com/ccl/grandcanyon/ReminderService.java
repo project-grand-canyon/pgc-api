@@ -48,6 +48,9 @@ public class ReminderService {
           Reminder.REMINDER_MONTH + " = ? " +
           "WHERE " + Reminder.CALLER_ID + " = ?";
 
+  private final static String SQL_SELECT_REP_DISTRICTS =
+          "SELECT * FROM districts WHERE district_number >= 0";
+
 
   private final static String SQL_SELECT_CALLERS =
       "SELECT r.*, c.*, ccm.contact_method, last_call_timestamp FROM reminders r " +
@@ -85,8 +88,8 @@ public class ReminderService {
   // number of days before sending second reminder to a caller
   private int secondReminderInterval;
 
-  private OffsetTime earliestReminder;
-  private OffsetTime latestReminder;
+  private LocalTime earliestReminder;
+  private LocalTime latestReminder;
 
   private ScheduledFuture reminderTask;
 
@@ -139,19 +142,19 @@ public class ReminderService {
     this.adminApplicationBaseUrl = config.getProperty(ADMIN_APPLICATION_BASE_URL);
 
     try {
-      this.earliestReminder = OffsetTime.parse(config.getProperty(EARLIEST_REMINDER_TIME));
+      this.earliestReminder = LocalTime.parse(config.getProperty(EARLIEST_REMINDER_TIME));
     }
     catch (DateTimeParseException e) {
-      logger.warning("Failed to parse property 'earliestReminderTime', using default of 09:00 EST");
-      this.earliestReminder = OffsetTime.of(9, 0, 0, 0, ZoneOffset.ofHours(-5));
+      logger.warning("Failed to parse property 'earliestReminderTime', using default of 09:00");
+      this.earliestReminder = LocalTime.of(9, 0);
     }
 
     try {
-      this.latestReminder = OffsetTime.parse(config.getProperty(LATEST_REMINDER_TIME));
+      this.latestReminder = LocalTime.parse(config.getProperty(LATEST_REMINDER_TIME));
     }
     catch (DateTimeParseException e) {
-      logger.warning("Failed to parse property 'latestReminderTime', using default of 18:00 EST");
-      this.latestReminder = OffsetTime.of(18, 0, 0, 0, ZoneOffset.ofHours(-5));
+      logger.warning("Failed to parse property 'latestReminderTime', using default of 18:00");
+      this.latestReminder = LocalTime.of(18, 0, 0, 0);
     }
 
     try {
@@ -429,38 +432,77 @@ public class ReminderService {
 
   class ReminderSender implements Runnable {
 
-    private boolean isAfterHours = true;
-
     @Override
     public void run() {
 
-      logger.info("Running reminder sender");
+      logger.info("Waking up Reminder Sender");
 
-      OffsetDateTime currentDateTime = OffsetDateTime.now(); //TODO: base this off each user's timezone?
+      Connection conn = null;
+      try {
+        conn = SQLHelper.getInstance().getConnection();
+        checkForStaleScripts(conn);
+        String query = SQL_SELECT_REP_DISTRICTS;
+        logger.info(query);
+        ResultSet rs = conn.createStatement().executeQuery(query);
+        while (rs.next()) {
+          District district = new District(rs);
+          run(district);
+        }
+      }
+      catch (Throwable e) {
+        logger.severe("Reminder service select districts failure: " + e.toString());
+      }
+      finally {
+        if (conn != null) {
+          try {
+            conn.close();
+          }
+          catch (SQLException e) {
+            logger.warning("Failed to close SQL connection during reminder check: " + e.getMessage());
+          }
+        }
+      }
+    }
 
-      DayOfWeek dayOfWeek = currentDateTime.getDayOfWeek();
+
+    private void run(District district) {
+
+      logger.info("Waking up reminder sender for " + district.readableName());
+
+      ZoneId timezoneId = ZoneId.of(district.getTimeZone());
+      LocalDateTime dateTimeInDistrict = LocalDateTime.now(timezoneId);
+      logger.info("Time in " + district.readableName() + ": " + dateTimeInDistrict + ". (Sending window:" + earliestReminder + "-" + latestReminder + ")");
+
+      DayOfWeek dayOfWeek = dateTimeInDistrict.getDayOfWeek();
       if (dayOfWeek.equals(DayOfWeek.SATURDAY) || dayOfWeek.equals(DayOfWeek.SUNDAY)) {
         logger.info("It's a weekend. Do nothing.");
         return;
       }
 
       holidayService.refresh();
-      if (holidayService.isHoliday(currentDateTime)) {
+      if (holidayService.isHoliday(dateTimeInDistrict.toLocalDate())) {
         logger.info("It's a holiday. Do nothing.");
         return;
       }
 
-      OffsetTime currentTime = currentDateTime.toOffsetTime();
-      if (currentTime.isBefore(earliestReminder) ||
-          currentTime.isAfter(latestReminder)) { //TODO: base this off each user's timezone?
-        logger.info("It's after hours. Do nothing.");
-        isAfterHours = true;
+      if (dateTimeInDistrict.toLocalTime().isBefore(earliestReminder) ||
+              dateTimeInDistrict.toLocalTime().isAfter(latestReminder)) {
+        logger.info("It's after hours in " + district.readableName() + ". Do nothing.");
         return;
       }
 
+      System.out.println("The sending window is open for " + district.readableName());
+
+      sendCallNotifications(district);
+
+      return;
+    }
+
+    private void sendCallNotifications(District district) {
       // In order to select all callers who might get a reminder today, first
       // determine what days of the month are in play.  Today is always included.
       Set<ReminderDate> datesToQuery = new HashSet<>();
+      LocalDateTime currentDateTime = LocalDateTime.now(ZoneId.of(district.getTimeZone()));
       datesToQuery.add(new ReminderDate(currentDateTime.toLocalDate()));
 
       Set<ReminderDate> missedDates = getMissedDaysBefore(currentDateTime.toLocalDate());
@@ -469,7 +511,7 @@ public class ReminderService {
       StringBuilder whereClause = new StringBuilder(" WHERE " + Reminder.DAY_OF_MONTH);
       if (datesToQuery.size() == 1) {
         whereClause.append(" = ").
-            append(datesToQuery.iterator().next().getDay());
+                append(datesToQuery.iterator().next().getDay());
       }
       else {
         whereClause.append(" IN (");
@@ -480,22 +522,19 @@ public class ReminderService {
         whereClause.append(")");
       }
 
+      whereClause.append(" AND c." + Caller.DISTRICT_ID + " = " + district.getDistrictId());
+
       Connection conn = null;
       int sentCount = 0;
       try {
         conn = SQLHelper.getInstance().getConnection();
 
-        // once a day check for stale district scripts
-        if (isAfterHours) {
-          isAfterHours = false;
-          logger.info("Reminder Service:  Checking for stale district scripts.");
-          checkForStaleScripts(conn);
-        }
 
         String query = SQL_SELECT_CALLERS + whereClause.toString();
         logger.info(query);
         ResultSet rs = conn.createStatement().executeQuery(query);
         while (rs.next()) {
+          logger.info("Sending for " + new Caller(rs).getCallerId());
           Reminder reminder = new Reminder(rs);
           ReminderDate correspondingReminderDate = getCorrespondingReminderDate(reminder, datesToQuery);
           if (correspondingReminderDate != null && !reminder.hasBeenSent(correspondingReminderDate)) {
@@ -508,12 +547,6 @@ public class ReminderService {
             }
           }
         }
-
-        // todo: send second reminders where applicable
-        /*
-          1. Get list of callers whose call date is today - <secondReminderInterval>
-          2. if first reminder sent but no call recorded, send second reminder.
-         */
       }
       catch (Throwable e) {
         logger.severe("Reminder service failure: " + e.toString());
@@ -530,6 +563,7 @@ public class ReminderService {
         }
       }
     }
+
 
     // Assumes number of missed days < 1 month
     private Set<ReminderDate> getMissedDaysBefore(LocalDate startingDate) {
