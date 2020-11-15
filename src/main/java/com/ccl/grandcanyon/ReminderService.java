@@ -470,40 +470,33 @@ public class ReminderService {
       logger.info("Waking up reminder sender for " + district.readableName());
 
       ZoneId timezoneId = ZoneId.of(district.getTimeZone());
-      LocalDateTime dateTimeInDistrict = LocalDateTime.now(timezoneId);
-      logger.info("Time in " + district.readableName() + ": " + dateTimeInDistrict + ". (Sending window:" + earliestReminder + "-" + latestReminder + ")");
+      LocalDateTime currentDateTime = LocalDateTime.now(timezoneId);
+      logger.info("Time in " + district.readableName() + ": " + currentDateTime + ". (Sending window:" + earliestReminder + "-" + latestReminder + ")");
 
-      DayOfWeek dayOfWeek = dateTimeInDistrict.getDayOfWeek();
+      DayOfWeek dayOfWeek = currentDateTime.getDayOfWeek();
       if (dayOfWeek.equals(DayOfWeek.SATURDAY) || dayOfWeek.equals(DayOfWeek.SUNDAY)) {
         logger.info("It's a weekend. Do nothing.");
         return;
       }
 
       holidayService.refresh();
-      if (holidayService.isHoliday(dateTimeInDistrict.toLocalDate())) {
+      if (holidayService.isHoliday(currentDateTime.toLocalDate())) {
         logger.info("It's a holiday. Do nothing.");
         return;
       }
 
-      LocalTime currentTime = dateTimeInDistrict.toLocalTime();
+      LocalTime currentTime = currentDateTime.toLocalTime();
       if (currentTime.isBefore(earliestReminder) ||
               currentTime.isAfter(latestReminder)) {
         logger.info("It's after hours in " + district.readableName() + ". Do nothing.");
         return;
       }
 
-      System.out.println("The sending window is open for " + district.readableName());
+      logger.info("The sending window is open for " + district.readableName());
 
-      sendCallNotifications(district);
-
-      return;
-    }
-
-    private void sendCallNotifications(District district) {
       // In order to select all callers who might get a reminder today, first
       // determine what days of the month are in play.  Today is always included.
       Set<ReminderDate> datesToQuery = new HashSet<>();
-      LocalDateTime currentDateTime = LocalDateTime.now(ZoneId.of(district.getTimeZone()));
       datesToQuery.add(new ReminderDate(currentDateTime.toLocalDate()));
 
       Set<ReminderDate> missedDates = getMissedDaysBefore(currentDateTime.toLocalDate());
