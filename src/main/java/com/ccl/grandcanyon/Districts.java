@@ -1,8 +1,6 @@
 package com.ccl.grandcanyon;
 
-import com.ccl.grandcanyon.deliverymethod.DeliveryService;
 import com.ccl.grandcanyon.types.*;
-import com.ccl.grandcanyon.types.District;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
@@ -13,7 +11,10 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -46,7 +47,8 @@ public class Districts {
           District.REP_LAST_NAME + " = ?, " +
           District.REP_IMAGE_URL + " = ?, " +
           District.INFO + " = ?, " +
-          District.STATUS + " = ? " +
+          District.STATUS + " = ?," +
+          District.TIME_ZONE + " = ? " +
           "WHERE " + District.DISTRICT_ID + " = ?";
 
   private static final String SQL_DELETE_DISTRICT =
@@ -170,6 +172,7 @@ public class Districts {
       statement.setString(idx++, district.getInfo());
       String status = district.getStatus() == null ? null : district.getStatus().name();
       statement.setString(idx++, status);
+      statement.setString(idx++, district.getTimeZone());
       statement.setInt(idx, districtId);
       statement.executeUpdate();
 
