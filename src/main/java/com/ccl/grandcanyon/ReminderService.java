@@ -446,7 +446,7 @@ public class ReminderService {
         ResultSet rs = conn.createStatement().executeQuery(query);
         while (rs.next()) {
           District district = new District(rs);
-          run(district);
+          run(district, conn);
         }
       }
       catch (Throwable e) {
@@ -465,7 +465,7 @@ public class ReminderService {
     }
 
 
-    private void run(District district) {
+    private void run(District district, Connection conn) throws SQLException {
 
       logger.info("Waking up reminder sender for " + district.readableName());
 
@@ -518,41 +518,23 @@ public class ReminderService {
 
       whereClause.append(" AND c." + Caller.DISTRICT_ID + " = " + district.getDistrictId());
 
-      Connection conn = null;
+
       int sentCount = 0;
-      try {
-        conn = SQLHelper.getInstance().getConnection();
 
-
-        String query = SQL_SELECT_CALLERS + whereClause.toString();
-        logger.info(query);
-        ResultSet rs = conn.createStatement().executeQuery(query);
-        while (rs.next()) {
-          logger.info("Sending for " + new Caller(rs).getCallerId());
-          Reminder reminder = new Reminder(rs);
-          ReminderDate correspondingReminderDate = getCorrespondingReminderDate(reminder, datesToQuery);
-          if (correspondingReminderDate != null && !reminder.hasBeenSent(correspondingReminderDate)) {
-            Caller caller = new Caller(rs);
-            if (!caller.isPaused()) {
-              ReminderStatus reminderStatus = sendReminder(conn, caller, correspondingReminderDate);
-              if (reminderStatus.success()) {
-                sentCount++;
-              }
+      String query = SQL_SELECT_CALLERS + whereClause.toString();
+      logger.info(query);
+      ResultSet rs = conn.createStatement().executeQuery(query);
+      while (rs.next()) {
+        logger.info("Sending for " + new Caller(rs).getCallerId());
+        Reminder reminder = new Reminder(rs);
+        ReminderDate correspondingReminderDate = getCorrespondingReminderDate(reminder, datesToQuery);
+        if (correspondingReminderDate != null && !reminder.hasBeenSent(correspondingReminderDate)) {
+          Caller caller = new Caller(rs);
+          if (!caller.isPaused()) {
+            ReminderStatus reminderStatus = sendReminder(conn, caller, correspondingReminderDate);
+            if (reminderStatus.success()) {
+              sentCount++;
             }
-          }
-        }
-      }
-      catch (Throwable e) {
-        logger.severe("Reminder service failure: " + e.toString());
-      }
-      finally {
-        logger.info(String.format("Sent %s reminders", sentCount));
-        if (conn != null) {
-          try {
-            conn.close();
-          }
-          catch (SQLException e) {
-            logger.warning("Failed to close SQL connection during reminder check: " + e.getMessage());
           }
         }
       }
