@@ -206,6 +206,12 @@ public class District extends GCBase {
     }
   }
 
+  public Boolean needsStaleScriptNotification(Timestamp staleTime) {
+    return this.delegateScript == false && // if the script writing is delegated to CCL, then no notification is needed
+            (this.scriptModifiedTime == null || this.scriptModifiedTime.before(staleTime)) &&
+            this.getLastStaleScriptNotification().before(staleTime);
+  }
+
   public boolean isSenatorDistrict(){
     return getNumber() < 0;
   }
