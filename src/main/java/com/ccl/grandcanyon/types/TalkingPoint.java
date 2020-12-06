@@ -1,10 +1,7 @@
 package com.ccl.grandcanyon.types;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -21,6 +18,7 @@ public class TalkingPoint extends GCBase {
   public static final String STATE = "state";
   public static final String CREATED_BY = "created_by";
   public static final String REFERENCE_URL = "reference_url";
+  public static final String REVIEW_STATUS = "review_status";
 
   private int talkingPointId;
   private int themeId;
@@ -31,6 +29,7 @@ public class TalkingPoint extends GCBase {
   private List<String> states;
   private int createdBy;
   private String referenceUrl;
+  private ReviewStatus reviewStatus;
 
 
 
@@ -45,6 +44,7 @@ public class TalkingPoint extends GCBase {
     this.referenceUrl = rs.getString(REFERENCE_URL);
     this.districts = new ArrayList<>();
     this.states = new ArrayList<>();
+    this.reviewStatus = ReviewStatus.valueOf(rs.getString(REVIEW_STATUS));
     do {
       int districtId = rs.getInt(DISTRICT_ID);
       if (districtId != 0) {
@@ -137,4 +137,8 @@ public class TalkingPoint extends GCBase {
   public void setReferenceUrl(String referenceUrl) {
     this.referenceUrl = referenceUrl;
   }
+
+  public ReviewStatus getReviewStatus() { return reviewStatus; }
+
+  public void setReviewStatus(ReviewStatus reviewStatus) { this.reviewStatus = reviewStatus; }
 }

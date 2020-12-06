@@ -2,7 +2,7 @@ package com.ccl.grandcanyon;
 
 
 import com.ccl.grandcanyon.types.Admin;
-import com.ccl.grandcanyon.types.District;
+import com.ccl.grandcanyon.types.ReviewStatus;
 import com.ccl.grandcanyon.types.TalkingPoint;
 
 import javax.ws.rs.*;
@@ -13,7 +13,10 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Path("/talkingpoints")
 public class TalkingPoints {
@@ -21,7 +24,8 @@ public class TalkingPoints {
   private enum TalkingPointAction {
     CREATE,
     MODIFY,
-    DELETE
+    DELETE,
+    REVIEW
   }
 
   private static final String SQL_SELECT_TALKING_POINT =
@@ -36,8 +40,9 @@ public class TalkingPoints {
           TalkingPoint.SCOPE + ", " +
           TalkingPoint.THEME_ID + ", " +
           TalkingPoint.CREATED_BY + ", " +
-          TalkingPoint.REFERENCE_URL +
-          ") VALUES (?, ?, ?, ?, ?, ?)";
+          TalkingPoint.REFERENCE_URL + ", " +
+          TalkingPoint.REVIEW_STATUS +
+          ") VALUES (?, ?, ?, ?, ?, ?, ?)";
 
   private static final String SQL_INSERT_TALKING_POINT_STATES =
       "INSERT INTO talking_points_scopes (" +
@@ -55,7 +60,8 @@ public class TalkingPoints {
           TalkingPoint.ENABLED + " = ?, " +
           TalkingPoint.SCOPE + " = ?, " +
           TalkingPoint.THEME_ID + " = ?, " +
-          TalkingPoint.REFERENCE_URL + " = ? " +
+          TalkingPoint.REFERENCE_URL + " = ?, " +
+          TalkingPoint.REVIEW_STATUS + " = ? " +
           "WHERE " + TalkingPoint.TALKING_POINT_ID + " = ?";
 
   private static final String SQL_DELETE_TALKING_POINT =
@@ -86,6 +92,15 @@ public class TalkingPoints {
     try {
       checkPermissions(conn, talkingPoint, TalkingPointAction.CREATE);
 
+      ReviewStatus reviewStatus;
+
+      try {
+        checkPermissions(conn, talkingPoint, TalkingPointAction.REVIEW);
+        reviewStatus = ReviewStatus.promoted; // if the admin has review privileges, their talking point is automatically approved
+      } catch (ForbiddenException e) {
+        reviewStatus = ReviewStatus.waiting_review;
+      }
+
       // wrap multiple inserts in a transaction
       conn.setAutoCommit(false);
       PreparedStatement insert = conn.prepareStatement(SQL_CREATE_TALKING_POINT,
@@ -97,6 +112,7 @@ public class TalkingPoints {
       insert.setInt(idx++, talkingPoint.getThemeId());
       insert.setInt(idx++, ((Admin)requestContext.getProperty(GCAuth.CURRENT_PRINCIPAL)).getAdminId());
       insert.setString(idx++, talkingPoint.getReferenceUrl());
+      insert.setString(idx++, reviewStatus.name());
       insert.executeUpdate();
 
       int talkingPointId;
@@ -145,6 +161,15 @@ public class TalkingPoints {
       // use transaction
       conn.setAutoCommit(false);
 
+      ReviewStatus reviewStatus;
+
+      if (talkingPoint.getReviewStatus() == null || talkingPoint.getReviewStatus() == ReviewStatus.waiting_review) {
+        reviewStatus = ReviewStatus.waiting_review;
+      } else {
+        checkPermissions(conn, talkingPoint, TalkingPointAction.REVIEW);
+        reviewStatus = talkingPoint.getReviewStatus();
+      }
+
       PreparedStatement update = conn.prepareStatement(SQL_UPDATE_TALKING_POINT);
       int idx = 1;
       update.setString(idx++, talkingPoint.getContent());
@@ -152,6 +177,7 @@ public class TalkingPoints {
       update.setString(idx++, talkingPoint.getScope().name());
       update.setInt(idx++, talkingPoint.getThemeId());
       update.setString(idx++, talkingPoint.getReferenceUrl());
+      update.setString(idx++, reviewStatus.name());
       update.setInt(idx++, talkingPointId);
       update.executeUpdate();
 
@@ -329,7 +355,6 @@ public class TalkingPoints {
     delete.executeUpdate();
   }
 
-
   private void checkPermissions(
       Connection conn,
       TalkingPoint talkingPoint,
@@ -349,6 +374,8 @@ public class TalkingPoints {
     }
 
     switch (action) {
+      case REVIEW:
+        throw new ForbiddenException(String.format("Only super admins are permitted to review talking points"));
       case CREATE:
         // No-op: any admin can create a talking point at any scope, for any district or state
         return;
