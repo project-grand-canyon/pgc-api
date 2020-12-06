@@ -2,7 +2,7 @@ package com.ccl.grandcanyon;
 
 
 import com.ccl.grandcanyon.types.Admin;
-import com.ccl.grandcanyon.types.District;
+import com.ccl.grandcanyon.types.ReviewStatus;
 import com.ccl.grandcanyon.types.TalkingPoint;
 
 import javax.ws.rs.*;
@@ -13,7 +13,10 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Path("/talkingpoints")
 public class TalkingPoints {
@@ -36,8 +39,9 @@ public class TalkingPoints {
           TalkingPoint.SCOPE + ", " +
           TalkingPoint.THEME_ID + ", " +
           TalkingPoint.CREATED_BY + ", " +
-          TalkingPoint.REFERENCE_URL +
-          ") VALUES (?, ?, ?, ?, ?, ?)";
+          TalkingPoint.REFERENCE_URL + ", " +
+          TalkingPoint.REVIEW_STATUS +
+          ") VALUES (?, ?, ?, ?, ?, ?, ?)";
 
   private static final String SQL_INSERT_TALKING_POINT_STATES =
       "INSERT INTO talking_points_scopes (" +
@@ -55,7 +59,8 @@ public class TalkingPoints {
           TalkingPoint.ENABLED + " = ?, " +
           TalkingPoint.SCOPE + " = ?, " +
           TalkingPoint.THEME_ID + " = ?, " +
-          TalkingPoint.REFERENCE_URL + " = ? " +
+          TalkingPoint.REFERENCE_URL + " = ?, " +
+          TalkingPoint.REVIEW_STATUS + " = ? " +
           "WHERE " + TalkingPoint.TALKING_POINT_ID + " = ?";
 
   private static final String SQL_DELETE_TALKING_POINT =
@@ -97,6 +102,7 @@ public class TalkingPoints {
       insert.setInt(idx++, talkingPoint.getThemeId());
       insert.setInt(idx++, ((Admin)requestContext.getProperty(GCAuth.CURRENT_PRINCIPAL)).getAdminId());
       insert.setString(idx++, talkingPoint.getReferenceUrl());
+      insert.setString(idx++, ReviewStatus.waiting_review.name());
       insert.executeUpdate();
 
       int talkingPointId;
@@ -152,6 +158,7 @@ public class TalkingPoints {
       update.setString(idx++, talkingPoint.getScope().name());
       update.setInt(idx++, talkingPoint.getThemeId());
       update.setString(idx++, talkingPoint.getReferenceUrl());
+      update.setString(idx++, ReviewStatus.waiting_review.name());
       update.setInt(idx++, talkingPointId);
       update.executeUpdate();
 
