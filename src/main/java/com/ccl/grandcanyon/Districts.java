@@ -47,8 +47,9 @@ public class Districts {
           District.REP_LAST_NAME + " = ?, " +
           District.REP_IMAGE_URL + " = ?, " +
           District.INFO + " = ?, " +
-          District.STATUS + " = ?," +
-          District.TIME_ZONE + " = ? " +
+          District.STATUS + " = ?, " +
+          District.TIME_ZONE + " = ?, " +
+          District.DELEGATE_SCRIPT + " = ? " +
           "WHERE " + District.DISTRICT_ID + " = ?";
 
   private static final String SQL_DELETE_DISTRICT =
@@ -162,6 +163,11 @@ public class Districts {
       District oldDistrict = retrieveDistrictById(conn, districtId);
 
       conn.setAutoCommit(false);
+
+      Boolean isIndicatingScriptDelegation = district.getDelegateScript() != null;
+      Boolean isRequestingScriptDelegation = isIndicatingScriptDelegation && district.getDelegateScript() == true;
+      Boolean delegateScript = isRequestingScriptDelegation || (!isIndicatingScriptDelegation && oldDistrict.getDelegateScript());
+
       PreparedStatement statement = conn.prepareStatement(SQL_UPDATE_DISTRICT);
       int idx = 1;
       statement.setString(idx++, district.getState());
@@ -173,6 +179,7 @@ public class Districts {
       String status = district.getStatus() == null ? null : district.getStatus().name();
       statement.setString(idx++, status);
       statement.setString(idx++, district.getTimeZone() == null ? oldDistrict.getTimeZone() : district.getTimeZone());
+      statement.setBoolean(idx++, delegateScript);
       statement.setInt(idx, districtId);
       statement.executeUpdate();
 

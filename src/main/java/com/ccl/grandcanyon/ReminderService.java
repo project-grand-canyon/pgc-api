@@ -594,8 +594,7 @@ public class ReminderService {
           District district = new District(rs);
           // send a notification if it's been > N days since script was modified and it's been greater than
           // N days since the last time we sent a notification.
-          if ((district.getScriptModifiedTime() == null || district.getScriptModifiedTime().before(staleTime)) &&
-              district.getLastStaleScriptNotification().before(staleTime)) {
+          if (district.needsStaleScriptNotification(staleTime)) {
             if (rs.getBoolean(Admin.LOGIN_ENABLED)) {
               if (sendStaleScrptNotification(district, rs.getString(Admin.EMAIL))) {
                 PreparedStatement update = conn.prepareStatement(SQL_UPDATE_STALE_SCRIPT_NOTIFICATION);

@@ -25,6 +25,7 @@ public class District extends GCBase {
   public static final String LAST_STALE_SCRIPT_NOTIFICATION = "last_stale_script_notification";
   public static final String STATUS = "status";
   public static final String TIME_ZONE = "time_zone";
+  public static final String DELEGATE_SCRIPT = "delegate_script";
 
   private int districtId;
   private String state;
@@ -37,6 +38,7 @@ public class District extends GCBase {
   private Timestamp lastStaleScriptNotification;
   private Status status;
   private String timezone;
+  private Boolean delegateScript;
 
   private String info;
 
@@ -59,6 +61,7 @@ public class District extends GCBase {
     this.callTargets = new ArrayList<>();
     this.status = Status.valueOf(rs.getString(STATUS));
     this.timezone = rs.getString(TIME_ZONE);
+    this.delegateScript = rs.getBoolean(DELEGATE_SCRIPT);
 
     boolean retrieveCallTargets = false;
     ResultSetMetaData metaData = rs.getMetaData();
@@ -186,6 +189,14 @@ public class District extends GCBase {
 
   public void setTimeZone(String timezone) { this.timezone = timezone; }
 
+  public Boolean getDelegateScript() {
+    return delegateScript;
+  }
+
+  public void setDelegateScript(Boolean delegateScript) {
+    this.delegateScript = delegateScript;
+  }
+
   public String readableName() {
     switch (this.getNumber()){
       case 0: return this.getState();
@@ -193,6 +204,12 @@ public class District extends GCBase {
       case -2: return String.format("%s Jr. Senator", this.getState());
       default: return String.format("%s-%s", this.getState(), this.getNumber());
     }
+  }
+
+  public Boolean needsStaleScriptNotification(Timestamp staleTime) {
+    return this.delegateScript == false && // if the script writing is delegated to CCL, then no notification is needed
+            (this.scriptModifiedTime == null || this.scriptModifiedTime.before(staleTime)) &&
+            this.getLastStaleScriptNotification().before(staleTime);
   }
 
   public boolean isSenatorDistrict(){
