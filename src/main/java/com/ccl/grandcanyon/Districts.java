@@ -172,7 +172,7 @@ public class Districts {
       statement.setString(idx++, district.getInfo());
       String status = district.getStatus() == null ? null : district.getStatus().name();
       statement.setString(idx++, status);
-      statement.setString(idx++, district.getTimeZone());
+      statement.setString(idx++, district.getTimeZone() == null ? oldDistrict.getTimeZone() : district.getTimeZone());
       statement.setInt(idx, districtId);
       statement.executeUpdate();
 
