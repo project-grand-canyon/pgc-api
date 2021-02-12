@@ -1,3 +1,6 @@
+//Change callFromEmail to true to execute new email format
+//Note that there is no call tracking at this time for hte new email format
+
 package com.ccl.grandcanyon;
 
 import com.ccl.grandcanyon.deliverymethod.DeliveryService;
@@ -18,6 +21,8 @@ import java.util.logging.Logger;
 import com.ccl.grandcanyon.utils.FileReader;
 
 public class ReminderService {
+  
+  private final static boolean callFromEmail = false;
 
   private final static String REMINDER_SERVICE_ENABLED = "reminderServiceEnabled";
   private final static String REMINDER_SERVICE_INTERVAL = "reminderServiceInterval";
@@ -209,6 +214,24 @@ public class ReminderService {
     }
   }
 
+  private String makeCallInReminderReplacements(List<District> targetDistricts, List<String> guides, Caller caller, String email) {
+    List<String> phoneNumbers = getPhoneNumbersByDistrict(conn, targetDistricts);
+    email.replaceAll("{CallerName}", caller.getFirstName() + " " + caller.getLastName());
+    email.replaceAll("{IInvited}", "https://cclcalls.org/call/" + String()); //TODO MAKE EXTENSION
+    int size = targetDistricts.size();
+    for (int i = 0; i < size; ++i) {
+      DistrictHydrated targetDistrict = targetDistricts.get(i);
+      String MOC = "{MOC" + String.valueOf(i + 1);
+      String title = targetDistrict.isSenatorDistrict() ? "Senator " : "Representative ";
+      email.replaceAll(MOC + "Name}", title + targetDistrict.getRepFirstName() + " " + targetDistrict.getRepLastName());
+      email.replaceAll(MOC + "District}", targetDistrict.isSenatorDistrict() ? targetDistrict.getState() : targetDistrict.getState() + " District " + String.valueOf(targetDistrict.getNumber()));
+      email.replaceAll(MOC + "Number}", phoneNumbers.get(i));
+      email.replaceAll(MOC + "RequestScript}", targetDistrict.getRequests().get(0).getContent());
+      email.replaceAll(MOC + "Guide}", guide.get(0));
+      email.replaceAll(MOC + "ICalled}", "https://cclcalls.org/call/thankyou?state=" + String.valueOf(targetDistrict.getState()) + "&district=" + String.valueOf(targetDistrict.getNumber()));
+    }
+    return email;
+  }
 
   public void tearDown() {
     if (reminderTask != null) {
@@ -257,67 +280,143 @@ public class ReminderService {
       Caller caller,
       ReminderDate reminderDate) throws SQLException {
 
-    boolean smsReminderSent = false;
+    if (callFromEmail){
+      boolean smsReminderSent = false;
+      boolean emailReminderSent = false;
+
+      District targetDistrict = oldGetDistrictToCall(conn, caller);
+      District callerDistrict = Districts.retrieveDistrictById(conn, caller.getDistrictId());
+      String trackingId = RandomStringUtils.randomAlphanumeric(8);
+
+      if (callerDistrict.getStatus() != Status.active) {
+        logger.info("Skipping caller with id " + caller.getCallerId() + " because their district status is " + callerDistrict.getStatus().toString());
+        return new ReminderStatus(caller, targetDistrict, false, false, trackingId);
+      }
+
+      String callInPageUrl = applicationBaseUrl + "/call/" + targetDistrict.getState() + "/" +
+          targetDistrict.getNumber() + "?t=" + trackingId + "&c=" + caller.getCallerId() + "&d=" + callerDistrict.getNumber();
+
+      if (caller.getContactMethods().contains(ContactMethod.sms)) {
+
+        Message reminderMessage = new Message();
+
+        String legislatorTitle = targetDistrict.getNumber() >= 0 ? "Rep." : "Senator";
+
+        reminderMessage.setBody("It's your day to call " + legislatorTitle + " " + targetDistrict.getRepLastName() +
+            ". http://" + callInPageUrl);
+        try {
+          smsReminderSent = smsDeliveryService.sendHtmlMessage(caller, reminderMessage);
+          if (smsReminderSent) {
+            logger.info(String.format("Sent SMS reminder to caller {id: %d name %s %s}.",
+                caller.getCallerId(), caller.getFirstName(), caller.getLastName()));
+          }
+        }
+        catch (Exception e) {
+          logger.warning(String.format("Failed to send SMS to caller {id: %d name %s %s}: %s",
+              caller.getCallerId(), caller.getFirstName(), caller.getLastName(), e.getMessage()));
+          smsReminderSent = false;
+        }
+      }
+
+      if (caller.getContactMethods().contains(ContactMethod.email)) {
+
+        Message reminderMessage = new Message();
+        reminderMessage.setSubject("It's time to call about climate change");
+        reminderMessage.setBody(this.regularCallInReminderHTML.replaceAll("cclcalls.org/call/", callInPageUrl));
+        try {
+          emailReminderSent = emailDeliveryService.sendHtmlMessage(caller, reminderMessage);
+          if (emailReminderSent) {
+            logger.info(String.format("Sent email reminder to caller {id: %d, name %s %s}.",
+                caller.getCallerId(), caller.getFirstName(), caller.getLastName()));
+          }
+        }
+        catch (Exception e) {
+          logger.warning(String.format("Failed to send email to caller {id: %d, name %s %s}: %s",
+              caller.getCallerId(), caller.getFirstName(), caller.getLastName(), e.getMessage()));
+          emailReminderSent = false;
+        }
+      }
+
+      ReminderStatus status = new ReminderStatus(caller, targetDistrict, smsReminderSent, emailReminderSent, trackingId);
+      if (status.success()) {
+        updateReminderStatus(conn, status, reminderDate);
+      }
+      return status;
+    }
+    else {
+      boolean smsReminderSent = false;
     boolean emailReminderSent = false;
 
-    District targetDistrict = getDistrictToCall(conn, caller);
-    District callerDistrict = Districts.retrieveDistrictById(conn, caller.getDistrictId());
+    DistrictHydrated callerDistrict = DistrictHydrated.retrieveDistrictById(conn, caller.getDistrictId());
+    List<DistrictHydrated> targetDistricts = getDistrictToCall(conn, callerDistrict);
     String trackingId = RandomStringUtils.randomAlphanumeric(8);
 
     if (callerDistrict.getStatus() != Status.active) {
-      logger.info("Skipping caller with id " + caller.getCallerId() + " because their district status is " + callerDistrict.getStatus().toString());
-      return new ReminderStatus(caller, targetDistrict, false, false, trackingId);
+      logger.info("Skipping caller with id " + caller.getCallerId() + " because their district status is "
+          + callerDistrict.getStatus().toString());
+      return new ReminderStatus(caller, targetDistricts.get(0), false, false, trackingId);
     }
 
-    String callInPageUrl = applicationBaseUrl + "/call/" + targetDistrict.getState() + "/" +
-        targetDistrict.getNumber() + "?t=" + trackingId + "&c=" + caller.getCallerId() + "&d=" + callerDistrict.getNumber();
+    List<String> guideUrls = new LinkedList<String>();
+    for (DistrictHydrated targetDistrict : targetDistricts) {
+      callInPageUrl.add(applicationBaseUrl + "/call/" + targetDistrict.getState() + "/" + targetDistrict.getNumber()
+          + "?t=" + trackingId + "&c=" + caller.getCallerId() + "&d=" + callerDistrict.getNumber());
+    }
+
+    List<String> iCalledUrls = new LinkedList<String>();
+    for (DistrictHydrated targetDistrict : targetDistricts) {
+      callInPageUrl.add(applicationBaseUrl + "/call/" + targetDistrict.getState() + "/" + targetDistrict.getNumber()
+          + "?t=" + trackingId + "&c=" + caller.getCallerId() + "&d=" + callerDistrict.getNumber());
+    }
 
     if (caller.getContactMethods().contains(ContactMethod.sms)) {
+
+      District targetDistrict = targetDistricts.get(0);
 
       Message reminderMessage = new Message();
 
       String legislatorTitle = targetDistrict.getNumber() >= 0 ? "Rep." : "Senator";
 
-      reminderMessage.setBody("It's your day to call " + legislatorTitle + " " + targetDistrict.getRepLastName() +
-          ". http://" + callInPageUrl);
+      reminderMessage.setBody("It's your day to call " + legislatorTitle + " " + targetDistrict.getRepLastName()
+          + ". http://" + callInPageUrl.get(0));
       try {
         smsReminderSent = smsDeliveryService.sendHtmlMessage(caller, reminderMessage);
         if (smsReminderSent) {
-          logger.info(String.format("Sent SMS reminder to caller {id: %d name %s %s}.",
-              caller.getCallerId(), caller.getFirstName(), caller.getLastName()));
+          logger.info(String.format("Sent SMS reminder to caller {id: %d name %s %s}.", caller.getCallerId(),
+              caller.getFirstName(), caller.getLastName()));
         }
-      }
-      catch (Exception e) {
-        logger.warning(String.format("Failed to send SMS to caller {id: %d name %s %s}: %s",
-            caller.getCallerId(), caller.getFirstName(), caller.getLastName(), e.getMessage()));
+      } catch (Exception e) {
+        logger.warning(String.format("Failed to send SMS to caller {id: %d name %s %s}: %s", caller.getCallerId(),
+            caller.getFirstName(), caller.getLastName(), e.getMessage()));
         smsReminderSent = false;
       }
     }
 
     if (caller.getContactMethods().contains(ContactMethod.email)) {
-
       Message reminderMessage = new Message();
       reminderMessage.setSubject("It's time to call about climate change");
-      reminderMessage.setBody(this.regularCallInReminderHTML.replaceAll("cclcalls.org/call/", callInPageUrl));
+      reminderMessage.setBody(
+          makeCallInReminderReplacements(targetDistricts, callInPageUrl, caller, this.regularCallInReminderHTML));
       try {
         emailReminderSent = emailDeliveryService.sendHtmlMessage(caller, reminderMessage);
         if (emailReminderSent) {
-          logger.info(String.format("Sent email reminder to caller {id: %d, name %s %s}.",
-              caller.getCallerId(), caller.getFirstName(), caller.getLastName()));
+          logger.info(String.format("Sent email reminder to caller {id: %d, name %s %s}.", caller.getCallerId(),
+              caller.getFirstName(), caller.getLastName()));
         }
-      }
-      catch (Exception e) {
-        logger.warning(String.format("Failed to send email to caller {id: %d, name %s %s}: %s",
-            caller.getCallerId(), caller.getFirstName(), caller.getLastName(), e.getMessage()));
+      } catch (Exception e) {
+        logger.warning(String.format("Failed to send email to caller {id: %d, name %s %s}: %s", caller.getCallerId(),
+            caller.getFirstName(), caller.getLastName(), e.getMessage()));
         emailReminderSent = false;
       }
     }
 
-    ReminderStatus status = new ReminderStatus(caller, targetDistrict, smsReminderSent, emailReminderSent, trackingId);
+    ReminderStatus status = new ReminderStatus(caller, targetDistricts.get(0), smsReminderSent, emailReminderSent,
+        trackingId);
     if (status.success()) {
       updateReminderStatus(conn, status, reminderDate);
     }
     return status;
+    }
   }
 
 
@@ -366,8 +465,7 @@ public class ReminderService {
     history.executeUpdate();
   }
 
-
-  private District getDistrictToCall(
+  private District oldGetDistrictToCall(
       Connection conn,
       Caller caller) throws SQLException {
 
@@ -395,8 +493,38 @@ public class ReminderService {
         callerDistrict :
         Districts.retrieveDistrictById(conn, targetDistrictId);
   }
-
-
+  
+  private List<DistrictHydrated> getDistrictToCall(Connection conn, DistrictHydrated callerDistrict) throws SQLException {
+    int targetDistrictId = 0;
+    List<DistrictHydrated> districtsToCall = new LinkedList<DistrictHydrated>();
+    List<CallTarget> targets = callerDistrict.getCallTargets();
+    assert (targets != null && !targets.isEmpty());
+    while (!targets.isEmpty()) {
+      int totalProbability = 0;
+      for (CallTarget target : targets){
+        totalProbability += target.getPercentage();
+      }
+      int random = new Random().nextInt(totalProbability);
+      int sum = 0;
+      for (CallTarget target : targets) {
+        sum += target.getPercentage();
+        if (random < sum) {
+          targetDistrictId = target.getTargetDistrictId();
+          if (targetDistrictId == 0) {
+            logger.severe(String.format("District %d has invalid call target set with sum = %d",
+                callerDistrict.getDistrictId(), sum));
+            targetDistrictId = callerDistrict.getDistrictId();
+          }
+          districtsToCall.add((targetDistrictId == callerDistrict.getDistrictId()) ? callerDistrict
+              : DistrictHydrated.retrieveDistrictById(conn, targetDistrictId));
+          targets.remove(target);
+        }
+      }
+    }
+    //TODO If the logger.severe error occurs there is the potential for duplicate districts maybe add a contingency plan?
+    return districtsToCall;
+  }
+  
   private boolean sendStaleScrptNotification(
       District district,
       String adminEmail)
