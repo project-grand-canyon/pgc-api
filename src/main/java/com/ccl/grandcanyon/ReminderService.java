@@ -437,21 +437,35 @@ public class ReminderService {
       for (CallTarget target : targets){
         totalProbability += target.getPercentage();
       }
-      int random = new Random().nextInt(totalProbability);
-      int sum = 0;
-      for (CallTarget target : targets) {
-        sum += target.getPercentage();
-        if (random < sum) {
-          targetDistrictId = target.getTargetDistrictId();
-          if (targetDistrictId == 0) {
-            logger.severe(String.format("District %d has invalid call target set with sum = %d",
-                callerDistrict.getDistrictId(), sum));
-            targetDistrictId = callerDistrict.getDistrictId();
+      if (totalProbability) {
+        int random = new Random().nextInt(totalProbability);
+        int sum = 0;
+        for (CallTarget target : targets) {
+          sum += target.getPercentage();
+          if (random < sum) {
+            targetDistrictId = target.getTargetDistrictId();
+            if (targetDistrictId == 0) {
+              logger.severe(String.format("District %d has invalid call target set with sum = %d",
+                  callerDistrict.getDistrictId(), sum));
+              targetDistrictId = callerDistrict.getDistrictId();
+            }
+            districtsToCall.add((targetDistrictId == callerDistrict.getDistrictId()) ? callerDistrict
+                : DistrictHydrated.retrieveDistrictById(conn, targetDistrictId));
+            targets.remove(target);
           }
-          districtsToCall.add((targetDistrictId == callerDistrict.getDistrictId()) ? callerDistrict
-              : DistrictHydrated.retrieveDistrictById(conn, targetDistrictId));
-          targets.remove(target);
         }
+      }
+      else {
+        DistrictHydrated target = targets.get(Random().nextInt(targets.size()));
+        targetDistrictId = target.getTargetDistrictId();
+        if (targetDistrictId == 0) {
+          logger.severe(String.format("District %d has invalid call target set with sum = %d",
+              callerDistrict.getDistrictId(), sum));
+          targetDistrictId = callerDistrict.getDistrictId();
+        }
+        districtsToCall.add((targetDistrictId == callerDistrict.getDistrictId()) ? callerDistrict
+            : DistrictHydrated.retrieveDistrictById(conn, targetDistrictId));
+        targets.remove(target);
       }
     }
     //TODO If the logger.severe error occurs there is the potential for duplicate districts maybe add a contingency plan?
