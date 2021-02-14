@@ -12,14 +12,12 @@ public class Call {
 
   public static final String CALLER_ID = "caller_id";
   public static final String DISTRICT_ID = "district_id";
-  public static final String TALKING_POINT_ID = "talking_point_id";
   public static final String MONTH = "month";
   public static final String YEAR = "year";
   public static final String CREATED = "created";
 
   private int callerId;
   private Integer districtId;
-  private Integer talkingPointId;
   private int month;
   private int year;
   private Timestamp created;
@@ -34,7 +32,6 @@ public class Call {
     this.districtId = rs.getInt(DISTRICT_ID);
     this.month = rs.getInt(MONTH);
     this.year = rs.getInt(YEAR);
-    this.talkingPointId = rs.getInt(TALKING_POINT_ID);
   }
 
   public Call() {}
@@ -53,14 +50,6 @@ public class Call {
 
   public void setDistrictId(Integer districtId) {
     this.districtId = districtId;
-  }
-
-  public Integer getTalkingPointId() {
-    return talkingPointId;
-  }
-
-  public void setTalkingPointId(Integer talkingPointId) {
-    this.talkingPointId = talkingPointId;
   }
 
   public int getMonth() {
