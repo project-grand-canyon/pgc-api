@@ -327,7 +327,7 @@ public class ReminderService {
 
     List<String> iCalledUrls = new LinkedList<String>();
     for (DistrictHydrated targetDistrict : targetDistricts) {
-      callInPageUrl.add(applicationBaseUrl + "/call/" + targetDistrict.getState() + "/" + targetDistrict.getNumber()
+      callInPageUrl.add(applicationBaseUrl + "/call/thankyou"
           + "?t=" + trackingId + "&c=" + caller.getCallerId() + "&d=" + callerDistrict.getNumber());
     }
 
