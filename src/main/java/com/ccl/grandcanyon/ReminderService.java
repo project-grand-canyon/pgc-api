@@ -189,7 +189,16 @@ public class ReminderService {
     }
   }
 
-  private String makeCallInReminderReplacements(Connection conn, List<District> targetDistricts, List<String> guides, Caller caller, String email) {
+  private List<String> getPhoneNumbersByDistrict(Connection conn, List<DistrictHydrated> targetDistricts) {
+    List<String> phoneNumbers = new LinkedList<String>();
+    for (DistrictHydrated target: targetDistricts) {
+      //Assumes the first district office is the Washington DC office.
+      phoneNumbers.add(target.getOffices().get(0).getPhone());
+    }
+    return phoneNumbers;
+  }
+
+  private String makeCallInReminderReplacements(Connection conn, List<DistrictHydrated> targetDistricts, List<String> guides, Caller caller, String email) {
     List<String> phoneNumbers = getPhoneNumbersByDistrict(conn, targetDistricts);
     email.replaceAll("{CallerName}", caller.getFirstName() + " " + caller.getLastName());
     email.replaceAll("{IInvited}", "https://cclcalls.org/call/" + String()); //TODO MAKE EXTENSION
