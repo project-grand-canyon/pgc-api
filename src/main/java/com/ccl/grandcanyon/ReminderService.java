@@ -438,17 +438,15 @@ public class ReminderService {
     history.executeUpdate();
   }
 
-  private District getDistrictToCall(
+  private List<DistrictHydrated> newGetDistrictToCall(
       Connection conn,
-      Caller caller) throws SQLException {
-
-    District callerDistrict = Districts.retrieveDistrictById(conn, caller.getDistrictId());
-    Integer targetDistrictId = 0;
+      District callerDistrict) throws SQLException {
     List<DistrictHydrated> districtsToCall = new LinkedList<DistrictHydrated>();
     List<CallTarget> targets = callerDistrict.getCallTargets();
     assert (targets != null && !targets.isEmpty());
     while (!targets.isEmpty()) {
-      int totalProbability = 0;
+      Integer targetDistrictId = 0;
+      Integer totalProbability = 0;
       for (CallTarget target : targets){
         totalProbability += target.getPercentage();
       }
@@ -457,64 +455,57 @@ public class ReminderService {
         int sum = 0;
         for (CallTarget target : targets) {
           sum += target.getPercentage();
-          if (random < sum) {
+          if (targetDistrictId == 0 && random < sum) {
             targetDistrictId = target.getTargetDistrictId();
-            if (targetDistrictId == 0) {
-              logger.severe(String.format("District %d has invalid call target set with sum = %d",
-                  callerDistrict.getDistrictId(), sum));
-              targetDistrictId = callerDistrict.getDistrictId();
-            }
-            districtsToCall.add((targetDistrictId == callerDistrict.getDistrictId()) ? callerDistrict
-                : DistrictHydrated.retrieveDistrictById(conn, targetDistrictId));
             targets.remove(target);
           }
         }
       }
       else {
-        DistrictHydrated target = targets.get(Random().nextInt(targets.size()));
+        CallTarget target = targets.get(new Random().nextInt(targets.size()));
         targetDistrictId = target.getTargetDistrictId();
-        if (targetDistrictId == 0) {
-          logger.severe(String.format("District %d has invalid call target set with sum = %d",
-              callerDistrict.getDistrictId(), sum));
-          targetDistrictId = callerDistrict.getDistrictId();
-        }
-        districtsToCall.add((targetDistrictId == callerDistrict.getDistrictId()) ? callerDistrict
-            : DistrictHydrated.retrieveDistrictById(conn, targetDistrictId));
         targets.remove(target);
       }
+
+      if (targetDistrictId == 0) {
+        logger.severe(String.format("District %d has invalid call target set",
+            callerDistrict.getDistrictId()));
+        targetDistrictId = callerDistrict.getDistrictId();
+      }
+      districtsToCall.add(Districts.retrieveDistrictHydratedById(conn, targetDistrictId));
+      
     }
     //TODO If the logger.severe error occurs there is the potential for duplicate districts maybe add a contingency plan?
     return districtsToCall;
   }
   
-  private List<DistrictHydrated> newGetDistrictToCall(Connection conn, District callerDistrict) throws SQLException {
+  private District getDistrictToCall(
+      Connection conn,
+      Caller caller) throws SQLException {
+
+    District callerDistrict = Districts.retrieveDistrictById(conn, caller.getDistrictId());
     int targetDistrictId = 0;
-    List<DistrictHydrated> districtsToCall = new LinkedList<DistrictHydrated>();
+
+    int random = new Random().nextInt(100);
+    int sum = 0;
     List<CallTarget> targets = callerDistrict.getCallTargets();
-    assert (targets != null && !targets.isEmpty());
-    while (!targets.isEmpty()) {
-      int totalProbability = 0;
-      for (CallTarget target : targets){
-        totalProbability += target.getPercentage();
-      }
-      int random = new Random().nextInt(totalProbability);
-      int sum = 0;
-      for (CallTarget target : targets) {
-        sum += target.getPercentage();
-        if (random < sum) {
-          targetDistrictId = target.getTargetDistrictId();
-          if (targetDistrictId == 0) {
-            logger.severe(String.format("District %d has invalid call target set with sum = %d",
-                callerDistrict.getDistrictId(), sum));
-            targetDistrictId = callerDistrict.getDistrictId();
-          }
-          districtsToCall.add(DistrictHydrated(conn, District.getDistricts(targetDistrictId, null, null, true)));
-          targets.remove(target);
-        }
+    assert(targets != null && !targets.isEmpty());
+
+    for (CallTarget target : targets) {
+      sum += target.getPercentage();
+      if (random < sum) {
+        targetDistrictId = target.getTargetDistrictId();
+        break;
       }
     }
-    //TODO If the logger.severe error occurs there is the potential for duplicate districts maybe add a contingency plan?
-    return districtsToCall;
+    if (targetDistrictId == 0) {
+      logger.severe(String.format("District %d has invalid call target set with sum = %d",
+          callerDistrict.getDistrictId(), sum));
+      targetDistrictId = callerDistrict.getDistrictId();
+    }
+    return (targetDistrictId == callerDistrict.getDistrictId()) ?
+        callerDistrict :
+        Districts.retrieveDistrictById(conn, targetDistrictId);
   }
   
   private boolean sendStaleScrptNotification(

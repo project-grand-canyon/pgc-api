@@ -510,6 +510,12 @@ public class Districts {
   }
 
 
+  static DistrictHydrated retrieveDistrictHydratedById(
+    Connection conn,
+    int districtId)
+    throws SQLException {
+      return new DistrictHydrated(getResultSetForId(conn, districtId));
+    }
 
 
   static District retrieveDistrictById(
