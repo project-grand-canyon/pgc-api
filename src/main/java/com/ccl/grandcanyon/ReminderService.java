@@ -381,7 +381,7 @@ public class ReminderService {
       Message reminderMessage = new Message();
       reminderMessage.setSubject("It's time to call about climate change");
       reminderMessage.setBody(
-          makeCallInReminderReplacements(conn, targetDistricts, callInPageUrl, caller, this.regularCallInReminderHTML));
+          makeCallInReminderReplacements(targetDistricts, callInPageUrl, caller, this.regularCallInReminderHTML));
       try {
         emailReminderSent = emailDeliveryService.sendHtmlMessage(caller, reminderMessage);
         if (emailReminderSent) {
