@@ -189,7 +189,7 @@ public class ReminderService {
     }
   }
 
-  private String makeCallInReminderReplacements(List<District> targetDistricts, List<String> guides, Caller caller, String email) {
+  private String makeCallInReminderReplacements(Connection conn, List<District> targetDistricts, List<String> guides, Caller caller, String email) {
     List<String> phoneNumbers = getPhoneNumbersByDistrict(conn, targetDistricts);
     email.replaceAll("{CallerName}", caller.getFirstName() + " " + caller.getLastName());
     email.replaceAll("{IInvited}", "https://cclcalls.org/call/" + String()); //TODO MAKE EXTENSION
@@ -360,7 +360,7 @@ public class ReminderService {
       Message reminderMessage = new Message();
       reminderMessage.setSubject("It's time to call about climate change");
       reminderMessage.setBody(
-          makeCallInReminderReplacements(targetDistricts, callInPageUrl, caller, this.regularCallInReminderHTML));
+          makeCallInReminderReplacements(conn, targetDistricts, callInPageUrl, caller, this.regularCallInReminderHTML));
       try {
         emailReminderSent = emailDeliveryService.sendHtmlMessage(caller, reminderMessage);
         if (emailReminderSent) {
