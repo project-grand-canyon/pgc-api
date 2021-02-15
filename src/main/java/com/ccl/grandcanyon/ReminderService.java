@@ -97,6 +97,8 @@ public class ReminderService {
 
   private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 
+  private int secondReminderInterval;
+  
   // TODO: Instead of distributing all callers across the month, do so for each
   // district
   private static int getNewDayOfMonth() {
