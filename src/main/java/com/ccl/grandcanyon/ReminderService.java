@@ -189,19 +189,31 @@ public class ReminderService {
     }
   }
 
-  private List<String> getPhoneNumbersByDistrict(Connection conn, List<DistrictHydrated> targetDistricts) {
+  private List<String> getPhoneNumbersByDistrict(List<DistrictHydrated> targetDistricts) {
     List<String> phoneNumbers = new LinkedList<String>();
     for (DistrictHydrated target: targetDistricts) {
-      //Assumes the first district office is the Washington DC office.
-      phoneNumbers.add(target.getOffices().get(0).getPhone());
+      List<DistrictOffice> offices = target.getOffices();
+      Integer numberOfOffices = offices.size();
+      if (numberOfOffices) {
+        phoneNumbers.add("Number Not Found");
+      }
+      else {
+        String number = offices.get(0).getPhone();
+        for (DistrictOffice office : offices) {
+          if (office.getAddress().getState() == "DC"){
+            number.add(office.getPhone());
+          }
+        }
+        phoneNumbers.add(number);
+      }
     }
     return phoneNumbers;
   }
 
-  private String makeCallInReminderReplacements(Connection conn, List<DistrictHydrated> targetDistricts, List<String> guides, Caller caller, String email) {
-    List<String> phoneNumbers = getPhoneNumbersByDistrict(conn, targetDistricts);
+  private String makeCallInReminderReplacements(List<DistrictHydrated> targetDistricts, List<String> guides, Caller caller, String email) {
+    List<String> phoneNumbers = getPhoneNumbersByDistrict(targetDistricts);
     email.replaceAll("{CallerName}", caller.getFirstName() + " " + caller.getLastName());
-    email.replaceAll("{IInvited}", "https://cclcalls.org/call/" + String()); //TODO MAKE EXTENSION
+    email.replaceAll("{IInvited}", "https://cclcalls.org/call/"); //TODO MAKE EXTENSION
     int size = targetDistricts.size();
     for (int i = 0; i < size; ++i) {
       DistrictHydrated targetDistrict = targetDistricts.get(i);
