@@ -1,6 +1,6 @@
 package com.ccl.grandcanyon;
 
-import com.ccl.grandcanyon.reminderservice.EmailSender;
+import com.ccl.grandcanyon.senderservice.EmailSenderService;
 import com.ccl.grandcanyon.auth.AuthenticationService;
 import com.ccl.grandcanyon.auth.PasswordUtil;
 import com.ccl.grandcanyon.types.*;
@@ -384,7 +384,7 @@ public class Admins {
 
       // send email to admin with link
       // TODO: replace this message body with HTML email template.
-      EmailSender emailSender = EmailSender.getInstance();
+      EmailSenderService emailSender = EmailSenderService.getInstance();
 
       String resetUrl = emailSender.getAdminApplicationBaseUrl() + "/finish_password_reset?token=" + token;
       Message resetRequestMessage = new Message();

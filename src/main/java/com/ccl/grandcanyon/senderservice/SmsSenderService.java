@@ -14,11 +14,11 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-public class SmsSender {
+public class SmsSenderService {
     private final static String SMS_DELIVERY_SERVICE = "smsDeliveryService";
     private final static String APPLICATION_BASE_URL = "applicationBaseUrl";
 
-    private static final Logger logger = Logger.getLogger(SMSSender.class.getName());
+    private static final Logger logger = Logger.getLogger(SmsSenderService.class.getName());
 
     private static ReminderService instance;
 
@@ -27,7 +27,7 @@ public class SmsSender {
 
     public static void init(Properties config) {
         assert (instance == null);
-        instance = new SmsSender(config);
+        instance = new SmsSenderService(config);
     }
     
     public static ReminderService getInstance() {
@@ -36,7 +36,7 @@ public class SmsSender {
     }
     
 
-    private SmsSender(Properties config){
+    private SmsSenderService(Properties config){
         
         this.applicationBaseUrl = config.getProperty(APPLICATION_BASE_URL);
         

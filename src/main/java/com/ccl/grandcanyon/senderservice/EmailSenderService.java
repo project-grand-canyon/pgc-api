@@ -14,15 +14,15 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-public class EmailSender {
+public class EmailSenderService {
     private final static boolean callFromEmail = false;
     private final static String EMAIL_DELIVERY_SERVICE = "emailDeliveryService";
     private final static String APPLICATION_BASE_URL = "applicationBaseUrl";
     private final static String ADMIN_APPLICATION_BASE_URL = "adminApplicationBaseUrl";
 
-    private static final Logger logger = Logger.getLogger(EmailSender.class.getName());
+    private static final Logger logger = Logger.getLogger(EmailSenderService.class.getName());
 
-    private static EmailSender instance;
+    private static EmailSenderService instance;
 
     private DeliveryService emailDeliveryService;
     private String applicationBaseUrl;
@@ -38,16 +38,16 @@ public class EmailSender {
   
     public static void init(Properties config) {
         assert (instance == null);
-        instance = new EmailSender(config);
+        instance = new EmailSenderService(config);
     }
     
-    public static EmailSender getInstance() {
+    public static EmailSenderService getInstance() {
         assert (instance != null);
         return instance;
     }
     
 
-    private EmailSender(Properties config){
+    private EmailSenderService(Properties config){
         
         this.applicationBaseUrl = config.getProperty(APPLICATION_BASE_URL);
         this.adminApplicationBaseUrl = config.getProperty(ADMIN_APPLICATION_BASE_URL);

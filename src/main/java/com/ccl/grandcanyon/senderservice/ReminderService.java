@@ -4,6 +4,8 @@ package com.ccl.grandcanyon;
 
 import com.ccl.grandcanyon.deliverymethod.DeliveryService;
 import com.ccl.grandcanyon.types.*;
+import com.ccl.grandcanyon.senderservice.EmailSenderService;
+import com.ccl.grandcanyon.senderservice.SmsSenderService;
 
 import org.apache.commons.lang3.RandomStringUtils;
 
@@ -71,9 +73,9 @@ public class ReminderService {
 
   private HolidayService holidayService;
 
-  private EmailSender emailSender;
+  private EmailSenderService EmailSenderService;
 
-  private SmsSender smsSender;
+  private SmsSenderService SmsSenderService;
 
   private static int dayOfMonthCounter = 1;
 
@@ -129,18 +131,18 @@ public class ReminderService {
     }
 
     try {
-      this.emailSender = EmailSender.getInstance();
+      this.EmailSenderService = EmailSenderService.getInstance();
     } catch (Exception e) {
       logger.warning("Failed to initialize Email Sender: " + e.getMessage());
-      this.emailSender = null;
+      this.EmailSenderService = null;
     }
 
     
     try {
-      this.smsSender = SmsSender.getInstance();
+      this.SmsSenderService = SmsSenderService.getInstance();
     } catch (Exception e) {
       logger.warning("Failed to initialize SMS Sender: " + e.getMessage());
-      this.smsSender = null;
+      this.SmsSenderService = null;
     }
 
     int staleScriptWarningInDays = Integer.parseInt(config.getProperty(STALE_SCRIPT_WARNING_INTERVAL, "30"));
@@ -190,11 +192,11 @@ public class ReminderService {
     List<District> emailTargets = new ArrayList<District>();
 
     if (caller.getContactMethods().contains(ContactMethod.sms)) {
-      smsTarget = smsSender.sendSmsReminder(conn, caller);
+      smsTarget = SmsSenderService.sendSmsReminder(conn, caller);
     }
 
     if (caller.getContactMethods().contains(ContactMethod.email)) {
-      emailTargets = emailSender.sendEmailReminder(conn, caller);
+      emailTargets = EmailSenderService.sendEmailReminder(conn, caller);
     }
 
     for (District emailTarget : emailTargets) {
@@ -392,7 +394,7 @@ public class ReminderService {
           // N days since the last time we sent a notification.
           if (district.needsStaleScriptNotification(staleTime)) {
             if (rs.getBoolean(Admin.LOGIN_ENABLED)) {
-              if (emailSender.sendStaleScrptNotification(district, rs.getString(Admin.EMAIL))) {
+              if (EmailSenderService.sendStaleScrptNotification(district, rs.getString(Admin.EMAIL))) {
                 PreparedStatement update = conn.prepareStatement(SQL_UPDATE_STALE_SCRIPT_NOTIFICATION);
                 int idx = 1;
                 update.setTimestamp(idx++, now);
