@@ -1,5 +1,8 @@
 .DS_Store
 .idea/
+.classpath
+.settings/
+.project
 y/
 target
 src/main/resources/config.properties
