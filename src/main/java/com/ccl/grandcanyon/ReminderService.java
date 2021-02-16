@@ -80,6 +80,8 @@ public class ReminderService {
   private String regularCallInReminderHTML;
   private String callReminderEmailResource = "callNotificationEmail.html";
 
+  private String callGuideEmailResource = "callGuideEmail.html";
+
   private String staleScriptHTML;
   private String staleScriptEmailResource = "staleScriptEmail.html";
 
@@ -168,7 +170,7 @@ public class ReminderService {
     this.staleScriptWarningInterval = TimeUnit.DAYS.toMillis(staleScriptWarningInDays);
 
     try {
-      this.regularCallInReminderHTML = FileReader.create().read(callReminderEmailResource);
+      this.regularCallInReminderHTML = FileReader.create().read(callFromEmail ? callGuideEmailResource : callReminderEmailResource);
     } catch (Exception e) {
       throw new RuntimeException(
           "Unable to load regular call-in notification email template: " + e.getLocalizedMessage());
@@ -329,7 +331,6 @@ public class ReminderService {
       return status;
     }
     else {
-      this.callReminderEmailResource = "newCallNotificationEmail.html";
       boolean smsReminderSent = false;
       boolean emailReminderSent = false;
 
@@ -620,6 +621,8 @@ public class ReminderService {
       }
 
       whereClause.append(" AND c." + Caller.DISTRICT_ID + " = " + district.getDistrictId());
+
+      int sentCount = 0;
 
       String query = SQL_SELECT_CALLERS + whereClause.toString();
       logger.info(query);
