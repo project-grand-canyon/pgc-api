@@ -73,9 +73,8 @@ public class ReminderService {
 
   private HolidayService holidayService;
 
-  private EmailSenderService EmailSenderService;
-
-  private SmsSenderService SmsSenderService;
+  private static final EmailSenderService emailSenderService = EmailSenderService.getInstance();
+  private static final SmsSenderService smsSenderService = SmsSenderService.getInstance();
 
   private static int dayOfMonthCounter = 1;
 
@@ -192,11 +191,11 @@ public class ReminderService {
     List<District> emailTargets = new ArrayList<District>();
 
     if (caller.getContactMethods().contains(ContactMethod.sms)) {
-      smsTarget = SmsSenderService.sendSmsReminder(conn, caller);
+      smsTarget = smsSenderService.sendSmsReminder(conn, caller);
     }
 
     if (caller.getContactMethods().contains(ContactMethod.email)) {
-      emailTargets = EmailSenderService.sendEmailReminder(conn, caller);
+      emailTargets = emailSenderService.sendEmailReminder(conn, caller);
     }
 
     for (District emailTarget : emailTargets) {

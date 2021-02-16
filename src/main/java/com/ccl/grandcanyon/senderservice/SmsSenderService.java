@@ -25,11 +25,6 @@ public class SmsSenderService {
     private DeliveryService smsDeliveryService;
     private String applicationBaseUrl;
 
-    public static void init(Properties config) {
-        assert (instance == null);
-        instance = new SmsSenderService(config);
-    }
-    
     public static ReminderService getInstance() {
         assert (instance != null);
         return instance;

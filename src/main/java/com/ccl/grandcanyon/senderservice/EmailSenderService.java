@@ -36,11 +36,6 @@ public class EmailSenderService {
     private String staleScriptHTML;
     private String staleScriptEmailResource = "staleScriptEmail.html";
   
-    public static void init(Properties config) {
-        assert (instance == null);
-        instance = new EmailSenderService(config);
-    }
-    
     public static EmailSenderService getInstance() {
         assert (instance != null);
         return instance;
