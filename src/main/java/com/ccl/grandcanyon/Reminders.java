@@ -47,8 +47,7 @@ public class Reminders {
       Caller caller = Callers.retrieveById(conn, callerId);
       checkPermissions(caller.getDistrictId(), "send a call notification");
       ReminderDate reminderDate = new ReminderDate(LocalDate.now());
-      ReminderStatus status = ReminderService.getInstance().sendReminder(conn, caller, reminderDate);
-      return Response.ok(BooleanNode.valueOf(status.success())).build();
+      return Response.ok(BooleanNode.valueOf(ReminderService.getInstance().sendReminder(conn, caller, reminderDate))).build();
     }
     finally {
       conn.close();

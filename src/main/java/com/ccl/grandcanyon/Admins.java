@@ -1,5 +1,6 @@
 package com.ccl.grandcanyon;
 
+import com.ccl.grandcanyon.reminderservice.EmailSender;
 import com.ccl.grandcanyon.auth.AuthenticationService;
 import com.ccl.grandcanyon.auth.PasswordUtil;
 import com.ccl.grandcanyon.types.*;
@@ -383,9 +384,9 @@ public class Admins {
 
       // send email to admin with link
       // TODO: replace this message body with HTML email template.
-      ReminderService reminderService = ReminderService.getInstance();
+      EmailSender emailSender = EmailSender.getInstance();
 
-      String resetUrl = reminderService.getAdminApplicationBaseUrl() + "/finish_password_reset?token=" + token;
+      String resetUrl = emailSender.getAdminApplicationBaseUrl() + "/finish_password_reset?token=" + token;
       Message resetRequestMessage = new Message();
       resetRequestMessage.setSubject("Password Reset Requested");
       resetRequestMessage.setBody("If you requsted a password reset, visit the page at the following URL:  http://" + resetUrl +
@@ -395,7 +396,7 @@ public class Admins {
       Caller adminRecipient = new Caller();
       adminRecipient.setEmail(admin.getEmail());
       try {
-        reminderService.getEmailDeliveryService().sendTextMessage(adminRecipient, resetRequestMessage);
+        emailSender.getEmailDeliveryService().sendTextMessage(adminRecipient, resetRequestMessage);
       }
       catch (Exception e) {
         throw new ServerErrorException(String.format(

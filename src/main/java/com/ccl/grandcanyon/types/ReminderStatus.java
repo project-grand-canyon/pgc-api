@@ -30,8 +30,4 @@ public class ReminderStatus extends ReminderBase {
   public District getTargetDistrict() {
     return targetDistrict;
   }
-
-  public boolean success() {
-    return getSmsDelivered() || getEmailDelivered();
-  }
 }
