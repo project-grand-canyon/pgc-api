@@ -216,12 +216,12 @@ public class ReminderService {
     List<String> phoneNumbers = getPhoneNumbersByDistrict(targetDistricts);
     email.replaceAll("{CallerName}", caller.getFirstName() + " " + caller.getLastName());
     email.replaceAll("{IInvited}", rootPath + "invite" + trackingPackage); //TODO MAKE EXTENSION
+    // TODO: Figure out how to handle Puerto Rico
     Integer size = targetDistricts.size();
     for (Integer i = 0; i < size; ++i) {
       DistrictHydrated targetDistrict = targetDistricts.get(i);
       String MOC = "{MOC" + String.valueOf(i + 1);
-      String title = targetDistrict.isSenatorDistrict() ? "Senator " : "Representative ";
-      email.replaceAll(MOC + "Name}", title + targetDistrict.getRepFirstName() + " " + targetDistrict.getRepLastName());
+      email.replaceAll(MOC + "Name}", targetDistrict.readableName());
       email.replaceAll(MOC + "District}", targetDistrict.isSenatorDistrict() ? targetDistrict.getState() : targetDistrict.getState() + " District " + String.valueOf(targetDistrict.getNumber()));
       email.replaceAll(MOC + "Number}", phoneNumbers.get(i));
       email.replaceAll(MOC + "RequestScript}", targetDistrict.getRequests().get(0).getContent());
@@ -265,136 +265,94 @@ public class ReminderService {
     return null;
   }
 
-  ReminderStatus sendReminder(Connection conn, Caller caller, ReminderDate reminderDate) throws SQLException {
+  boolean sendReminder(Connection conn, Caller caller, ReminderDate reminderDate) throws SQLException {
+    District callerDistrict = Districts.retrieveDistrictById(conn, caller.getDistrictId());
+    if (callerDistrict.getStatus() != Status.active) {
+      logger.info("Skipping caller with id " + caller.getCallerId() + " because their district status is " + callerDistrict.getStatus().toString());
+      return false;
+    }
+    String trackingId = RandomStringUtils.randomAlphanumeric(8);
+    String trackingPackage = "?t=" + trackingId + "&c=" + caller.getCallerId() + "&d=" + callerDistrict.getNumber();
+    String callInPageUrl = "http://" + applicationBaseUrl + "/call/";
+    District smsDistrict = null;
+    List<District> emailDistrict = new ArrayList<District>();
+    if (caller.getContactMethods().contains(ContactMethod.sms)) {
+      District targetDistrict = getDistrictToCall(conn, caller);      
+      String URL = callInPageUrl + targetDistrict.getState() + "/" +
+          targetDistrict.getNumber() + trackingPackage;
+      Message reminderMessage = new Message();
+      String legislatorTitle = targetDistrict.getNumber() >= 0 ? "Rep." : "Senator";
 
-    if (!callFromEmail){
-      boolean smsReminderSent = false;
-      boolean emailReminderSent = false;
-
-      District targetDistrict = getDistrictToCall(conn, caller);
-      District callerDistrict = Districts.retrieveDistrictById(conn, caller.getDistrictId());
-      String trackingId = RandomStringUtils.randomAlphanumeric(8);
-
-      if (callerDistrict.getStatus() != Status.active) {
-        logger.info("Skipping caller with id " + caller.getCallerId() + " because their district status is " + callerDistrict.getStatus().toString());
-        return new ReminderStatus(caller, targetDistrict, false, false, trackingId);
+      reminderMessage.setBody("It's your day to call " + legislatorTitle + " " + targetDistrict.getRepLastName() +
+          ". " + URL);
+      try {
+        if (smsDeliveryService.sendHtmlMessage(caller, reminderMessage)){
+          logger.info(String.format("Sent SMS reminder to caller {id: %d name %s %s}.",
+              caller.getCallerId(), caller.getFirstName(), caller.getLastName()));
+          smsDistrict = targetDistrict;
+        }
       }
-
-      String callInPageUrl = applicationBaseUrl + "/call/" + targetDistrict.getState() + "/" +
-          targetDistrict.getNumber() + "?t=" + trackingId + "&c=" + caller.getCallerId() + "&d=" + callerDistrict.getNumber();
-
-      if (caller.getContactMethods().contains(ContactMethod.sms)) {
-
-        Message reminderMessage = new Message();
-
-        String legislatorTitle = targetDistrict.getNumber() >= 0 ? "Rep." : "Senator";
-
-        reminderMessage.setBody("It's your day to call " + legislatorTitle + " " + targetDistrict.getRepLastName() +
-            ". http://" + callInPageUrl);
+      catch (Exception e) {
+        logger.warning(String.format("Failed to send SMS to caller {id: %d name %s %s}: %s",
+            caller.getCallerId(), caller.getFirstName(), caller.getLastName(), e.getMessage()));
+      }
+    }
+    if (caller.getContactMethods().contains(ContactMethod.email)) {
+      Message reminderMessage = new Message();
+      reminderMessage.setSubject("It's time to call about climate change");
+      if(callFromEmail) {
+        List<DistrictHydrated> targetDistricts = newGetDistrictToCall(conn, callerDistrict);
+        reminderMessage.setBody(
+            makeCallInReminderReplacements(targetDistricts, caller, trackingPackage, this.regularCallInReminderHTML));
         try {
-          smsReminderSent = smsDeliveryService.sendHtmlMessage(caller, reminderMessage);
-          if (smsReminderSent) {
-            logger.info(String.format("Sent SMS reminder to caller {id: %d name %s %s}.",
-                caller.getCallerId(), caller.getFirstName(), caller.getLastName()));
+          if (emailDeliveryService.sendHtmlMessage(caller, reminderMessage)) {
+            logger.info(String.format("Sent email reminder to caller {id: %d, name %s %s}.", caller.getCallerId(),
+                caller.getFirstName(), caller.getLastName()));
+            for (DistrictHydrated target: targetDistricts){
+              emailDistrict.add(Districts.retrieveDistrictById(conn, target.getDistrictId()));
+            }
           }
-        }
-        catch (Exception e) {
-          logger.warning(String.format("Failed to send SMS to caller {id: %d name %s %s}: %s",
-              caller.getCallerId(), caller.getFirstName(), caller.getLastName(), e.getMessage()));
-          smsReminderSent = false;
-        }
+        } catch (Exception e) {
+          logger.warning(String.format("Failed to send email to caller {id: %d, name %s %s}: %s", caller.getCallerId(),
+              caller.getFirstName(), caller.getLastName(), e.getMessage()));
+        } 
       }
-
-      if (caller.getContactMethods().contains(ContactMethod.email)) {
-
-        Message reminderMessage = new Message();
-        reminderMessage.setSubject("It's time to call about climate change");
-        reminderMessage.setBody(this.regularCallInReminderHTML.replaceAll("cclcalls.org/call/", callInPageUrl));
+      else{
+        District targetDistrict = getDistrictToCall(conn, caller);      
+        String URL = callInPageUrl + targetDistrict.getState() + "/" +
+           targetDistrict.getNumber() + trackingPackage;
+        reminderMessage.setBody(this.regularCallInReminderHTML.replaceAll("https://cclcalls.org/call/", URL));
         try {
-          emailReminderSent = emailDeliveryService.sendHtmlMessage(caller, reminderMessage);
-          if (emailReminderSent) {
+          if (emailDeliveryService.sendHtmlMessage(caller, reminderMessage)) {
             logger.info(String.format("Sent email reminder to caller {id: %d, name %s %s}.",
                 caller.getCallerId(), caller.getFirstName(), caller.getLastName()));
+            emailDistrict.add(targetDistrict);
           }
         }
         catch (Exception e) {
           logger.warning(String.format("Failed to send email to caller {id: %d, name %s %s}: %s",
               caller.getCallerId(), caller.getFirstName(), caller.getLastName(), e.getMessage()));
-          emailReminderSent = false;
         }
       }
-
-      ReminderStatus status = new ReminderStatus(caller, targetDistrict, smsReminderSent, emailReminderSent, trackingId);
-      if (status.success()) {
-        updateReminderStatus(conn, status, reminderDate);
-      }
-      return status;
     }
-    else {
-      boolean smsReminderSent = false;
-      boolean emailReminderSent = false;
 
-      District callerDistrict = Districts.retrieveDistrictById(conn, caller.getDistrictId());
-      List<DistrictHydrated> targetDistricts = newGetDistrictToCall(conn, callerDistrict);
-      String trackingId = RandomStringUtils.randomAlphanumeric(8);
-
-      if (callerDistrict.getStatus() != Status.active) {
-        logger.info("Skipping caller with id " + caller.getCallerId() + " because their district status is "
-            + callerDistrict.getStatus().toString());
-        return new ReminderStatus(caller, targetDistricts.get(0), false, false, trackingId);
+    boolean success = false;
+    for (District d : emailDistrict){
+      if (smsDistrict != null && smsDistrict == d){
+        updateReminderStatus(conn, new ReminderStatus(caller, d, true, true, trackingId), reminderDate);
+        smsDistrict = null;
+        success = true;
       }
-
-      String trackingPackage = "?t=" + trackingId + "&c=" + caller.getCallerId() + "&d=" + callerDistrict.getNumber();
-
-      if (caller.getContactMethods().contains(ContactMethod.sms)) {
-
-        District targetDistrict = targetDistricts.get(0);
-
-        Message reminderMessage = new Message();
-
-        String legislatorTitle = targetDistrict.getNumber() >= 0 ? "Rep." : "Senator";
-
-        reminderMessage.setBody("It's your day to call " + legislatorTitle + " " + targetDistrict.getRepLastName()
-            + ". http://" + applicationBaseUrl + "/call/" + targetDistrict.getState() + "/" +
-            targetDistrict.getNumber() + trackingPackage);
-        try {
-          smsReminderSent = smsDeliveryService.sendHtmlMessage(caller, reminderMessage);
-          if (smsReminderSent) {
-            logger.info(String.format("Sent SMS reminder to caller {id: %d name %s %s}.", caller.getCallerId(),
-                caller.getFirstName(), caller.getLastName()));
-          }
-        } catch (Exception e) {
-          logger.warning(String.format("Failed to send SMS to caller {id: %d name %s %s}: %s", caller.getCallerId(),
-              caller.getFirstName(), caller.getLastName(), e.getMessage()));
-          smsReminderSent = false;
-        }
+      else {
+        updateReminderStatus(conn, new ReminderStatus(caller, d, false, true, trackingId), reminderDate);
+        success = true;
       }
-
-      if (caller.getContactMethods().contains(ContactMethod.email)) {
-        Message reminderMessage = new Message();
-        reminderMessage.setSubject("It's time to call about climate change");
-        reminderMessage.setBody(
-            makeCallInReminderReplacements(targetDistricts, caller, trackingPackage, this.regularCallInReminderHTML));
-        try {
-          emailReminderSent = emailDeliveryService.sendHtmlMessage(caller, reminderMessage);
-          if (emailReminderSent) {
-            logger.info(String.format("Sent email reminder to caller {id: %d, name %s %s}.", caller.getCallerId(),
-                caller.getFirstName(), caller.getLastName()));
-          }
-        } catch (Exception e) {
-          logger.warning(String.format("Failed to send email to caller {id: %d, name %s %s}: %s", caller.getCallerId(),
-              caller.getFirstName(), caller.getLastName(), e.getMessage()));
-          emailReminderSent = false;
-        }
-      }
-
-      ReminderStatus status = new ReminderStatus(caller, targetDistricts.get(0), smsReminderSent, emailReminderSent,
-          trackingId);
-      if (status.success()) {
-        updateReminderStatus(conn, status, reminderDate);
-      }
-      return status;
     }
+    if (smsDistrict != null) {
+      updateReminderStatus(conn, new ReminderStatus(caller, smsDistrict, true, false, trackingId), reminderDate);
+      success = true;
+    }
+    return success;
   }
 
   public DeliveryService getSmsDeliveryService() {
@@ -634,8 +592,7 @@ public class ReminderService {
         if (correspondingReminderDate != null && !reminder.hasBeenSent(correspondingReminderDate)) {
           Caller caller = new Caller(rs);
           if (!caller.isPaused()) {
-            ReminderStatus reminderStatus = sendReminder(conn, caller, correspondingReminderDate);
-            if (reminderStatus.success()) {
+            if (sendReminder(conn, caller, correspondingReminderDate)) {
               sentCount++;
             }
           }
