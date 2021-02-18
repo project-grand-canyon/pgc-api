@@ -37,7 +37,7 @@ public class ReminderMessageFormatter {
         return instance;
     }
 
-    private ReminderMessageFormatter(Properties properties){
+    private ReminderMessageFormatter(Properties config){
         this.applicationBaseUrl = config.getProperty(APPLICATION_BASE_URL);
         this.adminApplicationBaseUrl = config.getProperty(ADMIN_APPLICATION_BASE_URL);
         
@@ -164,7 +164,7 @@ public class ReminderMessageFormatter {
         return email;
     }
     
-    public Message getReminderEmail(Connection conn, Caller caller, District callerDistrict, String trackingPackage) {
+    public Message getReminderEmail(Connection conn, Caller caller, District callerDistrict, String trackingPackage) throws SQLException {
         Message reminderMessage = new Message();
         reminderMessage.setSubject("It's time to call about climate change");
         if(callFromEmail) {
@@ -199,7 +199,7 @@ public class ReminderMessageFormatter {
         return message;
     }
 
-    public Message getSMS(Connection conn, Caller caller, String trackingPackage) {
+    public Message getSMS(Connection conn, Caller caller, String trackingPackage) throws SQLException {
         String callInPageUrl = "http://" + applicationBaseUrl + "/call/";
         Message reminderMessage = new Message();
         District targetDistrict = getDistrictToCall(conn, caller);      
