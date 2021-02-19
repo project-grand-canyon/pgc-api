@@ -21,6 +21,9 @@ public class ReminderMessageFormatter {
     private String callReminderEmailResource = "callNotificationEmail.html";
     private String callGuideEmailResource = "callGuideEmail.html";
 
+    private String callGuideCallBlockHTML;
+    private String callGuideEmailCallBlockResource = "callGuideEmailCallBlock.html";
+
     private String staleScriptHTML;
     private String staleScriptEmailResource = "staleScriptEmail.html";
 
@@ -48,6 +51,13 @@ public class ReminderMessageFormatter {
                     "Unable to load regular call-in notification email template: " + e.getLocalizedMessage());
         }
       
+        try {
+            this.callGuideCallBlockHTML = FileReader.create().read(callGuideEmailCallBlockResource);
+        } catch (Exception e) {
+            throw new RuntimeException(
+                    "Unable to load call guide block email template: " + e.getLocalizedMessage());
+        }
+
         try {
             this.staleScriptHTML = FileReader.create().read(staleScriptEmailResource);
         } catch (Exception e) {
@@ -145,20 +155,23 @@ public class ReminderMessageFormatter {
     private String makeCallInReminderReplacements(List<DistrictHydrated> targetDistricts, Caller caller, String trackingPackage, String email) {
         String rootPath = adminApplicationBaseUrl + "/call/";
         List<String> phoneNumbers = getPhoneNumbersByDistrict(targetDistricts);
-        email.replaceAll("{CallerName}", caller.getFirstName() + " " + caller.getLastName());
         email.replaceAll("{IInvited}", rootPath + "invite" + trackingPackage); //TODO MAKE EXTENSION
         // TODO: Figure out how to handle Puerto Rico
         Integer size = targetDistricts.size();
+        String callBlock = "";
         for (Integer i = 0; i < size; ++i) {
+            callBlock += this.callGuideCallBlockHTML;
+            callBlock.replaceAll("{CallNumber}", i.toString());
             DistrictHydrated targetDistrict = targetDistricts.get(i);
-            String MOC = "{MOC" + String.valueOf(i + 1);
-            email.replaceAll(MOC + "Name}", targetDistrict.readableName());
-            email.replaceAll(MOC + "District}", targetDistrict.isSenatorDistrict() ? targetDistrict.getState() : targetDistrict.getState() + " District " + String.valueOf(targetDistrict.getNumber()));
-            email.replaceAll(MOC + "Number}", phoneNumbers.get(i));
-            email.replaceAll(MOC + "RequestScript}", targetDistrict.getRequests().get(0).getContent());
-            email.replaceAll(MOC + "Guide}", rootPath + targetDistrict.getState() + "/" + targetDistrict.getNumber() + trackingPackage);
-            email.replaceAll(MOC + "ICalled}", rootPath + "thankyou" + trackingPackage);
+            callBlock.replaceAll("{MOCName}", targetDistrict.readableName());
+            callBlock.replaceAll("{MOCDistrict}", targetDistrict.isSenatorDistrict() ? targetDistrict.getState() : targetDistrict.getState() + " District " + String.valueOf(targetDistrict.getNumber()));
+            callBlock.replaceAll("{MOCNumber}", phoneNumbers.get(i));
+            callBlock.replaceAll("{MOCRequestScript}", targetDistrict.getRequests().get(0).getContent());
+            callBlock.replaceAll("{MOCGuide}", rootPath + targetDistrict.getState() + "/" + targetDistrict.getNumber() + trackingPackage);
+            callBlock.replaceAll("{MOCICalled}", rootPath + "thankyou" + trackingPackage);
         }
+        email.replaceAll("{CallBlock}", callBlock);
+        email.replaceAll("{CallerName}", caller.getFirstName() + " " + caller.getLastName());
         return email;
     }
     
