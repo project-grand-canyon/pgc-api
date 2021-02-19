@@ -63,8 +63,7 @@ public class Calls {
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
       // find the caller associated with the tracking Id
-      Reminder reminder = ReminderService.getInstance().getReminderByTrackingId(
-          conn, call.getTrackingId());
+      Reminder reminder = ReminderSQLFetcher.getReminderByTrackingId(call.getTrackingId());
       if (reminder == null) {
         throw new BadRequestException("Unknown or expired call tracking Id");
       }

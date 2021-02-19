@@ -5,6 +5,7 @@ package com.ccl.grandcanyon;
 import com.ccl.grandcanyon.deliverymethod.DeliveryService;
 import com.ccl.grandcanyon.types.*;
 import com.ccl.grandcanyon.ReminderMessageFormatter;
+import com.ccl.grandcanyon.ReminderSQLFetcher;
 
 import org.apache.commons.lang3.RandomStringUtils;
 
@@ -29,34 +30,7 @@ public class ReminderService {
   private final static String SMS_DELIVERY_SERVICE = "smsDeliveryService";
   private final static String EMAIL_DELIVERY_SERVICE = "emailDeliveryService";
   private final static String STALE_SCRIPT_WARNING_INTERVAL = "staleScriptWarningInterval";
-  private final static String SQL_SELECT_REMINDER = "SELECT * FROM reminders WHERE " + Reminder.TRACKING_ID + " = ?";
-
-  private final static String SQL_INSERT_REMINDER = "INSERT into reminders (" + Reminder.CALLER_ID + ", "
-      + Reminder.DAY_OF_MONTH + ") VALUES (?, ?)";
-
-  private final static String SQL_UPDATE_REMINDER = "UPDATE reminders SET " + Reminder.LAST_REMINDER_TIMESTAMP
-      + " = ?, " + Reminder.TRACKING_ID + " = ?, " + Reminder.REMINDER_YEAR + " = ?, " + Reminder.REMINDER_MONTH
-      + " = ? " + "WHERE " + Reminder.CALLER_ID + " = ?";
-
-  private final static String SQL_SELECT_REP_DISTRICTS = "SELECT * FROM districts WHERE district_number >= 0";
-
-  private final static String SQL_SELECT_CALLERS = "SELECT r.*, c.*, ccm.contact_method, last_call_timestamp FROM reminders r "
-      + "LEFT JOIN callers AS c ON c.caller_id = r.caller_id "
-      + "LEFT JOIN callers_contact_methods AS ccm on c.caller_id = ccm.caller_id "
-      + "LEFT JOIN (SELECT caller_id,  MAX(created) as last_call_timestamp FROM calls GROUP by caller_id) cls ON c.caller_id = cls.caller_id";
-
-  private final static String SQL_INSERT_REMINDER_HISTORY = "INSERT into reminder_history (" + ReminderStatus.CALLER_ID
-      + ", " + ReminderStatus.CALLER_DISTRICT_ID + ", " + ReminderStatus.TARGET_DISTRICT_ID + ", "
-      + ReminderStatus.TIME_SENT + ", " + ReminderStatus.TRACKING_ID + ", " + ReminderStatus.EMAIL_DELIVERED + ", "
-      + ReminderStatus.SMS_DELIVERED + ") VALUES (?, ?, ?, ?, ?, ?, ?)";
-
-  private final static String SQL_STALE_SCRIPT_QUERY = "SELECT d.*, a.admin_id, a.login_enabled, a.email from districts d "
-      + "LEFT JOIN admins_districts as ad ON ad.district_id = d.district_id "
-      + "LEFT JOIN admins as a ON a.admin_id = ad.admin_id";
-
-  private final static String SQL_UPDATE_STALE_SCRIPT_NOTIFICATION = "UPDATE districts SET "
-      + District.LAST_STALE_SCRIPT_NOTIFICATION + " = ? " + "WHERE " + District.DISTRICT_ID + " = ?";
-
+  
   private static final Logger logger = Logger.getLogger(ReminderService.class.getName());
 
   private static ReminderService instance;
@@ -86,7 +60,7 @@ public class ReminderService {
   
   // TODO: Instead of distributing all callers across the month, do so for each
   // district
-  private static int getNewDayOfMonth() {
+  public static int getNewDayOfMonth() {
     int dayToReturn = dayOfMonthCounter;
     dayOfMonthCounter = dayOfMonthCounter == ReminderDate.MAX_DAY ? ReminderDate.MIN_DAY : dayOfMonthCounter + 1;
     return dayToReturn;
@@ -174,31 +148,17 @@ public class ReminderService {
     }
   }
 
-  public void createInitialReminder(Connection conn, int callerId) throws SQLException {
-
-    PreparedStatement statement = conn.prepareStatement(SQL_INSERT_REMINDER);
-    statement.setInt(1, callerId);
-    statement.setInt(2, getNewDayOfMonth());
-    statement.executeUpdate();
-  }
-
-  public Reminder getReminderByTrackingId(Connection conn, String trackingId) throws SQLException {
-
-    PreparedStatement statement = conn.prepareStatement(SQL_SELECT_REMINDER);
-    statement.setString(1, trackingId);
-    ResultSet rs = statement.executeQuery();
-    if (rs.next()) {
-      return new Reminder(rs);
-    }
-    return null;
-  }
-
-  boolean sendReminder(Connection conn, Caller caller, ReminderDate reminderDate) throws SQLException {
+  boolean sendReminder(Caller caller, ReminderDate reminderDate) {
     ReminderMessageFormatter RMF = ReminderMessageFormatter.getInstance();
-    District callerDistrict = Districts.retrieveDistrictById(conn, caller.getDistrictId());
-    if (callerDistrict.getStatus() != Status.active) {
-      logger.info("Skipping caller with id " + caller.getCallerId() + " because their district status is " + callerDistrict.getStatus().toString());
-      return false;
+    District callerDistrict = null;
+    try {
+      callerDistrict = ReminderSQLFetcher.getCallerDistrict(caller);
+      if (callerDistrict.getStatus() != Status.active) {
+        logger.info("Skipping caller with id " + caller.getCallerId() + " because their district status is " + callerDistrict.getStatus().toString());
+        return false;
+      }
+    } catch (Exception e) {
+      logger.severe(String.format("Failed to fetch caller district for caller: %d", caller.getDistrictId()));
     }
     String trackingId = RandomStringUtils.randomAlphanumeric(8);
     String trackingPackage = "?t=" + trackingId + "&c=" + caller.getCallerId() + "&d=" + callerDistrict.getNumber();
@@ -206,7 +166,7 @@ public class ReminderService {
     List<District> emailDistrict = new ArrayList<District>();
     Message reminderMessage;
     if (caller.getContactMethods().contains(ContactMethod.sms)) {
-      reminderMessage = RMF.getSMS(conn, caller, trackingPackage);
+      reminderMessage = RMF.getSMS(caller, trackingPackage);
       try {
         if (smsDeliveryService.sendHtmlMessage(caller, reminderMessage)){
           logger.info(String.format("Sent SMS reminder to caller {id: %d name %s %s}.",
@@ -220,7 +180,7 @@ public class ReminderService {
       }
     }
     if (caller.getContactMethods().contains(ContactMethod.email)) {
-      reminderMessage = RMF.getReminderEmail(conn, caller, callerDistrict, trackingPackage);
+      reminderMessage = RMF.getReminderEmail(caller, callerDistrict, trackingPackage);
       try {
         if (emailDeliveryService.sendHtmlMessage(caller, reminderMessage)) {
             logger.info(String.format("Sent email reminder to caller {id: %d, name %s %s}.", caller.getCallerId(),
@@ -233,20 +193,24 @@ public class ReminderService {
       }
     }
     boolean success = false;
-    for (District d : emailDistrict){
-      if (smsDistrict != null && smsDistrict == d){
-        updateReminderStatus(conn, new ReminderStatus(caller, d, true, true, trackingId), reminderDate);
-        smsDistrict = null;
+    try{
+      for (District d : emailDistrict){
+        if (smsDistrict != null && smsDistrict == d){
+          ReminderSQLFetcher.updateReminderStatus(new ReminderStatus(caller, d, true, true, trackingId), reminderDate);
+          smsDistrict = null;
+          success = true;
+        }
+        else {
+          ReminderSQLFetcher.updateReminderStatus(new ReminderStatus(caller, d, false, true, trackingId), reminderDate);
+          success = true;
+        }
+      }
+      if (smsDistrict != null) {
+        ReminderSQLFetcher.updateReminderStatus(new ReminderStatus(caller, smsDistrict, true, false, trackingId), reminderDate);
         success = true;
       }
-      else {
-        updateReminderStatus(conn, new ReminderStatus(caller, d, false, true, trackingId), reminderDate);
-        success = true;
-      }
-    }
-    if (smsDistrict != null) {
-      updateReminderStatus(conn, new ReminderStatus(caller, smsDistrict, true, false, trackingId), reminderDate);
-      success = true;
+    } catch(Exception e) {
+      logger.warning(String.format("Failed to update Reminder Status on caller: %d", caller.getCallerId()));
     }
     return success;
   }
@@ -259,42 +223,19 @@ public class ReminderService {
     return emailDeliveryService;
   }
 
-  private void updateReminderStatus(Connection conn, ReminderStatus reminderStatus, ReminderDate reminderDate)
-      throws SQLException {
-
-    Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-    PreparedStatement update = conn.prepareStatement(SQL_UPDATE_REMINDER);
-    int idx = 1;
-    update.setTimestamp(idx++, timestamp);
-    update.setString(idx++, reminderStatus.getTrackingId());
-    update.setInt(idx++, reminderDate.getYear());
-    update.setInt(idx++, reminderDate.getMonth());
-    update.setInt(idx, reminderStatus.getCaller().getCallerId());
-    update.executeUpdate();
-
-    // add history record
-    PreparedStatement history = conn.prepareStatement(SQL_INSERT_REMINDER_HISTORY);
-    idx = 1;
-    history.setInt(idx++, reminderStatus.getCaller().getCallerId());
-    history.setInt(idx++, reminderStatus.getCaller().getDistrictId());
-    history.setInt(idx++, reminderStatus.getTargetDistrict().getDistrictId());
-    history.setTimestamp(idx++, timestamp);
-    history.setString(idx++, reminderStatus.getTrackingId());
-    history.setBoolean(idx++, reminderStatus.getEmailDelivered());
-    history.setBoolean(idx, reminderStatus.getSmsDelivered());
-    history.executeUpdate();
-  }
-  
   private boolean sendStaleScrptNotification(
       District district,
-      String adminEmail)
-      throws Exception {
+      String adminEmail) {
     boolean success = false;
     if (adminEmail != null) {
       Message message = ReminderMessageFormatter.getInstance().getAdminReminderEmail(district, dateFormat.format(district.getScriptModifiedTime()));
       Caller adminAsCaller = new Caller();
       adminAsCaller.setEmail(adminEmail);
-      success = emailDeliveryService.sendTextMessage(adminAsCaller, message);
+      try{
+        success = emailDeliveryService.sendTextMessage(adminAsCaller, message);
+      } catch(Exception e) {
+        logger.warning("Failed to deliver stale script message to: " + adminAsCaller.getEmail());
+      }
     }
     if (success) {
       logger.info(String.format("Sent stale script warning to %s for %s district %d", adminEmail, district.getState(),
@@ -313,35 +254,23 @@ public class ReminderService {
     public void run() {
 
       logger.info("Waking up Reminder Sender");
-
-      Connection conn = null;
       try {
-        conn = SQLHelper.getInstance().getConnection();
-        checkForStaleScripts(conn);
-        String query = SQL_SELECT_REP_DISTRICTS;
-        logger.info(query);
-        ResultSet rs = conn.createStatement().executeQuery(query);
+        ReminderSQLFetcher.openConnection();
+        checkForStaleScripts();
+        ResultSet rs = ReminderSQLFetcher.getDistrictSet();
         while (rs.next()) {
           District district = new District(rs);
-          run(district, conn);
+          run(district);
         }
       } catch (Throwable e) {
         logger.severe("Reminder service select districts failure: " + e.toString());
       } finally {
-        if (conn != null) {
-          try {
-            conn.close();
-          } catch (SQLException e) {
-            logger.warning("Failed to close SQL connection during reminder check: " + e.getMessage());
-          }
-        }
+        ReminderSQLFetcher.closeConnection();
       }
     }
 
-    private void run(District district, Connection conn) throws SQLException {
-
+    private void run(District district) {
       logger.info("Waking up reminder sender for " + district.readableName());
-
       ZoneId timezoneId = ZoneId.of(district.getTimeZone());
       LocalDateTime currentDateTime = LocalDateTime.now(timezoneId);
       logger.info("Time in " + district.readableName() + ": " + currentDateTime + ". (Sending window:"
@@ -374,38 +303,26 @@ public class ReminderService {
 
       Set<ReminderDate> missedDates = getMissedDaysBefore(currentDateTime.toLocalDate());
       datesToQuery.addAll(missedDates);
-
-      StringBuilder whereClause = new StringBuilder(" WHERE " + Reminder.DAY_OF_MONTH);
-      if (datesToQuery.size() == 1) {
-        whereClause.append(" = ").append(datesToQuery.iterator().next().getDay());
-      } else {
-        whereClause.append(" IN (");
-        for (ReminderDate date : datesToQuery) {
-          whereClause.append(date.getDay()).append(",");
-        }
-        whereClause.deleteCharAt(whereClause.length() - 1);
-        whereClause.append(")");
-      }
-
-      whereClause.append(" AND c." + Caller.DISTRICT_ID + " = " + district.getDistrictId());
-
-      int sentCount = 0;
-
-      String query = SQL_SELECT_CALLERS + whereClause.toString();
-      logger.info(query);
-      ResultSet rs = conn.createStatement().executeQuery(query);
-      while (rs.next()) {
-        logger.info("Sending for " + new Caller(rs).getCallerId());
-        Reminder reminder = new Reminder(rs);
-        ReminderDate correspondingReminderDate = getCorrespondingReminderDate(reminder, datesToQuery);
-        if (correspondingReminderDate != null && !reminder.hasBeenSent(correspondingReminderDate)) {
-          Caller caller = new Caller(rs);
-          if (!caller.isPaused()) {
-            if (sendReminder(conn, caller, correspondingReminderDate)) {
-              sentCount++;
+      
+      try {
+        ResultSet rs = ReminderSQLFetcher.getCallerSet(datesToQuery, district);
+        int sentCount = 0;
+        while (rs.next()) {
+          logger.info("Sending for " + new Caller(rs).getCallerId());
+          Reminder reminder = new Reminder(rs);
+          ReminderDate correspondingReminderDate = getCorrespondingReminderDate(reminder, datesToQuery);
+          if (correspondingReminderDate != null && !reminder.hasBeenSent(correspondingReminderDate)) {
+            Caller caller = new Caller(rs);
+            if (!caller.isPaused()) {
+              if (sendReminder(caller, correspondingReminderDate)) {
+                sentCount++;
+              }
             }
           }
         }
+      }
+      catch(Exception e) {
+        logger.severe("Message Sender Failed: " + e.toString());
       }
     }
 
@@ -448,12 +365,11 @@ public class ReminderService {
       return null;
     }
 
-    private void checkForStaleScripts(Connection conn) {
+    private void checkForStaleScripts() {
 
       Timestamp staleTime = new Timestamp(System.currentTimeMillis() - staleScriptWarningInterval);
-      Timestamp now = new Timestamp(System.currentTimeMillis());
       try {
-        ResultSet rs = conn.createStatement().executeQuery(SQL_STALE_SCRIPT_QUERY);
+        ResultSet rs = ReminderSQLFetcher.getStaleScriptSet();
         while (rs.next()) {
           District district = new District(rs);
           // send a notification if it's been > N days since script was modified and it's
@@ -462,11 +378,7 @@ public class ReminderService {
           if (district.needsStaleScriptNotification(staleTime)) {
             if (rs.getBoolean(Admin.LOGIN_ENABLED)) {
               if (sendStaleScrptNotification(district, rs.getString(Admin.EMAIL))) {
-                PreparedStatement update = conn.prepareStatement(SQL_UPDATE_STALE_SCRIPT_NOTIFICATION);
-                int idx = 1;
-                update.setTimestamp(idx++, now);
-                update.setInt(idx, district.getDistrictId());
-                update.executeUpdate();
+                ReminderSQLFetcher.updateStaleScript(district);  
               }
             } else {
               logger.warning(String.format(

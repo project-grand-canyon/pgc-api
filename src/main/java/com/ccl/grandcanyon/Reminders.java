@@ -42,15 +42,15 @@ public class Reminders {
       @PathParam("callerId") int callerId)
       throws SQLException {
 
-    Connection conn = SQLHelper.getInstance().getConnection();
+    ReminderSQLFetcher.openConnection();
     try {
-      Caller caller = Callers.retrieveById(conn, callerId);
+      Caller caller = ReminderSQLFetcher.getCallerById(callerId);
       checkPermissions(caller.getDistrictId(), "send a call notification");
       ReminderDate reminderDate = new ReminderDate(LocalDate.now());
-      return Response.ok(BooleanNode.valueOf(ReminderService.getInstance().sendReminder(conn, caller, reminderDate))).build();
+      return Response.ok(BooleanNode.valueOf(ReminderService.getInstance().sendReminder(caller, reminderDate))).build();
     }
     finally {
-      conn.close();
+      ReminderSQLFetcher.closeConnection();
     }
   }
 

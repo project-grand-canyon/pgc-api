@@ -56,8 +56,7 @@ public class ReminderMessageFormatter {
     }
     
     private List<DistrictHydrated> newGetDistrictToCall(
-            Connection conn,
-            District callerDistrict) throws SQLException {
+            District callerDistrict) {
         List<DistrictHydrated> districtsToCall = new LinkedList<DistrictHydrated>();
         List<CallTarget> targets = callerDistrict.getCallTargets();
         assert (targets != null && !targets.isEmpty());
@@ -89,7 +88,7 @@ public class ReminderMessageFormatter {
                         callerDistrict.getDistrictId()));
                 targetDistrictId = callerDistrict.getDistrictId();
             }
-            districtsToCall.add(Districts.retrieveDistrictHydratedById(conn, targetDistrictId));
+            districtsToCall.add(ReminderSQLFetcher.getDistrictHydratedById(targetDistrictId));
       
         }
         //TODO If the logger.severe error occurs there is the potential for duplicate districts maybe add a contingency plan?
@@ -97,9 +96,8 @@ public class ReminderMessageFormatter {
     }
 
     private District getDistrictToCall(
-            Connection conn,
-            Caller caller) throws SQLException {
-        District callerDistrict = Districts.retrieveDistrictById(conn, caller.getDistrictId());
+            Caller caller) {
+        District callerDistrict = ReminderSQLFetcher.getDistrictById(caller.getDistrictId());
         int targetDistrictId = 0;
         int random = new Random().nextInt(100);
         int sum = 0;
@@ -119,8 +117,8 @@ public class ReminderMessageFormatter {
             targetDistrictId = callerDistrict.getDistrictId();
         }
         return (targetDistrictId == callerDistrict.getDistrictId()) ?
-                callerDistrict :
-                Districts.retrieveDistrictById(conn, targetDistrictId);
+            callerDistrict :
+            ReminderSQLFetcher.getDistrictById(targetDistrictId);
     }
 
     private List<String> getPhoneNumbersByDistrict(List<DistrictHydrated> targetDistricts) {
@@ -164,21 +162,21 @@ public class ReminderMessageFormatter {
         return email;
     }
     
-    public Message getReminderEmail(Connection conn, Caller caller, District callerDistrict, String trackingPackage) throws SQLException {
+    public Message getReminderEmail(Caller caller, District callerDistrict, String trackingPackage) {
         Message reminderMessage = new Message();
         reminderMessage.setSubject("It's time to call about climate change");
         if(callFromEmail) {
-            List<DistrictHydrated> targetDistricts = newGetDistrictToCall(conn, callerDistrict);
+            List<DistrictHydrated> targetDistricts = newGetDistrictToCall(callerDistrict);
             reminderMessage.setBody(
                     makeCallInReminderReplacements(targetDistricts, caller, trackingPackage, this.regularCallInReminderHTML));
             for (DistrictHydrated target: targetDistricts){
-                reminderMessage.addTargetDistrict(Districts.retrieveDistrictById(conn, target.getDistrictId()));
+                reminderMessage.addTargetDistrict(ReminderSQLFetcher.getDistrictById(target.getDistrictId()));
             }
             return reminderMessage; 
         }
         else {
             String callInPageUrl = "http://" + applicationBaseUrl + "/call/";
-            District targetDistrict = getDistrictToCall(conn, caller);      
+            District targetDistrict = getDistrictToCall(caller);      
             String URL = callInPageUrl + targetDistrict.getState() + "/" +
                     targetDistrict.getNumber() + trackingPackage;
             reminderMessage.setBody(this.regularCallInReminderHTML.replaceAll("https://cclcalls.org/call/", URL));
@@ -199,10 +197,10 @@ public class ReminderMessageFormatter {
         return message;
     }
 
-    public Message getSMS(Connection conn, Caller caller, String trackingPackage) throws SQLException {
+    public Message getSMS(Caller caller, String trackingPackage) {
         String callInPageUrl = "http://" + applicationBaseUrl + "/call/";
         Message reminderMessage = new Message();
-        District targetDistrict = getDistrictToCall(conn, caller);      
+        District targetDistrict = getDistrictToCall(caller);      
         String URL = callInPageUrl + targetDistrict.getState() + "/" +
                 targetDistrict.getNumber() + trackingPackage;
         String legislatorTitle = targetDistrict.getNumber() >= 0 ? "Rep." : "Senator";
