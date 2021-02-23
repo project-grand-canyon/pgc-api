@@ -151,8 +151,9 @@ public class ReminderService {
   boolean sendReminder(Caller caller, ReminderDate reminderDate) {
     ReminderMessageFormatter RMF = ReminderMessageFormatter.getInstance();
     District callerDistrict = null;
+    ReminderSQLFetcher fetcher = new ReminderSQLFetcher();
     try {
-      callerDistrict = ReminderSQLFetcher.getCallerDistrict(caller);
+      callerDistrict = fetcher.getCallerDistrict(caller);
       if (callerDistrict.getStatus() != Status.active) {
         logger.info("Skipping caller with id " + caller.getCallerId() + " because their district status is " + callerDistrict.getStatus().toString());
         return false;
@@ -196,17 +197,17 @@ public class ReminderService {
     try{
       for (District d : emailDistrict){
         if (smsDistrict != null && smsDistrict == d){
-          ReminderSQLFetcher.updateReminderStatus(new ReminderStatus(caller, d, true, true, trackingId), reminderDate);
+          fetcher.updateReminderStatus(new ReminderStatus(caller, d, true, true, trackingId), reminderDate);
           smsDistrict = null;
           success = true;
         }
         else {
-          ReminderSQLFetcher.updateReminderStatus(new ReminderStatus(caller, d, false, true, trackingId), reminderDate);
+          fetcher.updateReminderStatus(new ReminderStatus(caller, d, false, true, trackingId), reminderDate);
           success = true;
         }
       }
       if (smsDistrict != null) {
-        ReminderSQLFetcher.updateReminderStatus(new ReminderStatus(caller, smsDistrict, true, false, trackingId), reminderDate);
+        fetcher.updateReminderStatus(new ReminderStatus(caller, smsDistrict, true, false, trackingId), reminderDate);
         success = true;
       }
     } catch(Exception e) {
@@ -255,22 +256,21 @@ public class ReminderService {
 
       logger.info("Waking up Reminder Sender");
       try {
-        ReminderSQLFetcher.openConnection();
         checkForStaleScripts();
-        ResultSet rs = ReminderSQLFetcher.getDistrictSet();
+        ReminderSQLFetcher fetcher = new ReminderSQLFetcher();
+        ResultSet rs = fetcher.getDistrictSet();
         while (rs.next()) {
           District district = new District(rs);
           run(district);
         }
       } catch (Throwable e) {
         logger.severe("Reminder service select districts failure: " + e.toString());
-      } finally {
-        ReminderSQLFetcher.closeConnection();
       }
     }
 
     private void run(District district) {
       logger.info("Waking up reminder sender for " + district.readableName());
+      ReminderSQLFetcher fetcher = new ReminderSQLFetcher();
       ZoneId timezoneId = ZoneId.of(district.getTimeZone());
       LocalDateTime currentDateTime = LocalDateTime.now(timezoneId);
       logger.info("Time in " + district.readableName() + ": " + currentDateTime + ". (Sending window:"
@@ -305,7 +305,7 @@ public class ReminderService {
       datesToQuery.addAll(missedDates);
       
       try {
-        ResultSet rs = ReminderSQLFetcher.getCallerSet(datesToQuery, district);
+        ResultSet rs = fetcher.getCallerSet(datesToQuery, district);
         int sentCount = 0;
         while (rs.next()) {
           logger.info("Sending for " + new Caller(rs).getCallerId());
@@ -369,7 +369,8 @@ public class ReminderService {
 
       Timestamp staleTime = new Timestamp(System.currentTimeMillis() - staleScriptWarningInterval);
       try {
-        ResultSet rs = ReminderSQLFetcher.getStaleScriptSet();
+        ReminderSQLFetcher fetcher = new ReminderSQLFetcher();
+        ResultSet rs = fetcher.getStaleScriptSet();
         while (rs.next()) {
           District district = new District(rs);
           // send a notification if it's been > N days since script was modified and it's
@@ -378,7 +379,7 @@ public class ReminderService {
           if (district.needsStaleScriptNotification(staleTime)) {
             if (rs.getBoolean(Admin.LOGIN_ENABLED)) {
               if (sendStaleScrptNotification(district, rs.getString(Admin.EMAIL))) {
-                ReminderSQLFetcher.updateStaleScript(district);  
+                fetcher.updateStaleScript(district);  
               }
             } else {
               logger.warning(String.format(

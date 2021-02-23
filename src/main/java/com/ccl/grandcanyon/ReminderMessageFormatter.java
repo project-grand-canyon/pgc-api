@@ -70,6 +70,7 @@ public class ReminderMessageFormatter {
         List<DistrictHydrated> districtsToCall = new LinkedList<DistrictHydrated>();
         List<CallTarget> targets = callerDistrict.getCallTargets();
         assert (targets != null && !targets.isEmpty());
+        ReminderSQLFetcher fetcher = new ReminderSQLFetcher();
         while (!targets.isEmpty()) {
             Integer targetDistrictId = 0;
             Integer totalProbability = 0;
@@ -98,16 +99,16 @@ public class ReminderMessageFormatter {
                         callerDistrict.getDistrictId()));
                 targetDistrictId = callerDistrict.getDistrictId();
             }
-            districtsToCall.add(ReminderSQLFetcher.getDistrictHydratedById(targetDistrictId));
+            districtsToCall.add(fetcher.getDistrictHydratedById(targetDistrictId));
       
         }
         //TODO If the logger.severe error occurs there is the potential for duplicate districts maybe add a contingency plan?
         return districtsToCall;
     }
 
-    private District getDistrictToCall(
-            Caller caller) {
-        District callerDistrict = ReminderSQLFetcher.getDistrictById(caller.getDistrictId());
+    private District getDistrictToCall(Caller caller) {
+        ReminderSQLFetcher fetcher = new ReminderSQLFetcher();
+        District callerDistrict = fetcher.getDistrictById(caller.getDistrictId());
         int targetDistrictId = 0;
         int random = new Random().nextInt(100);
         int sum = 0;
@@ -128,7 +129,7 @@ public class ReminderMessageFormatter {
         }
         return (targetDistrictId == callerDistrict.getDistrictId()) ?
             callerDistrict :
-            ReminderSQLFetcher.getDistrictById(targetDistrictId);
+            fetcher.getDistrictById(targetDistrictId);
     }
 
     private List<String> getPhoneNumbersByDistrict(List<DistrictHydrated> targetDistricts) {
@@ -182,8 +183,9 @@ public class ReminderMessageFormatter {
             List<DistrictHydrated> targetDistricts = newGetDistrictToCall(callerDistrict);
             reminderMessage.setBody(
                     makeCallInReminderReplacements(targetDistricts, caller, trackingPackage, this.regularCallInReminderHTML));
+            ReminderSQLFetcher fetcher = new ReminderSQLFetcher();
             for (DistrictHydrated target: targetDistricts){
-                reminderMessage.addTargetDistrict(ReminderSQLFetcher.getDistrictById(target.getDistrictId()));
+                reminderMessage.addTargetDistrict(fetcher.getDistrictById(target.getDistrictId()));
             }
             return reminderMessage; 
         }

@@ -117,7 +117,8 @@ public class Callers {
       }
 
       insertContactMethods(conn, callerId, caller);
-      ReminderSQLFetcher.createInitialReminder(conn, callerId);
+      ReminderSQLFetcher fetcher = new ReminderSQLFetcher();
+      fetcher.createInitialReminder(callerId);
       Caller newCaller = retrieveById(conn, callerId);
       conn.commit();
 

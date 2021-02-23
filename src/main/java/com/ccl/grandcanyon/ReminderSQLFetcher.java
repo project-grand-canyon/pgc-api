@@ -38,60 +38,35 @@ public class ReminderSQLFetcher {
 
     private static final Logger logger = Logger.getLogger(ReminderSQLFetcher.class.getName());
     
-    private static ReminderSQLFetcher instance;
-
-    private static Connection conn; 
-
-    public static void init(Properties config) {
-        assert (instance == null);
-        instance = new ReminderSQLFetcher(config);
-    }
-    
-    public static ReminderSQLFetcher getInstance() {
-        assert (instance != null);
-        return instance;
-    }
-    
-    private ReminderSQLFetcher(Properties config) {
+    public ReminderSQLFetcher() {
         logger.info("Init Reminder SQL Fetcher");
     }
 
-    public static void openConnection() {
-        try {
-            conn = SQLHelper.getInstance().getConnection();
-        } catch (Throwable e) {
-            logger.severe("Unable to open connection: " + e.toString());
+    public void createInitialReminder(int callerId) throws SQLException {
+        try (Connection conn = SQLHelper.getInstance().getConnection();
+            PreparedStatement statement = conn.prepareStatement(SQL_INSERT_REMINDER);
+        ){
+            statement.setInt(1, callerId);
+            statement.setInt(2, ReminderService.getNewDayOfMonth());
+            statement.executeUpdate();
         }
     }
 
-    public static void closeConnection() {
-        if (conn != null){
-            try {
-                conn.close();
-            } catch (SQLException e) {
-                logger.warning("Failed to close SQL connection during reminder check: " + e.getMessage());
-            }
+    public Caller getCallerById(int callerId) throws SQLException {
+        try(Connection conn = SQLHelper.getInstance().getConnection()){
+            return Callers.retrieveById(conn, callerId);
         }
     }
 
-    public static void createInitialReminder(Connection conn, int callerId) throws SQLException {
-        PreparedStatement statement = conn.prepareStatement(SQL_INSERT_REMINDER);
-        statement.setInt(1, callerId);
-        statement.setInt(2, ReminderService.getNewDayOfMonth());
-        statement.executeUpdate();
-    }
-
-    public static Caller getCallerById(int callerId) throws SQLException {
-        return Callers.retrieveById(conn, callerId);        
-    }
-
-    public static ResultSet getDistrictSet() throws SQLException {
+    public ResultSet getDistrictSet() throws SQLException {
         String query = SQL_SELECT_REP_DISTRICTS;
         logger.info(query);
-        return conn.createStatement().executeQuery(query);
+        try(Connection conn = SQLHelper.getInstance().getConnection()){
+            return conn.createStatement().executeQuery(query);
+        }
     } 
 
-    public static ResultSet getCallerSet(Set<ReminderDate> datesToQuery, District district) throws SQLException {
+    public ResultSet getCallerSet(Set<ReminderDate> datesToQuery, District district) throws SQLException {
         StringBuilder whereClause = new StringBuilder(" WHERE " + Reminder.DAY_OF_MONTH);
         if (datesToQuery.size() == 1) {
             whereClause.append(" = ").append(datesToQuery.iterator().next().getDay());
@@ -108,38 +83,48 @@ public class ReminderSQLFetcher {
   
         String query = SQL_SELECT_CALLERS + whereClause.toString();
         logger.info(query);
-        return conn.createStatement().executeQuery(query);
-    }
-
-    public static ResultSet getStaleScriptSet() throws SQLException {
-        return conn.createStatement().executeQuery(SQL_STALE_SCRIPT_QUERY);
-    }
-
-    public static void updateStaleScript(District district) throws SQLException {
-        Timestamp now = new Timestamp(System.currentTimeMillis());
-        PreparedStatement update = conn.prepareStatement(SQL_UPDATE_STALE_SCRIPT_NOTIFICATION);
-        int idx = 1;
-        update.setTimestamp(idx++, now);
-        update.setInt(idx, district.getDistrictId());
-        update.executeUpdate();
-    }
-
-    public static District getCallerDistrict(Caller caller) throws SQLException {
-        return Districts.retrieveDistrictById(conn, caller.getDistrictId());
-    }
-
-    public static Reminder getReminderByTrackingId(String trackingId) throws SQLException {
-        PreparedStatement statement = conn.prepareStatement(SQL_SELECT_REMINDER);
-        statement.setString(1, trackingId);
-        ResultSet rs = statement.executeQuery();
-        if (rs.next()) {
-            return new Reminder(rs);
+        try(Connection conn = SQLHelper.getInstance().getConnection()){
+            return conn.createStatement().executeQuery(query);
         }
-        return null;
     }
 
-    public static DistrictHydrated getDistrictHydratedById(int id) {
-        try{
+    public ResultSet getStaleScriptSet() throws SQLException {
+        try(Connection conn = SQLHelper.getInstance().getConnection()){
+            return conn.createStatement().executeQuery(SQL_STALE_SCRIPT_QUERY);
+        }
+    }
+
+    public void updateStaleScript(District district) throws SQLException {
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+        try(Connection conn = SQLHelper.getInstance().getConnection()){
+            PreparedStatement update = conn.prepareStatement(SQL_UPDATE_STALE_SCRIPT_NOTIFICATION);
+            int idx = 1;
+            update.setTimestamp(idx++, now);
+            update.setInt(idx, district.getDistrictId());
+            update.executeUpdate();
+        }
+    }
+
+    public District getCallerDistrict(Caller caller) throws SQLException {
+        try(Connection conn = SQLHelper.getInstance().getConnection()){
+            return Districts.retrieveDistrictById(conn, caller.getDistrictId());
+        }
+    }
+
+    public Reminder getReminderByTrackingId(String trackingId) throws SQLException {
+        try(Connection conn = SQLHelper.getInstance().getConnection()){
+            PreparedStatement statement = conn.prepareStatement(SQL_SELECT_REMINDER);
+            statement.setString(1, trackingId);
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                return new Reminder(rs);
+            }
+            return null;
+        }
+    }
+
+    public DistrictHydrated getDistrictHydratedById(int id) {
+        try(Connection conn = SQLHelper.getInstance().getConnection()) {
             return Districts.retrieveDistrictHydratedById(conn, id);
         }catch(Exception e) {
             logger.severe(String.format("Failed to fetch Hydrated District: %d", id));
@@ -147,8 +132,8 @@ public class ReminderSQLFetcher {
         }
     }
 
-    public static District getDistrictById(int id) {
-        try{
+    public District getDistrictById(int id) {
+        try(Connection conn = SQLHelper.getInstance().getConnection()){
             return Districts.retrieveDistrictById(conn, id);
         } catch(Exception e) {
             logger.severe(String.format("Failed to fetch Hydrated District: %d", id));
@@ -156,29 +141,29 @@ public class ReminderSQLFetcher {
         }
     }
 
-    public static void updateReminderStatus(ReminderStatus reminderStatus, ReminderDate reminderDate) throws SQLException
-         {
+    public void updateReminderStatus(ReminderStatus reminderStatus, ReminderDate reminderDate) throws SQLException {
+        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+        try(Connection conn = SQLHelper.getInstance().getConnection()){
+            PreparedStatement update = conn.prepareStatement(SQL_UPDATE_REMINDER);
+            int idx = 1;
+            update.setTimestamp(idx++, timestamp);
+            update.setString(idx++, reminderStatus.getTrackingId());
+            update.setInt(idx++, reminderDate.getYear());
+            update.setInt(idx++, reminderDate.getMonth());
+            update.setInt(idx, reminderStatus.getCaller().getCallerId());
+            update.executeUpdate();
 
-    Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-    PreparedStatement update = conn.prepareStatement(SQL_UPDATE_REMINDER);
-    int idx = 1;
-    update.setTimestamp(idx++, timestamp);
-    update.setString(idx++, reminderStatus.getTrackingId());
-    update.setInt(idx++, reminderDate.getYear());
-    update.setInt(idx++, reminderDate.getMonth());
-    update.setInt(idx, reminderStatus.getCaller().getCallerId());
-    update.executeUpdate();
-
-    // add history record
-    PreparedStatement history = conn.prepareStatement(SQL_INSERT_REMINDER_HISTORY);
-    idx = 1;
-    history.setInt(idx++, reminderStatus.getCaller().getCallerId());
-    history.setInt(idx++, reminderStatus.getCaller().getDistrictId());
-    history.setInt(idx++, reminderStatus.getTargetDistrict().getDistrictId());
-    history.setTimestamp(idx++, timestamp);
-    history.setString(idx++, reminderStatus.getTrackingId());
-    history.setBoolean(idx++, reminderStatus.getEmailDelivered());
-    history.setBoolean(idx, reminderStatus.getSmsDelivered());
-    history.executeUpdate();
+            // add history record
+            PreparedStatement history = conn.prepareStatement(SQL_INSERT_REMINDER_HISTORY);
+            idx = 1;
+            history.setInt(idx++, reminderStatus.getCaller().getCallerId());
+            history.setInt(idx++, reminderStatus.getCaller().getDistrictId());
+            history.setInt(idx++, reminderStatus.getTargetDistrict().getDistrictId());
+            history.setTimestamp(idx++, timestamp);
+            history.setString(idx++, reminderStatus.getTrackingId());
+            history.setBoolean(idx++, reminderStatus.getEmailDelivered());
+            history.setBoolean(idx, reminderStatus.getSmsDelivered());
+            history.executeUpdate();
+        }
     }
 }
