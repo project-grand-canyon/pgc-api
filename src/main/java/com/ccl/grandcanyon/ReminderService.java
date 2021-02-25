@@ -271,9 +271,10 @@ public class ReminderService {
 
     String callInPageUrl = applicationBaseUrl + "/call/" + targetDistrict.getState() + "/" +
         targetDistrict.getNumber() + "?t=" + trackingId + "&c=" + caller.getCallerId() + "&d=" + callerDistrict.getNumber();
+    logger.info("Sending caller with id " + caller.getCallerId() + " sms: " + caller.getContactMethods().contains(ContactMethod.sms) + " email " + caller.getContactMethods().contains(ContactMethod.email));
 
     if (caller.getContactMethods().contains(ContactMethod.sms)) {
-
+      logger.info("Sending sms for caller with id " + caller.getCallerId());
       Message reminderMessage = new Message();
 
       String legislatorTitle = targetDistrict.getNumber() >= 0 ? "Rep." : "Senator";
@@ -295,7 +296,7 @@ public class ReminderService {
     }
 
     if (caller.getContactMethods().contains(ContactMethod.email)) {
-
+      logger.info("Sending email for caller with id " + caller.getCallerId());
       Message reminderMessage = new Message();
       reminderMessage.setSubject("It's time to call about climate change");
       reminderMessage.setBody(this.regularCallInReminderHTML.replaceAll("cclcalls.org/call/", callInPageUrl));
@@ -525,11 +526,11 @@ public class ReminderService {
       logger.info(query);
       ResultSet rs = conn.createStatement().executeQuery(query);
       while (rs.next()) {
-        logger.info("Sending for " + new Caller(rs).getCallerId());
+        Caller caller = new Caller(rs);
+        logger.info("Considering caller " + caller.getCallerId() + " with contact methods " + caller.getContactMethods().toString());
         Reminder reminder = new Reminder(rs);
         ReminderDate correspondingReminderDate = getCorrespondingReminderDate(reminder, datesToQuery);
         if (correspondingReminderDate != null && !reminder.hasBeenSent(correspondingReminderDate)) {
-          Caller caller = new Caller(rs);
           if (!caller.isPaused()) {
             ReminderStatus reminderStatus = sendReminder(conn, caller, correspondingReminderDate);
             if (reminderStatus.success()) {
