@@ -43,8 +43,8 @@ public class Calls {
           Call.CALLER_ID + ", " +
           Call.MONTH + ", " +
           Call.YEAR + ", " +
-          Call.DISTRICT_ID + ", " +
-          ") VALUES (?, ?, ?, ?, ?)";
+          Call.DISTRICT_ID +
+          ") VALUES (?, ?, ?, ?)";
 
   private static final Logger logger = Logger.getLogger(Calls.class.getName());
 
