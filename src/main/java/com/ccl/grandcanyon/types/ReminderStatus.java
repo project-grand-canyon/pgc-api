@@ -8,27 +8,27 @@ public class ReminderStatus extends ReminderBase {
   // the caller who was reminded
   private Caller caller;
 
-  // the district that the caller was asked to contact
-  private District targetDistrict;
+  // the district id that the caller was asked to contact
+  private Integer targetDistrictId;
 
   public ReminderStatus(
       Caller caller,
-      District targetDistrict,
+      Integer targetDistrictId,
       boolean smsDelivered,
       boolean emailDelivered,
       String trackingId) {
 
     super(smsDelivered, emailDelivered, trackingId);
     this.caller = caller;
-    this.targetDistrict = targetDistrict;
+    this.targetDistrictId = targetDistrictId;
   }
 
   public Caller getCaller() {
     return caller;
   }
 
-  public District getTargetDistrict() {
-    return targetDistrict;
+  public Integer getTargetDistrictId() {
+    return targetDistrictId;
   }
 
   public boolean success() {

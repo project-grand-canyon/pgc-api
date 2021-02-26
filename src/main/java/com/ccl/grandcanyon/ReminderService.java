@@ -30,7 +30,7 @@ public class ReminderService {
   private final static String SMS_DELIVERY_SERVICE = "smsDeliveryService";
   private final static String EMAIL_DELIVERY_SERVICE = "emailDeliveryService";
   private final static String STALE_SCRIPT_WARNING_INTERVAL = "staleScriptWarningInterval";
-  
+
   private static final Logger logger = Logger.getLogger(ReminderService.class.getName());
 
   private static ReminderService instance;
@@ -57,7 +57,7 @@ public class ReminderService {
   private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 
   private int secondReminderInterval;
-  
+
   // TODO: Instead of distributing all callers across the month, do so for each
   // district
   public static int getNewDayOfMonth() {
@@ -82,7 +82,7 @@ public class ReminderService {
 
     this.serviceIntervalMinutes = Integer.parseInt(config.getProperty(REMINDER_SERVICE_INTERVAL, "60"));
     this.secondReminderInterval = Integer.parseInt(config.getProperty(SECOND_REMINDER_INTERVAL, "4"));
-    
+
     try {
       this.earliestReminder = LocalTime.parse(config.getProperty(EARLIEST_REMINDER_TIME));
     } catch (DateTimeParseException e) {
@@ -149,13 +149,14 @@ public class ReminderService {
   }
 
   boolean sendReminder(Caller caller, ReminderDate reminderDate) {
-    ReminderMessageFormatter RMF = ReminderMessageFormatter.getInstance();
+    ReminderMessageFormatter reminderMessageFormatter = ReminderMessageFormatter.getInstance();
     District callerDistrict = null;
     ReminderSQLFetcher fetcher = new ReminderSQLFetcher();
     try {
       callerDistrict = fetcher.getCallerDistrict(caller);
       if (callerDistrict.getStatus() != Status.active) {
-        logger.info("Skipping caller with id " + caller.getCallerId() + " because their district status is " + callerDistrict.getStatus().toString());
+        logger.info("Skipping caller with id " + caller.getCallerId() + " because their district status is "
+            + callerDistrict.getStatus().toString());
         return false;
       }
     } catch (Exception e) {
@@ -163,57 +164,46 @@ public class ReminderService {
     }
     String trackingId = RandomStringUtils.randomAlphanumeric(8);
     String trackingPackage = "?t=" + trackingId + "&c=" + caller.getCallerId() + "&d=" + callerDistrict.getNumber();
-    District smsDistrict = null;
-    List<District> emailDistrict = new ArrayList<District>();
+    boolean smsSuccess = false;
+    boolean emailSuccess = false;
     Message reminderMessage;
+    List<DistrictHydrated> targetDistricts = newGetDistrictToCall(callerDistrict);
     if (caller.getContactMethods().contains(ContactMethod.sms)) {
-      reminderMessage = RMF.getSMS(caller, trackingPackage);
+      reminderMessage = reminderMessageFormatter.getSMS(targetDistricts.get(0), trackingPackage);
       try {
-        if (smsDeliveryService.sendHtmlMessage(caller, reminderMessage)){
-          logger.info(String.format("Sent SMS reminder to caller {id: %d name %s %s}.",
-              caller.getCallerId(), caller.getFirstName(), caller.getLastName()));
-          smsDistrict = reminderMessage.getTargetDistricts().get(0);
+        if (smsDeliveryService.sendHtmlMessage(caller, reminderMessage)) {
+          logger.info(String.format("Sent SMS reminder to caller {id: %d name %s %s}.", caller.getCallerId(),
+              caller.getFirstName(), caller.getLastName()));
+          smsSuccess = true;
         }
-      }
-      catch (Exception e) {
-        logger.warning(String.format("Failed to send SMS to caller {id: %d name %s %s}: %s",
-            caller.getCallerId(), caller.getFirstName(), caller.getLastName(), e.getMessage()));
+      } catch (Exception e) {
+        logger.warning(String.format("Failed to send SMS to caller {id: %d name %s %s}: %s", caller.getCallerId(),
+            caller.getFirstName(), caller.getLastName(), e.getMessage()));
       }
     }
     if (caller.getContactMethods().contains(ContactMethod.email)) {
-      reminderMessage = RMF.getReminderEmail(caller, callerDistrict, trackingPackage);
+      List<String> phoneNumbers = getPhoneNumbersByDistrict(targetDistricts);
+      reminderMessage = reminderMessageFormatter.getReminderEmail(targetDistricts, phoneNumbers, caller,
+          trackingPackage);
       try {
         if (emailDeliveryService.sendHtmlMessage(caller, reminderMessage)) {
-            logger.info(String.format("Sent email reminder to caller {id: %d, name %s %s}.", caller.getCallerId(),
-                    caller.getFirstName(), caller.getLastName()));
-            emailDistrict.addAll(reminderMessage.getTargetDistricts());
+          logger.info(String.format("Sent email reminder to caller {id: %d, name %s %s}.", caller.getCallerId(),
+              caller.getFirstName(), caller.getLastName()));
+          emailSuccess = true;
         }
       } catch (Exception e) {
-          logger.warning(String.format("Failed to send email to caller {id: %d, name %s %s}: %s", caller.getCallerId(),
-                  caller.getFirstName(), caller.getLastName(), e.getMessage()));
+        logger.warning(String.format("Failed to send email to caller {id: %d, name %s %s}: %s", caller.getCallerId(),
+            caller.getFirstName(), caller.getLastName(), e.getMessage()));
       }
     }
-    boolean success = false;
-    try{
-      for (District d : emailDistrict){
-        if (smsDistrict != null && smsDistrict == d){
-          fetcher.updateReminderStatus(new ReminderStatus(caller, d, true, true, trackingId), reminderDate);
-          smsDistrict = null;
-          success = true;
-        }
-        else {
-          fetcher.updateReminderStatus(new ReminderStatus(caller, d, false, true, trackingId), reminderDate);
-          success = true;
-        }
-      }
-      if (smsDistrict != null) {
-        fetcher.updateReminderStatus(new ReminderStatus(caller, smsDistrict, true, false, trackingId), reminderDate);
-        success = true;
-      }
-    } catch(Exception e) {
+    try {
+      fetcher.updateReminderStatus(
+          new ReminderStatus(caller, targetDistricts.get(0).getDistrictId(), smsSuccess, emailSuccess, trackingId),
+          reminderDate);
+    } catch (Exception e) {
       logger.warning(String.format("Failed to update Reminder Status on caller: %d", caller.getCallerId()));
     }
-    return success;
+    return smsSuccess || emailSuccess;
   }
 
   public DeliveryService getSmsDeliveryService() {
@@ -224,17 +214,16 @@ public class ReminderService {
     return emailDeliveryService;
   }
 
-  private boolean sendStaleScrptNotification(
-      District district,
-      String adminEmail) {
+  private boolean sendStaleScrptNotification(District district, String adminEmail) {
     boolean success = false;
     if (adminEmail != null) {
-      Message message = ReminderMessageFormatter.getInstance().getAdminReminderEmail(district, dateFormat.format(district.getScriptModifiedTime()));
+      Message message = ReminderMessageFormatter.getInstance().getAdminReminderEmail(district,
+          dateFormat.format(district.getScriptModifiedTime()));
       Caller adminAsCaller = new Caller();
       adminAsCaller.setEmail(adminEmail);
-      try{
+      try {
         success = emailDeliveryService.sendTextMessage(adminAsCaller, message);
-      } catch(Exception e) {
+      } catch (Exception e) {
         logger.warning("Failed to deliver stale script message to: " + adminAsCaller.getEmail());
       }
     }
@@ -247,6 +236,63 @@ public class ReminderService {
           district.getState(), district.getNumber(), adminEmail));
     }
     return success;
+  }
+
+  private List<DistrictHydrated> newGetDistrictToCall(District callerDistrict) {
+    List<DistrictHydrated> districtsToCall = new LinkedList<DistrictHydrated>();
+    List<CallTarget> targets = callerDistrict.getCallTargets();
+    assert (targets != null && !targets.isEmpty());
+    ReminderSQLFetcher fetcher = new ReminderSQLFetcher();
+    while (!targets.isEmpty()) {
+      Integer targetDistrictId = 0;
+      Integer totalProbability = 0;
+      for (CallTarget target : targets) {
+        totalProbability += target.getPercentage();
+      }
+      if (totalProbability != 0) {
+        int random = new Random().nextInt(totalProbability);
+        int sum = 0;
+        for (CallTarget target : targets) {
+          sum += target.getPercentage();
+          if (targetDistrictId == 0 && random < sum) {
+            targetDistrictId = target.getTargetDistrictId();
+            targets.remove(target);
+          }
+        }
+      } else {
+        CallTarget target = targets.get(new Random().nextInt(targets.size()));
+        targetDistrictId = target.getTargetDistrictId();
+        targets.remove(target);
+      }
+
+      if (targetDistrictId == 0) {
+        logger.severe(String.format("District %d has invalid call target set", callerDistrict.getDistrictId()));
+        targetDistrictId = callerDistrict.getDistrictId();
+      }
+      districtsToCall.add(fetcher.getDistrictHydratedById(targetDistrictId));
+
+    }
+    return districtsToCall;
+  }
+
+  private List<String> getPhoneNumbersByDistrict(List<DistrictHydrated> targetDistricts) {
+    List<String> phoneNumbers = new LinkedList<String>();
+    for (DistrictHydrated target : targetDistricts) {
+      List<DistrictOffice> offices = target.getOffices();
+      Integer numberOfOffices = offices.size();
+      if (numberOfOffices == 0) {
+        phoneNumbers.add("Number Not Found");
+      } else {
+        String number = offices.get(0).getPhone();
+        for (DistrictOffice office : offices) {
+          if (office.getAddress().getState() == "DC") {
+            number = office.getPhone();
+          }
+        }
+        phoneNumbers.add(number);
+      }
+    }
+    return phoneNumbers;
   }
 
   class ReminderSender implements Runnable {
@@ -303,7 +349,7 @@ public class ReminderService {
 
       Set<ReminderDate> missedDates = getMissedDaysBefore(currentDateTime.toLocalDate());
       datesToQuery.addAll(missedDates);
-      
+
       try {
         ResultSet rs = fetcher.getCallerSet(datesToQuery, district);
         int sentCount = 0;
@@ -320,8 +366,7 @@ public class ReminderService {
             }
           }
         }
-      }
-      catch(Exception e) {
+      } catch (Exception e) {
         logger.severe("Message Sender Failed: " + e.toString());
       }
     }
@@ -379,7 +424,7 @@ public class ReminderService {
           if (district.needsStaleScriptNotification(staleTime)) {
             if (rs.getBoolean(Admin.LOGIN_ENABLED)) {
               if (sendStaleScrptNotification(district, rs.getString(Admin.EMAIL))) {
-                fetcher.updateStaleScript(district);  
+                fetcher.updateStaleScript(district);
               }
             } else {
               logger.warning(String.format(
@@ -393,5 +438,4 @@ public class ReminderService {
       }
     }
   }
-
 }

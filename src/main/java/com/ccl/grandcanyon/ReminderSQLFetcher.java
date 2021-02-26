@@ -158,7 +158,7 @@ public class ReminderSQLFetcher {
             idx = 1;
             history.setInt(idx++, reminderStatus.getCaller().getCallerId());
             history.setInt(idx++, reminderStatus.getCaller().getDistrictId());
-            history.setInt(idx++, reminderStatus.getTargetDistrict().getDistrictId());
+            history.setInt(idx++, reminderStatus.getTargetDistrictId());
             history.setTimestamp(idx++, timestamp);
             history.setString(idx++, reminderStatus.getTrackingId());
             history.setBoolean(idx++, reminderStatus.getEmailDelivered());
