@@ -43,9 +43,8 @@ public class Calls {
           Call.CALLER_ID + ", " +
           Call.MONTH + ", " +
           Call.YEAR + ", " +
-          Call.DISTRICT_ID + ", " +
-          Call.TALKING_POINT_ID +
-          ") VALUES (?, ?, ?, ?, ?)";
+          Call.DISTRICT_ID +
+          ") VALUES (?, ?, ?, ?)";
 
   private static final Logger logger = Logger.getLogger(Calls.class.getName());
 
@@ -91,12 +90,6 @@ public class Calls {
         insert.setInt(idx++, callDateTime.getYear());
         if (call.getDistrictId() != null) {
           insert.setInt(idx++, call.getDistrictId());
-        }
-        else {
-          insert.setNull(idx++, Types.INTEGER);
-        }
-        if (call.getTalkingPointId() != null) {
-          insert.setInt(idx++, call.getTalkingPointId());
         }
         else {
           insert.setNull(idx++, Types.INTEGER);
