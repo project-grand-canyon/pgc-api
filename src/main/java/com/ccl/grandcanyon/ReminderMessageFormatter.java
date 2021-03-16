@@ -19,9 +19,6 @@ public class ReminderMessageFormatter {
     private String callGuideReminderHTML;
     private String callGuideEmailResource = "callGuideEmail.html";
 
-    private String callGuideCallBlockHTML;
-    private String callGuideEmailCallBlockResource = "callGuideEmailCallBlock.html";
-
     private String staleScriptHTML;
     private String staleScriptEmailResource = "staleScriptEmail.html";
 
@@ -52,14 +49,7 @@ public class ReminderMessageFormatter {
         try {
             this.callGuideReminderHTML = FileReader.create().read(callGuideEmailResource);
         } catch (Exception e) {
-            throw new RuntimeException(
-                    "Unable to load regular call-in notification email template: " + e.getLocalizedMessage());
-        }
-
-        try {
-            this.callGuideCallBlockHTML = FileReader.create().read(callGuideEmailCallBlockResource);
-        } catch (Exception e) {
-            throw new RuntimeException("Unable to load call guide block email template: " + e.getLocalizedMessage());
+            throw new RuntimeException("Unable to load call-in guide email template: " + e.getLocalizedMessage());
         }
 
         try {
@@ -69,41 +59,29 @@ public class ReminderMessageFormatter {
         }
     }
 
-    private String makeCallInReminderReplacements(List<DistrictHydrated> targetDistricts, List<String> phoneNumbers,
-            Caller caller, String trackingPackage, String email) {
+    private String makeCallInReminderReplacements(DistrictHydrated targetDistrict, String phoneNumber, Caller caller,
+            String trackingPackage, String email) {
         String rootPath = adminApplicationBaseUrl + "/call/";
-        email.replaceAll("{IInvited}", rootPath + "invite" + trackingPackage);
-        Integer size = targetDistricts.size();
-        String callBlock = "";
-        for (Integer i = 0; i < size; ++i) {
-            callBlock += this.callGuideCallBlockHTML;
-            callBlock.replaceAll("{CallNumber}", i.toString());
-            DistrictHydrated targetDistrict = targetDistricts.get(i);
-            callBlock.replaceAll("{MOCName}", targetDistrict.readableName());
-            callBlock.replaceAll("{MOCDistrict}", targetDistrict.isSenatorDistrict() ? targetDistrict.getState()
-                    : targetDistrict.getState() + " District " + String.valueOf(targetDistrict.getNumber()));
-            callBlock.replaceAll("{MOCNumber}", phoneNumbers.get(i));
-            callBlock.replaceAll("{MOCRequestScript}", targetDistrict.getRequests().get(0).getContent());
-            callBlock.replaceAll("{MOCGuide}",
-                    rootPath + targetDistrict.getState() + "/" + targetDistrict.getNumber() + trackingPackage);
-            callBlock.replaceAll("{MOCICalled}", rootPath + "thankyou" + trackingPackage);
-        }
-        email.replaceAll("{CallBlock}", callBlock);
+        email.replaceAll("{mocNumber}", phoneNumber);
+        email.replaceAll("{mocName}", targetDistrict.readableName());
+        email.replaceAll("{ask}", targetDistrict.getRequests().get(0).getContent());
+        email.replaceAll("{thankYouUrl}", rootPath + "thankyou" + trackingPackage);
         email.replaceAll("{CallerName}", caller.getFirstName() + " " + caller.getLastName());
         return email;
     }
 
-    public Message getReminderEmail(List<DistrictHydrated> targetDistricts, List<String> phoneNumbers, Caller caller,
-            String trackingPackage) {
+    public Message getReminderEmail(DistrictHydrated targetDistrict, Caller caller, District callerDistrict,
+            String trackingId) {
         Message reminderMessage = new Message();
         reminderMessage.setSubject("It's time to call about climate change");
+        String phoneNumber = getPhoneNumbersByDistrict(targetDistrict);
+        String trackingPackage = "?t=" + trackingId + "&c=" + caller.getCallerId() + "&d=" + callerDistrict.getNumber();
         if (callFromEmail) {
-            reminderMessage.setBody(makeCallInReminderReplacements(targetDistricts, phoneNumbers, caller,
-                    trackingPackage, this.callGuideReminderHTML));
+            reminderMessage.setBody(makeCallInReminderReplacements(targetDistrict, phoneNumber, caller, trackingPackage,
+                    this.callGuideReminderHTML));
             return reminderMessage;
         } else {
             String callInPageUrl = "http://" + applicationBaseUrl + "/call/";
-            District targetDistrict = targetDistricts.get(0);
             String URL = callInPageUrl + targetDistrict.getState() + "/" + targetDistrict.getNumber() + trackingPackage;
             reminderMessage.setBody(this.regularCallInReminderHTML.replaceAll("https://cclcalls.org/call/", URL));
             return reminderMessage;
@@ -121,7 +99,8 @@ public class ReminderMessageFormatter {
         return message;
     }
 
-    public Message getSMS(District targetDistrict, String trackingPackage) {
+    public Message getSMS(District targetDistrict, Caller caller, District callerDistrict, String trackingId) {
+        String trackingPackage = "?t=" + trackingId + "&c=" + caller.getCallerId() + "&d=" + callerDistrict.getNumber();
         String callInPageUrl = "http://" + applicationBaseUrl + "/call/";
         Message reminderMessage = new Message();
         String URL = callInPageUrl + targetDistrict.getState() + "/" + targetDistrict.getNumber() + trackingPackage;
@@ -137,5 +116,22 @@ public class ReminderMessageFormatter {
 
     public String getAdminApplicationBaseURL() {
         return adminApplicationBaseUrl;
+    }
+
+    private String getPhoneNumbersByDistrict(DistrictHydrated targetDistrict) {
+        String phoneNumber;
+        List<DistrictOffice> offices = targetDistrict.getOffices();
+        Integer numberOfOffices = offices.size();
+        if (numberOfOffices == 0) {
+            phoneNumber = "Number Not Found";
+        } else {
+            phoneNumber = offices.get(0).getPhone();
+            for (DistrictOffice office : offices) {
+                if (office.getAddress().getState() == "DC") {
+                    phoneNumber = office.getPhone();
+                }
+            }
+        }
+        return phoneNumber;
     }
 }

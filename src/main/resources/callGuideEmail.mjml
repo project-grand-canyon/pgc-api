@@ -1,77 +1,93 @@
 <mjml>
-  <mj-head>
-    <mj-style>
-      .box-shadow td {
-        box-shadow: 0 4px 6px hsla(0, 0%, 46%, 0.2), 0 1px 3px hsla(0, 0%, 46%, 0.2);
-      }
-    </mj-style>
-  </mj-head>
   <mj-body>
-    <mj-section>
-      <mj-column width="100px" vertical-align="middle">
-        <mj-image src="https://cclcalls.org/img/ccl-logo-thumbnail.png"></mj-image>
-      </mj-column>
-      <mj-column width="100%" vertical-align="middle">
-        <mj-text font-size="24px">CCL's Monthly Calling Campaign</mj-text>
-      </mj-column>
-      <mj-column width="100%">
-        <mj-divider border-color="#000"></mj-divider>
+    <mj-section padding="0px">
+      <mj-column padding="0px">
+        <mj-image src="https://cclcalls.org/img/mcc-logo-horizontal.png" height="144px" width="600px" padding="0px">
+        </mj-image>
       </mj-column>
     </mj-section>
-    <mj-hero background-color="white" padding="0px">
-      <mj-text font-size="14px" line-height="14px">
-        Dear {CallerName}
+    <mj-hero padding-top="36px" padding-left="0px" padding-right="0px" padding-bottom="36px">
+      <mj-text padding-top="24px" padding-left="0px" padding-right="0px" padding-bottom="0px" align="center" font-weight="700" color="#0081C7" font-size="36px" font-family="Ubuntu">
+        It's your day to call Congress
       </mj-text>
-      <mj-text padding="20px" font-size="14px" line-height="14px">
-        It's time to call your Member of Congress about climate change. Please find 5 minutes in the next day or
-        two to urge climate action.
+      <mj-text padding-top="23px" padding-left="0px" padding-right="0px" padding-bottom="0px" font-family="Source Sans Pro" font-size="16px">
+        Dear {callerName},
       </mj-text>
-      <mj-divider border-color="#000"></mj-divider>
+      <mj-text padding-top="16px" padding-left="0px" padding-right="0px" padding-bottom="0px" font-family="Source Sans Pro" font-size="16px">
+        Calling takes less than 5 minutes and is the most impactful way you can show Congress that you want climate solutions. Just use the script below.
+      </mj-text>
+      <mj-text padding-top="20px" padding-left="0px" padding-right="0px" padding-bottom="0px" align="center" font-family="Ubuntu" font-size="28px" color="#5A7931">
+        Call {mocName}
+      </mj-text>
+      <mj-text padding-top="12px" padding-left="0px" padding-right="0px" padding-bottom="0px" align="center" font-family="Ubuntu" font-size="18px" font-weight="bold">
+        {mocNumber}
+      </mj-text>
+      <mj-text padding-top="20px" padding-left="0px" padding-right="0px" padding-bottom="0px" font-family="Ubuntu" font-size="24px">
+        Call-In Script:
+      </mj-text>
+      <mj-text padding-top="16px" padding-left="34px" padding-right="0px" padding-bottom="0px" font-family="Ubuntu" font-size="16px" font-weight="bold">
+        Introduction:
+      </mj-text>
+      <mj-text padding-top="12px" padding-left="34px" padding-right="0px" padding-bottom="0px" font-family="Ubuntu" font-size="16px">
+        My name is {callerName}, I’m a constituent and a voter and climate change is a high priority for me.
+      </mj-text>
+      <mj-text padding-top="16px" padding-left="34px" padding-right="0px" padding-bottom="0px" font-family="Ubuntu" font-size="16px" font-weight="bold">
+        Ask:
+      </mj-text>
+      <mj-text padding-top="12px" padding-left="34px" padding-right="0px" padding-bottom="0px" font-family="Ubuntu" font-size="16px">
+        {ask}
+      </mj-text>
+      <mj-button padding-top="20px" padding-left="20px" padding-right="0px" padding-bottom="0px" width="92px" height="42px" font-family="Ubuntu" font-size="18px" font-weight="500" color="black" border-radius="2px" inner-padding="0px" href="{thankYouUrl}" background-color="#9BC23B">Log Call</mj-button>
     </mj-hero>
-    {CallBlock}
-    <mj-hero background-color="white" padding="0px">
-      <mj-text padding="10px" align="center" font-size="20px" line-height="20px">
-        Once you have called each of your Members of Congress, invite your friends to do the same.
+    <mj-hero padding="36px" background-color="#15527B">
+      <mj-text padding-top="0px" padding-left="0px" padding-right="0px" padding-bottom="0px" font-size="24px" font-family="Ubuntu" align="center" color="#9BC23B">
+        Why call?
       </mj-text>
-      <mj-button font-size="24px" color="white" background-color="#4c4cff" href="{IInvited}" css-class="box-shadow">
-        I invited a friend to join the Monthly Call-In Campaign!
-      </mj-button>
-      <mj-divider border-color="#000"></mj-divider>
+      <mj-image src="https://cclcalls.org/img/diversity.png" height="144px" width="144px" padding="20px"></mj-image>
+      <mj-text padding-top="0px" padding-left="0px" padding-right="0px" padding-bottom="0px" font-size="16px" font-family="Ubuntu" color="white" font-weight="700">
+        POWER IN NUMBERS
+      </mj-text>
+      <mj-text padding-top="32px" padding-left="0px" padding-right="0px" padding-bottom="5px" font-size="16px" font-family="Ubuntu" color="white">
+        Congressional offices tally the number of calls they get about an issue, and pass the information along to representatives to consider. When there’s a large volume of calls about an issue, they’re forced to take a stand and respond.
+      </mj-text>
     </mj-hero>
-    <mj-section>
-      <mj-column>
-        <mj-text font-size="14px">
-          Comments, questions, moved districts?
-        </mj-text>
-        <mj-text font-size="14px">
-          Reply to this email with your feedback, questions, and/or district change request.
-        </mj-text>
-        <mj-text font-size="14px">
-          What is the Monthly Calling Campaign?
-        </mj-text>
-        <mj-text font-size="14px">
-          The Monthly Calling Campaign is an effort by Citizens' Climate Lobby to inspire as many people as
-          possible to call their Member of Congress and express their concern about climate change.
-          <br /><br /> Congressional staffers and representatives have told us nothing is more powerful in
-          helping a representative know what their constituents want than written letters and phone calls.
-        </mj-text>
-        <mj-text font-size="14px">
-          What is CCL?
-        </mj-text>
-        <mj-text font-size="14px">
-          CCL exists to create the political will for climate solutions by enabling individual breakthroughs
-          in the exercise of personal and political power.
-          <br /><br />You can learn more at <a href="https://citizensclimatelobby.org/about-ccl/">citizensclimatelobby.org</a>
-        </mj-text>
-      </mj-column>
-    </mj-section>
-    <mj-section>
-      <mj-column>
-        <mj-text align="center">
-          From your friends at <a href="citizensclimatelobby.org">CCL</a>. To unsubscribe, simply reply to
-          this email with "unsubscribe" in the body.
-        </mj-text>
-      </mj-column>
-    </mj-section>
+    <mj-hero padding-top="36px" padding-left="0px" padding-right="0px" padding-bottom="36px">
+      <mj-text padding-top="0px" padding-left="0px" padding-right="0px" padding-bottom="0px" font-size="24px" font-family="Ubuntu">
+        Frequently Asked Questions
+      </mj-text>
+      <mj-text padding-top="16px" padding-left="0px" padding-right="0px" padding-bottom="0px" font-size="18px" font-family="Ubuntu" font-weight="700">
+        What to expect
+      </mj-text>
+      <mj-text padding-top="12px" padding-left="0px" padding-right="0px" padding-bottom="0px" font-size="16px" font-family="Ubuntu">
+        Calling is simple, fast and non-threatening. You will either talk to a staff member (not {mocName}) or you will get a recording. Staff will not quiz you.
+      </mj-text>
+      <mj-text padding-top="20px" padding-left="0px" padding-right="0px" padding-bottom="0px" font-size="18px" font-family="Ubuntu" font-weight="700">
+        Comments, questions, moved districts?
+      </mj-text>
+      <mj-text padding-top="12px" padding-left="0px" padding-right="0px" padding-bottom="0px" font-size="16px" font-family="Ubuntu">
+        Reply to this email with your feedback, questions, and/or district change request.
+      </mj-text>
+      <mj-text padding-top="20px" padding-left="0px" padding-right="0px" padding-bottom="0px" font-size="18px" font-family="Ubuntu" font-weight="700">
+        What is the Monthly Calling Campaign?
+      </mj-text>
+      <mj-text padding-top="12px" padding-left="0px" padding-right="0px" padding-bottom="0px" font-size="16px" font-family="Ubuntu">
+        The Monthly Calling Campaign is an effort by Citizens' Climate Lobby to inspire as many people as possible to call their Member of Congress and express their concern about climate change.
+      </mj-text>
+      <mj-text padding-top="16px" padding-left="0px" padding-right="0px" padding-bottom="0px" font-size="16px" font-family="Ubuntu">
+        Congressional staffers and representatives have told us nothing is more powerful in helping a representative know what their constituents want than written letters and phone calls.
+      </mj-text>
+      <mj-text padding-top="20px" padding-left="0px" padding-right="0px" padding-bottom="0px" font-size="18px" font-family="Ubuntu" font-weight="700">
+        What is CCL?
+      </mj-text>
+      <mj-text padding-top="12px" padding-left="0px" padding-right="0px" padding-bottom="0px" font-size="16px" font-family="Ubuntu">
+        CCL exists to create the political will for climate solutions by enabling individual breakthroughs in the exercise of personal and political power.
+      </mj-text>
+      <mj-text padding-top="16px" padding-left="0px" padding-right="0px" padding-bottom="24px" font-size="16px" font-family="Ubuntu">
+        You can learn more at <a href="citizensclimatelobby.org">citizensclimatelobby.org</a>
+      </mj-text>
+      <mj-text padding-top="24px" padding-left="0px" padding-right="0px" padding-bottom="0px" font-size="16px" font-family="Ubuntu">
+        From your friends at CCL. To unsubscribe, simply reply to this email with "unsubscribe" in the body.
+      </mj-text>
+    </mj-hero>
   </mj-body>
 </mjml>
