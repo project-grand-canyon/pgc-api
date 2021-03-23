@@ -8,6 +8,7 @@ import com.ccl.grandcanyon.ReminderMessageFormatter;
 import com.ccl.grandcanyon.ReminderSQLFetcher;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import com.google.cloud.Tuple;
 
 import java.sql.*;
 import java.text.DateFormat;
@@ -122,6 +123,13 @@ public class ReminderService {
       this.holidayService = null;
     }
 
+    try {
+      ReminderMessageFormatter.init(config);
+    } catch (Exception e) {
+      logger.warning("Failed to initialize Reminder Message Formatter: " + e.getMessage());
+      this.holidayService = null;
+    }
+
     int staleScriptWarningInDays = Integer.parseInt(config.getProperty(STALE_SCRIPT_WARNING_INTERVAL, "30"));
     this.staleScriptWarningInterval = TimeUnit.DAYS.toMillis(staleScriptWarningInDays);
 
@@ -152,15 +160,11 @@ public class ReminderService {
     ReminderMessageFormatter reminderMessageFormatter = ReminderMessageFormatter.getInstance();
     District callerDistrict = null;
     ReminderSQLFetcher fetcher = new ReminderSQLFetcher();
-    try {
-      callerDistrict = fetcher.getCallerDistrict(caller);
-      if (callerDistrict.getStatus() != Status.active) {
-        logger.info("Skipping caller with id " + caller.getCallerId() + " because their district status is "
-            + callerDistrict.getStatus().toString());
-        return false;
-      }
-    } catch (Exception e) {
-      logger.severe(String.format("Failed to fetch caller district for caller: %d", caller.getDistrictId()));
+    callerDistrict = fetcher.getCallerDistrict(caller);
+    if (callerDistrict.getStatus() != Status.active) {
+      logger.info("Skipping caller with id " + caller.getCallerId() + " because their district status is "
+          + callerDistrict.getStatus().toString());
+      return false;
     }
     String trackingId = RandomStringUtils.randomAlphanumeric(8);
     boolean smsSuccess = false;
@@ -182,6 +186,7 @@ public class ReminderService {
     }
     if (caller.getContactMethods().contains(ContactMethod.email)) {
       reminderMessage = reminderMessageFormatter.getReminderEmail(targetDistrict, caller, callerDistrict, trackingId);
+      //logger.info(String.format("\n\n\n\n\n SUBJECT: %s \n\n\n\n\n BODY: %s \n\n\n\n\n", reminderMessage.getSubject(), reminderMessage.getBody()));
       try {
         if (emailDeliveryService.sendHtmlMessage(caller, reminderMessage)) {
           logger.info(String.format("Sent email reminder to caller {id: %d, name %s %s}.", caller.getCallerId(),
@@ -214,8 +219,7 @@ public class ReminderService {
   private boolean sendStaleScriptNotification(District district, String adminEmail) {
     boolean success = false;
     if (adminEmail != null) {
-      Message message = ReminderMessageFormatter.getInstance().getAdminReminderEmail(district,
-          dateFormat.format(district.getScriptModifiedTime()));
+      Message message = ReminderMessageFormatter.getInstance().getAdminReminderEmail(district, district.getScriptModifiedTime() == null ? "null" : dateFormat.format(district.getScriptModifiedTime()));
       Caller adminAsCaller = new Caller();
       adminAsCaller.setEmail(adminEmail);
       try {
@@ -258,9 +262,8 @@ public class ReminderService {
       try {
         checkForStaleScripts();
         ReminderSQLFetcher fetcher = new ReminderSQLFetcher();
-        ResultSet rs = fetcher.getDistrictSet();
-        while (rs.next()) {
-          District district = new District(rs);
+        List<District> districts = fetcher.getDistricts();
+        for(District district : districts) {
           run(district);
         }
       } catch (Throwable e) {
@@ -277,7 +280,7 @@ public class ReminderService {
           + earliestReminder + "-" + latestReminder + ")");
 
       DayOfWeek dayOfWeek = currentDateTime.getDayOfWeek();
-      if (dayOfWeek.equals(DayOfWeek.SATURDAY) || dayOfWeek.equals(DayOfWeek.SUNDAY)) {
+      if (dayOfWeek.equals(DayOfWeek.SATURDAY) /*|| dayOfWeek.equals(DayOfWeek.SUNDAY)*/) {
         logger.info("It's a weekend. Do nothing.");
         return;
       }
@@ -305,14 +308,14 @@ public class ReminderService {
       datesToQuery.addAll(missedDates);
 
       try {
-        ResultSet rs = fetcher.getCallerSet(datesToQuery, district);
+        List<CallerInfo> info = fetcher.getCallerInfo(datesToQuery, district);
         int sentCount = 0;
-        while (rs.next()) {
-          logger.info("Sending for " + new Caller(rs).getCallerId());
-          Reminder reminder = new Reminder(rs);
+        for (CallerInfo datum : info) {
+          Caller caller = datum.getCaller();
+          logger.info("Sending for " + caller.getCallerId());
+          Reminder reminder = datum.getReminder();
           ReminderDate correspondingReminderDate = getCorrespondingReminderDate(reminder, datesToQuery);
           if (correspondingReminderDate != null && !reminder.hasBeenSent(correspondingReminderDate)) {
-            Caller caller = new Caller(rs);
             if (!caller.isPaused()) {
               if (sendReminder(caller, correspondingReminderDate)) {
                 sentCount++;
@@ -365,30 +368,22 @@ public class ReminderService {
     }
 
     private void checkForStaleScripts() {
-
       Timestamp staleTime = new Timestamp(System.currentTimeMillis() - staleScriptWarningInterval);
-      try {
-        ReminderSQLFetcher fetcher = new ReminderSQLFetcher();
-        ResultSet rs = fetcher.getStaleScriptSet();
-        while (rs.next()) {
-          District district = new District(rs);
-          // send a notification if it's been > N days since script was modified and it's
-          // been greater than
-          // N days since the last time we sent a notification.
-          if (district.needsStaleScriptNotification(staleTime)) {
-            if (rs.getBoolean(Admin.LOGIN_ENABLED)) {
-              if (sendStaleScriptNotification(district, rs.getString(Admin.EMAIL))) {
-                fetcher.updateStaleScript(district);
-              }
-            } else {
-              logger.warning(String.format(
-                  "Could not send stale script warning to Admin for %s district %d:  Admin account not enabled.",
-                  district.getState(), district.getNumber()));
+      ReminderSQLFetcher fetcher = new ReminderSQLFetcher();
+      List<StaleScriptInfo> info = fetcher.getStaleScriptInfo();
+      for (StaleScriptInfo datum : info){
+        District district = datum.getDistrict();
+        if (district.needsStaleScriptNotification(staleTime)) {
+          if (datum.getAdminLoginEnabled()) {
+            if (sendStaleScriptNotification(district, datum.getAdminEmail())) {
+              fetcher.updateStaleScript(district);
             }
+          } else {
+          logger.warning(String.format(
+              "Could not send stale script warning to Admin for %s district %d:  Admin account not enabled.",
+              district.getState(), district.getNumber()));
           }
         }
-      } catch (Throwable e) {
-        logger.severe("Unexpected error checking for stale scripts: " + e.toString());
       }
     }
   }

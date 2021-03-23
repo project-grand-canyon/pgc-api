@@ -194,7 +194,7 @@ public class AdminWeeklyUpdater {
         ) throws SQLException {
             Map<Integer, Tuple<Integer, Integer>> districtCallCounts = this.getDistrictCallCounts(conn, districtIds);
             Map<Integer, Tuple<Integer, Integer>> districtCallerCounts = this.getDistrictCallerCounts(conn, districtIds);
-            Map<Integer, DistrictReport> reports = new HashMap();
+            Map<Integer, DistrictReport> reports = new HashMap<Integer, DistrictReport>();
             for (Integer districtId: districtIds) {
                 Tuple<Integer, Integer> calls = districtCallCounts.getOrDefault(districtId, Tuple.of(0, 0));
                 Tuple<Integer, Integer> callers = districtCallerCounts.getOrDefault(districtId, Tuple.of(0, 0));
@@ -207,7 +207,7 @@ public class AdminWeeklyUpdater {
                 Connection conn) throws SQLException {
             PreparedStatement statement = conn.prepareStatement(SQL_SELECT_DISTRICTS);
             ResultSet rs = statement.executeQuery();
-            Map<Integer, District> districts = new HashMap();
+            Map<Integer, District> districts = new HashMap<Integer, District>();
             while(rs.next())  {
                 District district = new District(rs);
                 districts.put(district.getDistrictId(), district);
@@ -231,7 +231,7 @@ public class AdminWeeklyUpdater {
             String districts = districtIds.stream().map(Object::toString).collect(Collectors.joining(", "));
             PreparedStatement statement = conn.prepareStatement(SQL_SELECT_CALLS_FOR_DISTRICTS.replace("?", districts));
             ResultSet rs = statement.executeQuery();
-            Map<Integer, Tuple<Integer, Integer>> districtCounts = new HashMap();
+            Map<Integer, Tuple<Integer, Integer>> districtCounts = new HashMap<Integer, Tuple<Integer, Integer>>();
             while (rs.next()) {
 
                 Integer calls = rs.getInt("calls");
@@ -248,7 +248,7 @@ public class AdminWeeklyUpdater {
             PreparedStatement statement = conn.prepareStatement(SQL_SELECT_CALLER_COUNT.replace("?", districts));
             ResultSet rs = statement.executeQuery();
 
-            Map<Integer, Integer> callerCounts = new HashMap();
+            Map<Integer, Integer> callerCounts = new HashMap<Integer, Integer>();
             while (rs.next()) {
                 District district = new District(rs);
                 Integer callers = rs.getInt("caller_count");
@@ -257,7 +257,7 @@ public class AdminWeeklyUpdater {
 
             PreparedStatement statement2 = conn.prepareStatement(SQL_SELECT_NEW_CALLER_COUNT.replace("?", districts));
             ResultSet rs2 = statement2.executeQuery();
-            Map<Integer, Integer> newCallerCounts = new HashMap();
+            Map<Integer, Integer> newCallerCounts = new HashMap<Integer, Integer>();
             while (rs2.next()) {
                 District district = new District(rs2);
                 Integer callerz = rs2.getInt("caller_count");

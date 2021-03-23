@@ -2,14 +2,17 @@ package com.ccl.grandcanyon;
 
 import com.ccl.grandcanyon.types.*;
 import com.ccl.grandcanyon.utils.FileReader;
+import java.util.logging.Logger;
 
 import java.util.*;
 
 public class ReminderMessageFormatter {
-    private final static boolean callFromEmail = false;
+    private final static boolean callFromEmail = true;
 
     private final static String APPLICATION_BASE_URL = "applicationBaseUrl";
     private final static String ADMIN_APPLICATION_BASE_URL = "adminApplicationBaseUrl";
+
+    private static final Logger logger = Logger.getLogger(ReminderMessageFormatter.class.getName());
 
     private static ReminderMessageFormatter instance;
 
@@ -38,7 +41,7 @@ public class ReminderMessageFormatter {
     private ReminderMessageFormatter(Properties config) {
         this.applicationBaseUrl = config.getProperty(APPLICATION_BASE_URL);
         this.adminApplicationBaseUrl = config.getProperty(ADMIN_APPLICATION_BASE_URL);
-
+        logger.info("Initializing Reminder Message Formatter");
         try {
             this.regularCallInReminderHTML = FileReader.create().read(callReminderEmailResource);
         } catch (Exception e) {
@@ -62,11 +65,16 @@ public class ReminderMessageFormatter {
     private String makeCallInReminderReplacements(DistrictHydrated targetDistrict, String phoneNumber, Caller caller,
             String trackingPackage, String email) {
         String rootPath = adminApplicationBaseUrl + "/call/";
-        email.replaceAll("{mocNumber}", phoneNumber);
-        email.replaceAll("{mocName}", targetDistrict.readableName());
-        email.replaceAll("{ask}", targetDistrict.getRequests().get(0).getContent());
-        email.replaceAll("{thankYouUrl}", rootPath + "thankyou" + trackingPackage);
-        email.replaceAll("{CallerName}", caller.getFirstName() + " " + caller.getLastName());
+        logger.info("MOCNUMBER = " + phoneNumber + "\n\n");
+        logger.info("MOCNAME = " + targetDistrict.readableName() + "\n\n");
+        logger.info("ASK = " + targetDistrict.getRequests().get(0).getContent() + "\n\n");
+        logger.info("THANKYOUURL = " + rootPath + "thankyou" + trackingPackage + "\n\n");
+        logger.info("MOCNAME = " + caller.getFirstName() + " " + caller.getLastName() + "\n\n");
+        email = email.replaceAll("fieldmocNumberfield", phoneNumber);
+        email = email.replaceAll("fieldmocNamefield", targetDistrict.readableName());
+        email = email.replaceAll("fieldaskfield", targetDistrict.getRequests().get(0).getContent());
+        email = email.replaceAll("fieldthankYouUrlfield", rootPath + "thankyou" + trackingPackage);
+        email = email.replaceAll("fieldcallerNamefield", caller.getFirstName() + " " + caller.getLastName());
         return email;
     }
 

@@ -39,8 +39,7 @@ public class Reminders {
   @Path("{callerId}")
   @Produces(MediaType.APPLICATION_JSON)
   public Response sendReminder(
-      @PathParam("callerId") int callerId)
-      throws SQLException {
+      @PathParam("callerId") int callerId) {
         ReminderSQLFetcher fetcher = new ReminderSQLFetcher();
         Caller caller = fetcher.getCallerById(callerId);
         checkPermissions(caller.getDistrictId(), "send a call notification");

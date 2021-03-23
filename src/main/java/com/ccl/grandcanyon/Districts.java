@@ -55,6 +55,8 @@ public class Districts {
 
   private static final String SQL_DELETE_CALL_TARGETS = "DELETE from call_targets where " + CallTarget.DISTRICT_ID
       + " = ?";
+  
+
 
   @Context
   UriInfo uriInfo;
@@ -356,7 +358,7 @@ public class Districts {
   }
 
   private DistrictHydrated getDistrictHydrated(Connection conn, ResultSet rs) throws SQLException {
-
+    
     DistrictHydrated district = new DistrictHydrated(rs);
 
     List<Integer> orderedTalkingPointIds = getScriptTalkingPointIds(conn, district.getDistrictId());
