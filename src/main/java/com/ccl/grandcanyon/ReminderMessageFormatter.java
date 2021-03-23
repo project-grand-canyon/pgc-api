@@ -65,11 +65,6 @@ public class ReminderMessageFormatter {
     private String makeCallInReminderReplacements(DistrictHydrated targetDistrict, String phoneNumber, Caller caller,
             String trackingPackage, String email) {
         String rootPath = adminApplicationBaseUrl + "/call/";
-        logger.info("MOCNUMBER = " + phoneNumber + "\n\n");
-        logger.info("MOCNAME = " + targetDistrict.readableName() + "\n\n");
-        logger.info("ASK = " + targetDistrict.getRequests().get(0).getContent() + "\n\n");
-        logger.info("THANKYOUURL = " + rootPath + "thankyou" + trackingPackage + "\n\n");
-        logger.info("MOCNAME = " + caller.getFirstName() + " " + caller.getLastName() + "\n\n");
         email = email.replaceAll("fieldmocNumberfield", phoneNumber);
         email = email.replaceAll("fieldmocNamefield", targetDistrict.readableName());
         email = email.replaceAll("fieldaskfield", targetDistrict.getRequests().get(0).getContent());
