@@ -2,18 +2,18 @@
   <mj-body>
     <mj-section padding="0px">
       <mj-column padding="0px">
-        <mj-image src="https://cclcalls.org/img/mcc-logo-horizontal.png" height="144px" width="600px" padding="0px">
+        <mj-image src="https://cclcalls.org/img/mcc-logo-horizontal.png" height="144px" width="600px" padding="36px" padding-bottom="0px">
         </mj-image>
       </mj-column>
     </mj-section>
-    <mj-hero padding-top="36px" padding-left="0px" padding-right="0px" padding-bottom="36px">
+    <mj-hero padding="36px" padding-top="0px">
       <mj-text padding-top="24px" padding-left="0px" padding-right="0px" padding-bottom="0px" align="center" font-weight="700" color="#0081C7" font-size="36px" font-family="Ubuntu">
         It's your day to call Congress
       </mj-text>
-      <mj-text padding-top="23px" padding-left="0px" padding-right="0px" padding-bottom="0px" font-family="Source Sans Pro" font-size="16px">
+      <mj-text padding-top="23px" padding-left="0px" padding-right="0px" padding-bottom="0px" font-family="Ubuntu" font-size="16px">
         Dear [callerName],
       </mj-text>
-      <mj-text padding-top="16px" padding-left="0px" padding-right="0px" padding-bottom="0px" font-family="Source Sans Pro" font-size="16px">
+      <mj-text padding-top="16px" padding-left="0px" padding-right="0px" padding-bottom="0px" font-family="Ubuntu" font-size="16px">
         Calling takes less than 5 minutes and is the most impactful way you can show Congress that you want climate solutions. Just use the script below.
       </mj-text>
       <mj-text padding-top="20px" padding-left="0px" padding-right="0px" padding-bottom="0px" align="center" font-family="Ubuntu" font-size="28px" color="#5A7931">
@@ -39,7 +39,8 @@
       </mj-text>
       <mj-button padding-top="20px" padding-left="20px" padding-right="0px" padding-bottom="0px" width="92px" height="42px" font-family="Ubuntu" font-size="18px" font-weight="500" color="black" border-radius="2px" inner-padding="0px" href="[thankYouUrl]" background-color="#9BC23B">Log Call</mj-button>
     </mj-hero>
-    <mj-hero padding="36px" background-color="#15527B">
+    <mj-wrapper padding="36px">
+      <mj-hero padding="10px" background-color="#15527B">
       <mj-text padding-top="0px" padding-left="0px" padding-right="0px" padding-bottom="0px" font-size="24px" font-family="Ubuntu" align="center" color="#9BC23B">
         Why call?
       </mj-text>
@@ -51,7 +52,8 @@
         Congressional offices tally the number of calls they get about an issue, and pass the information along to representatives to consider. When there’s a large volume of calls about an issue, they’re forced to take a stand and respond.
       </mj-text>
     </mj-hero>
-    <mj-hero padding-top="36px" padding-left="0px" padding-right="0px" padding-bottom="36px">
+    </mj-wrapper>
+        <mj-hero padding="36px">
       <mj-text padding-top="0px" padding-left="0px" padding-right="0px" padding-bottom="0px" font-size="24px" font-family="Ubuntu">
         Frequently Asked Questions
       </mj-text>

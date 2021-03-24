@@ -66,7 +66,7 @@ public class ReminderMessageFormatter {
             String trackingPackage, String email) {
         String rootPath = adminApplicationBaseUrl + "/call/";
         email = email.replaceAll("fieldmocNumberfield", phoneNumber);
-        email = email.replaceAll("fieldmocNamefield", targetDistrict.readableName());
+        email = email.replaceAll("fieldmocNamefield", (targetDistrict.isSenatorDistrict() ? "Senator " : "Representative ") +  targetDistrict.getRepFirstName() + " " + targetDistrict.getRepLastName());
         email = email.replaceAll("fieldaskfield", targetDistrict.getRequests().get(0).getContent());
         email = email.replaceAll("fieldthankYouUrlfield", rootPath + "thankyou" + trackingPackage);
         email = email.replaceAll("fieldcallerNamefield", caller.getFirstName() + " " + caller.getLastName());
