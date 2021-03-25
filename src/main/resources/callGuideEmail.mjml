@@ -11,16 +11,16 @@
         It's your day to call Congress
       </mj-text>
       <mj-text padding-top="23px" padding-left="0px" padding-right="0px" padding-bottom="0px" font-family="Ubuntu" font-size="16px">
-        Dear [callerName],
+        Dear fieldcallerNamefield,
       </mj-text>
       <mj-text padding-top="16px" padding-left="0px" padding-right="0px" padding-bottom="0px" font-family="Ubuntu" font-size="16px">
         Calling takes less than 5 minutes and is the most impactful way you can show Congress that you want climate solutions. Just use the script below.
       </mj-text>
       <mj-text padding-top="20px" padding-left="0px" padding-right="0px" padding-bottom="0px" align="center" font-family="Ubuntu" font-size="28px" color="#5A7931">
-        Call [mocName]
+        Call fieldmocNamefield
       </mj-text>
       <mj-text padding-top="12px" padding-left="0px" padding-right="0px" padding-bottom="0px" align="center" font-family="Ubuntu" font-size="18px" font-weight="bold">
-        [mocNumber]
+        fieldmocNumberfield
       </mj-text>
       <mj-text padding-top="20px" padding-left="0px" padding-right="0px" padding-bottom="0px" font-family="Ubuntu" font-size="24px">
         Call-In Script:
@@ -29,15 +29,15 @@
         Introduction:
       </mj-text>
       <mj-text padding-top="12px" padding-left="34px" padding-right="0px" padding-bottom="0px" font-family="Ubuntu" font-size="16px">
-        My name is [callerName], I’m a constituent and a voter and climate change is a high priority for me.
+        My name is fieldcallerNamefield, I'm a constituent and a voter and climate change is a high priority for me.
       </mj-text>
       <mj-text padding-top="16px" padding-left="34px" padding-right="0px" padding-bottom="0px" font-family="Ubuntu" font-size="16px" font-weight="bold">
         Ask:
       </mj-text>
       <mj-text padding-top="12px" padding-left="34px" padding-right="0px" padding-bottom="0px" font-family="Ubuntu" font-size="16px">
-        [ask]
+        fieldaskfield
       </mj-text>
-      <mj-button padding-top="20px" padding-left="20px" padding-right="0px" padding-bottom="0px" width="92px" height="42px" font-family="Ubuntu" font-size="18px" font-weight="500" color="black" border-radius="2px" inner-padding="0px" href="[thankYouUrl]" background-color="#9BC23B">Log Call</mj-button>
+      <mj-button padding-top="20px" padding-left="20px" padding-right="0px" padding-bottom="0px" width="92px" height="42px" font-family="Ubuntu" font-size="18px" font-weight="500" color="black" border-radius="2px" inner-padding="0px" href="fieldthankYouUrlfield" background-color="#9BC23B">Log Call</mj-button>
     </mj-hero>
     <mj-wrapper padding="36px">
       <mj-hero padding="10px" background-color="#15527B">
@@ -49,7 +49,7 @@
         POWER IN NUMBERS
       </mj-text>
       <mj-text padding-top="32px" padding-left="0px" padding-right="0px" padding-bottom="5px" font-size="16px" font-family="Ubuntu" color="white">
-        Congressional offices tally the number of calls they get about an issue, and pass the information along to representatives to consider. When there’s a large volume of calls about an issue, they’re forced to take a stand and respond.
+        Congressional offices tally the number of calls they get about an issue, and pass the information along to representatives to consider. When there's a large volume of calls about an issue, they're forced to take a stand and respond.
       </mj-text>
     </mj-hero>
     </mj-wrapper>
@@ -61,7 +61,7 @@
         What to expect
       </mj-text>
       <mj-text padding-top="12px" padding-left="0px" padding-right="0px" padding-bottom="0px" font-size="16px" font-family="Ubuntu">
-        Calling is simple, fast and non-threatening. You will either talk to a staff member (not [mocName]) or you will get a recording. Staff will not quiz you.
+        Calling is simple, fast and non-threatening. You will either talk to a staff member (not fieldmocNamefield) or you will get a recording. Staff will not quiz you.
       </mj-text>
       <mj-text padding-top="20px" padding-left="0px" padding-right="0px" padding-bottom="0px" font-size="18px" font-family="Ubuntu" font-weight="700">
         Comments, questions, moved districts?
