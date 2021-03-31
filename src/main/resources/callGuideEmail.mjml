@@ -1,14 +1,31 @@
 <mjml>
+  <mj-head>
+    <mj-attributes>
+        <mj-class name="ccl" font-family="Ubuntu" />
+    </mj-attributes>
+  </mj-head>
   <mj-body>
-    <mj-section padding="0px">
-      <mj-column padding="0px">
-        <mj-image src="https://cclcalls.org/img/mcc-logo-horizontal.png" height="144px" width="600px" padding="36px" padding-bottom="0px">
-        </mj-image>
+
+      <mj-section>
+      <mj-column vertical-align="middle">
+        <mj-image src="https://cclcalls.org/img/mcc_logo.png" title="monthly calling campaign logo" height="200px" width="200px" />
       </mj-column>
-    </mj-section>
+            <mj-column vertical-align="middle">
+                  <mj-text padding-left="0px" padding-right="0px" padding-bottom="0px" font-size="28px" mj-class="ccl">
+										<span style="font-weight: 700;">Citizens' Climate</span> Lobby
+      						</mj-text>
+                  	<mj-text padding-left="0px" padding-right="0px" padding-bottom="0px" font-weight="700" color="#0081C7" font-size="28px" mj-class="ccl">MONTHLY CALLING CAMPAIGN</mj-text>
+                </mj-column>
+              </mj-section>
+        <mj-hero background-color="#ffefba">
+          <mj-text font-size="18px" align="center">📣 Welcome to our new call-in guide 📣</mj-text>
+                      <mj-text></,j-text>To make calling more convenient, we've embedded the script, slimmed down for a quicker conversation, right here in the email. We hope you like it, and thank you for calling!</mj-text>
+          <mj-text>-The Monthly Calling Campaign Team</mj-text>
+    </mj-hero>
+
     <mj-hero padding="36px" padding-top="0px">
-      <mj-text padding-top="24px" padding-left="0px" padding-right="0px" padding-bottom="0px" align="center" font-weight="700" color="#0081C7" font-size="36px" font-family="Ubuntu">
-        It's your day to call Congress
+      <mj-text padding-top="24px" padding-left="0px" padding-right="0px" padding-bottom="0px" align="center" font-weight="700" font-size="36px" font-family="Ubuntu">
+        It's time to call Congress
       </mj-text>
       <mj-text padding-top="23px" padding-left="0px" padding-right="0px" padding-bottom="0px" font-family="Ubuntu" font-size="16px">
         Dear fieldcallerNamefield,
@@ -18,9 +35,6 @@
       </mj-text>
       <mj-text padding-top="20px" padding-left="0px" padding-right="0px" padding-bottom="0px" align="center" font-family="Ubuntu" font-size="28px" color="#5A7931">
         Call fieldmocNamefield
-      </mj-text>
-      <mj-text padding-top="12px" padding-left="0px" padding-right="0px" padding-bottom="0px" align="center" font-family="Ubuntu" font-size="18px" font-weight="bold">
-        fieldmocNumberfield
       </mj-text>
       <mj-text padding-top="20px" padding-left="0px" padding-right="0px" padding-bottom="0px" font-family="Ubuntu" font-size="24px">
         Call-In Script:
@@ -37,8 +51,12 @@
       <mj-text padding-top="12px" padding-left="34px" padding-right="0px" padding-bottom="0px" font-family="Ubuntu" font-size="16px">
         fieldaskfield
       </mj-text>
-      <mj-button padding-top="20px" padding-left="20px" padding-right="0px" padding-bottom="0px" width="92px" height="42px" font-family="Ubuntu" font-size="18px" font-weight="500" color="black" border-radius="2px" inner-padding="0px" href="fieldthankYouUrlfield" background-color="#9BC23B">Log Call</mj-button>
+      <mj-text padding-top="12px" padding-left="0px" padding-right="0px" padding-bottom="0px" align="center" font-family="Ubuntu" font-size="18px" font-weight="bold">
+        fieldmocNumberfield
+      </mj-text>
+      <mj-button padding-top="20px" padding-left="0px" padding-right="0px" padding-bottom="0px" height="42px" font-family="Ubuntu" font-size="18px" font-weight="500" color="black" border-radius="2px" inner-padding="20px" href="fieldthankYouUrlfield" background-color="#9BC23B">Report Your Call</mj-button>
     </mj-hero>
+
     <mj-wrapper padding="36px">
       <mj-hero padding="10px" background-color="#15527B">
       <mj-text padding-top="0px" padding-left="0px" padding-right="0px" padding-bottom="0px" font-size="24px" font-family="Ubuntu" align="center" color="#9BC23B">

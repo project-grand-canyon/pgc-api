@@ -7,7 +7,14 @@ import java.util.logging.Logger;
 import java.util.*;
 
 public class ReminderMessageFormatter {
-    private final static boolean callFromEmail = true;
+    private final static boolean callFromEmailTestEnabled = true;
+    private final static List<Integer> callFromEmailDistricts = new ArrayList<Integer>(
+            Arrays.asList(
+                    639, // WA-6
+                    736, // PA-5
+                    549 // MP-0 (useful for testing)
+            )
+    );
 
     private final static String APPLICATION_BASE_URL = "applicationBaseUrl";
     private final static String ADMIN_APPLICATION_BASE_URL = "adminApplicationBaseUrl";
@@ -64,7 +71,7 @@ public class ReminderMessageFormatter {
 
     private String makeCallInReminderReplacements(DistrictHydrated targetDistrict, String phoneNumber, Caller caller,
             String trackingPackage, String email) {
-        String rootPath = adminApplicationBaseUrl + "/call/";
+        String rootPath = "https://" + applicationBaseUrl + "/call/";
         email = email.replaceAll("fieldmocNumberfield", phoneNumber);
         email = email.replaceAll("fieldmocNamefield", (targetDistrict.isSenatorDistrict() ? "Senator " : "Representative ") +  targetDistrict.getRepFirstName() + " " + targetDistrict.getRepLastName());
         email = email.replaceAll("fieldaskfield", targetDistrict.getRequests().get(0).getContent());
@@ -79,7 +86,7 @@ public class ReminderMessageFormatter {
         reminderMessage.setSubject("It's time to call about climate change");
         String phoneNumber = getPhoneNumbersByDistrict(targetDistrict);
         String trackingPackage = "?t=" + trackingId + "&c=" + caller.getCallerId() + "&d=" + callerDistrict.getNumber();
-        if (callFromEmail) {
+        if (callFromEmailTestEnabled && callFromEmailDistricts.contains(caller.getDistrictId())) {
             reminderMessage.setBody(makeCallInReminderReplacements(targetDistrict, phoneNumber, caller, trackingPackage,
                     this.callGuideReminderHTML));
             return reminderMessage;
