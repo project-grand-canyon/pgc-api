@@ -295,7 +295,6 @@ public class Admins {
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
       conn.setAutoCommit(false);
-      TalkingPoints.clearTalkingPointsForAdmin(conn, adminId);
       PreparedStatement delete = conn.prepareStatement(SQL_DELETE_ADMIN);
       delete.setInt(1, adminId);
       delete.executeUpdate();

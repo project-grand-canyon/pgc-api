@@ -166,46 +166,24 @@ INSERT INTO `district_offices` VALUES   (300, 959, '111-222-1111', 'AA1MainOffic
 UNLOCK TABLES;
 
 --
--- Dumping data for table `district_scripts`
---
-
-LOCK TABLES `district_scripts` WRITE;
-/*!40000 ALTER TABLE `district_scripts` DISABLE KEYS */;
-INSERT INTO `district_scripts` VALUES   (959, 92, 1),
-                                        (960, 92, 2),
-                                        (961, 92, 3),
-                                        (962, 92, 4),
-                                        (963, 92, 5),
-                                        (964, 92, 6),
-                                        (965, 92, 7),
-                                        (966, 92, 8),
-                                        (967, 92, 9),
-                                        (968, 92, 10),
-                                        (969, 92, 11),
-                                        (970, 92, 12),
-                                        (971, 92, 13);
-/*!40000 ALTER TABLE `district_scripts` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Dumping data for table `districts`
 --
 
 LOCK TABLES `districts` WRITE;
 /*!40000 ALTER TABLE `districts` DISABLE KEYS */;
-INSERT INTO `districts` VALUES  (959, 'AA', 1, 'AA1Info', '2020-08-15 04:10:14', '2020-08-15 04:10:14', 'AA1FirstName', 'AA1LastName', NULL, NULL, '2020-08-15 04:10:14', 'active', 'US/Eastern', 0),
-                                (960, 'AA', 2, 'AA2Info', '2020-08-15 04:10:14', '2020-08-15 04:10:14', 'AA2FirstName', 'AA2LastName', NULL, NULL, '2020-08-15 04:10:14', 'active', 'US/Eastern', 0),
-                                (961, 'AA', 3, 'AA3Info', '2020-08-15 04:10:14', '2020-08-15 04:10:14', 'AA3FirstName', 'AA3LastName', NULL, NULL, '2020-08-15 04:10:14', 'active', 'US/Eastern', 0),
-                                (962, 'AA', 4, 'AA4Info', '2020-08-15 04:10:14', '2020-08-15 04:10:14', 'AA4FirstName', 'AA4LastName', NULL, NULL, '2020-08-15 04:10:14', 'active', 'US/Eastern', 0),
-                                (963, 'AA', 5, 'AA5Info', '2020-08-15 04:10:15', '2020-08-15 04:10:14', 'AA1FirstName', 'AA1LastName', NULL, NULL, '2020-08-15 04:10:14', 'active', 'US/Eastern', 0),
-                                (964, 'AA', 6, 'AA6Info', '2020-08-15 04:10:14', '2020-08-15 04:10:14', 'AA6FirstName', 'AA6LastName', NULL, NULL, '2020-08-15 04:10:14', 'active', 'US/Eastern', 0),
-                                (965, 'BB', 1, 'BB1Info', '2020-08-15 04:10:15', '2020-08-15 04:10:14', 'BB1FirstName', 'BB1LastName', NULL, NULL, '2020-08-15 04:10:14', 'covid_paused', 'US/Eastern', 0),
-                                (966, 'BB', 2, 'BB2Info', '2020-08-15 04:10:15', '2020-08-15 04:10:15', 'BB2FirstName', 'BB2LastName', NULL, NULL, '2020-08-15 04:10:15', 'active', 'US/Eastern', 0),
-                                (967, 'BB', 3, 'BB3Info', '2020-08-15 04:10:15', '2020-08-15 04:10:15', 'BB3FirstName', 'BB3LastName', NULL, NULL, '2020-08-15 04:10:15', 'covid_paused', 'US/Eastern', 0),
-                                (968, 'BB', 4, 'BB4Info', '2020-08-15 04:10:15', '2020-08-15 04:10:15', 'BB4FirstName', 'BB4LastName', NULL, NULL, '2020-08-15 04:10:15', 'active', 'US/Eastern', 0),
-                                (969, 'CC', 1, 'CC1Info', '2020-08-15 04:10:15', '2020-08-15 04:10:15', 'CC1FirstName', 'CC1LastName', NULL, NULL, '2020-08-15 04:10:15', 'covid_paused', 'US/Eastern', 0),
-                                (970, 'CC', 2, 'CC2Info', '2020-08-15 04:10:15', '2020-08-15 04:10:15', 'CC2FirstName', 'CC2LastName', NULL, NULL, '2020-08-15 04:10:15', 'active', 'US/Eastern', 0),
-                                (971, 'CC', 3, 'CC3Info', '2020-08-15 04:10:15', '2020-08-15 04:10:15', 'CC3FirstName', 'CC3LastName', NULL, NULL, '2020-08-15 04:10:15', 'active', 'US/Eastern', 0);
+INSERT INTO `districts` VALUES  (959, 'AA', 1, 'AA1Info', '2020-08-15 04:10:14', '2020-08-15 04:10:14', 'AA1FirstName', 'AA1LastName', NULL, NULL, 'active', 'US/Eastern'),
+                                (960, 'AA', 2, 'AA2Info', '2020-08-15 04:10:14', '2020-08-15 04:10:14', 'AA2FirstName', 'AA2LastName', NULL, NULL, 'active', 'US/Eastern'),
+                                (961, 'AA', 3, 'AA3Info', '2020-08-15 04:10:14', '2020-08-15 04:10:14', 'AA3FirstName', 'AA3LastName', NULL, NULL, 'active', 'US/Eastern'),
+                                (962, 'AA', 4, 'AA4Info', '2020-08-15 04:10:14', '2020-08-15 04:10:14', 'AA4FirstName', 'AA4LastName', NULL, NULL, 'active', 'US/Eastern'),
+                                (963, 'AA', 5, 'AA5Info', '2020-08-15 04:10:15', '2020-08-15 04:10:14', 'AA1FirstName', 'AA1LastName', NULL, NULL, 'active', 'US/Eastern'),
+                                (964, 'AA', 6, 'AA6Info', '2020-08-15 04:10:14', '2020-08-15 04:10:14', 'AA6FirstName', 'AA6LastName', NULL, NULL, 'active', 'US/Eastern'),
+                                (965, 'BB', 1, 'BB1Info', '2020-08-15 04:10:15', '2020-08-15 04:10:14', 'BB1FirstName', 'BB1LastName', NULL, NULL, 'covid_paused', 'US/Eastern'),
+                                (966, 'BB', 2, 'BB2Info', '2020-08-15 04:10:15', '2020-08-15 04:10:15', 'BB2FirstName', 'BB2LastName', NULL, NULL, 'active', 'US/Eastern'),
+                                (967, 'BB', 3, 'BB3Info', '2020-08-15 04:10:15', '2020-08-15 04:10:15', 'BB3FirstName', 'BB3LastName', NULL, NULL, 'covid_paused', 'US/Eastern'),
+                                (968, 'BB', 4, 'BB4Info', '2020-08-15 04:10:15', '2020-08-15 04:10:15', 'BB4FirstName', 'BB4LastName', NULL, NULL, 'active', 'US/Eastern'),
+                                (969, 'CC', 1, 'CC1Info', '2020-08-15 04:10:15', '2020-08-15 04:10:15', 'CC1FirstName', 'CC1LastName', NULL, NULL, 'covid_paused', 'US/Eastern'),
+                                (970, 'CC', 2, 'CC2Info', '2020-08-15 04:10:15', '2020-08-15 04:10:15', 'CC2FirstName', 'CC2LastName', NULL, NULL, 'active', 'US/Eastern'),
+                                (971, 'CC', 3, 'CC3Info', '2020-08-15 04:10:15', '2020-08-15 04:10:15', 'CC3FirstName', 'CC3LastName', NULL, NULL, 'active', 'US/Eastern');
 /*!40000 ALTER TABLE `districts` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -270,31 +248,6 @@ UNLOCK TABLES;
 LOCK TABLES `reset_tokens` WRITE;
 /*!40000 ALTER TABLE `reset_tokens` DISABLE KEYS */;
 /*!40000 ALTER TABLE `reset_tokens` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Dumping data for table `talking_points`
---
-
-LOCK TABLES `talking_points` WRITE;
-/*!40000 ALTER TABLE `talking_points` DISABLE KEYS */;
-INSERT INTO `talking_points` VALUES (92, 'BB1 Talking points', 14, '2020-08-15 04:10:17', '2020-08-15 04:10:17', 1, 'district', 123, 'http://BB1tp1.stuff', 'passed'),
-                                    (93, 'BB1 Talking Point 2', 14, '2020-08-15 04:10:17', '2020-08-15 04:10:17', 1, 'district', 123, 'http://BB1tp1.stuff', 'passed');
-/*!40000 ALTER TABLE `talking_points` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Dumping data for table `talking_points_scopes`
---
-
-LOCK TABLES `talking_points_scopes` WRITE;
-/*!40000 ALTER TABLE `talking_points_scopes` DISABLE KEYS */;
-INSERT INTO `talking_points_scopes` VALUES  (92, 965, NULL),
-                                            (93, 965, NULL),
-                                            (92, 959, NULL),
-                                            (93, 962, NULL),
-                                            (92, 964, NULL);
-/*!40000 ALTER TABLE `talking_points_scopes` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --

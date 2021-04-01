@@ -2,7 +2,7 @@ CREATE DATABASE core;
 USE core;
 
 -- note that order is important due to fk constraints
-DROP TABLE IF EXISTS `talking_points_scopes`, `requests`, `reminders`, `reminder_history`, `district_scripts`, `talking_points`, `themes`, `district_offices`, `calls`, `callers_contact_methods`, `callers`, `call_targets`, `admins_districts`, `admins`, `districts`, `addresses`;
+DROP TABLE IF EXISTS `requests`, `reminders`, `reminder_history`, `themes`, `district_offices`, `calls`, `callers_contact_methods`, `callers`, `call_targets`, `admins_districts`, `admins`, `districts`, `addresses`;
 
 
 -- Create syntax for TABLE 'admins'
@@ -31,7 +31,6 @@ CREATE TABLE `districts` (
   `rep_last_name` varchar(50) DEFAULT NULL,
   `rep_image_url` varchar(512) DEFAULT NULL,
   `script_modified_time` timestamp NULL DEFAULT NULL,
-  `last_stale_script_notification` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `status` enum('active','covid_paused') NOT NULL DEFAULT 'active',
   PRIMARY KEY (`district_id`),
   UNIQUE KEY `state` (`state`,`district_number`)
@@ -93,7 +92,6 @@ CREATE TABLE `calls` (
   `month` int(11) DEFAULT NULL,
   `year` int(11) DEFAULT NULL,
   `district_id` int(11) DEFAULT NULL,
-  `talking_point_id` int(11) DEFAULT NULL,
   `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   KEY `caller_id` (`caller_id`),
   KEY `district_id` (`district_id`),
@@ -129,36 +127,6 @@ CREATE TABLE `themes` (
   PRIMARY KEY (`theme_id`),
   UNIQUE KEY `theme_name` (`theme_name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
-
--- Create syntax for TABLE 'talking_points'
-CREATE TABLE `talking_points` (
-  `talking_point_id` int(11) NOT NULL AUTO_INCREMENT,
-  `content` varchar(512) NOT NULL,
-  `theme_id` int(11) NOT NULL,
-  `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `last_modified` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `enabled` tinyint(1) NOT NULL,
-  `scope` enum('national','state','district') NOT NULL,
-  `created_by` int(11) DEFAULT NULL,
-  `reference_url` varchar(512) DEFAULT NULL,
-  PRIMARY KEY (`talking_point_id`),
-  KEY `theme_id` (`theme_id`),
-  KEY `talking_points_admins_FK` (`created_by`),
-  CONSTRAINT `talking_points_admins_FK` FOREIGN KEY (`created_by`) REFERENCES `admins` (`admin_id`),
-  CONSTRAINT `talking_points_ibfk_1` FOREIGN KEY (`theme_id`) REFERENCES `themes` (`theme_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=92 DEFAULT CHARSET=utf8;
-
--- Create syntax for TABLE 'district_scripts'
-CREATE TABLE `district_scripts` (
-  `district_id` int(11) NOT NULL,
-  `talking_point_id` int(11) NOT NULL,
-  `ordering` int(11) NOT NULL,
-  UNIQUE KEY `district_id` (`district_id`,`talking_point_id`),
-  UNIQUE KEY `district_id_2` (`district_id`,`ordering`),
-  KEY `talking_point_id` (`talking_point_id`),
-  CONSTRAINT `district_scripts_ibfk_1` FOREIGN KEY (`district_id`) REFERENCES `districts` (`district_id`) ON DELETE CASCADE,
-  CONSTRAINT `district_scripts_ibfk_2` FOREIGN KEY (`talking_point_id`) REFERENCES `talking_points` (`talking_point_id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- Create syntax for TABLE 'reminder_history'
 CREATE TABLE `reminder_history` (
@@ -199,17 +167,6 @@ CREATE TABLE `requests` (
   KEY `district_id` (`district_id`),
   CONSTRAINT `requests_ibfk_1` FOREIGN KEY (`district_id`) REFERENCES `districts` (`district_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=904 DEFAULT CHARSET=utf8;
-
--- Create syntax for TABLE 'talking_points_scopes'
-CREATE TABLE `talking_points_scopes` (
-  `talking_point_id` int(11) NOT NULL,
-  `district_id` int(11) DEFAULT NULL,
-  `state` varchar(2) DEFAULT NULL,
-  KEY `talking_point_id` (`talking_point_id`),
-  KEY `district_id` (`district_id`),
-  CONSTRAINT `talking_points_scopes_ibfk_1` FOREIGN KEY (`talking_point_id`) REFERENCES `talking_points` (`talking_point_id`) ON DELETE CASCADE,
-  CONSTRAINT `talking_points_scopes_ibfk_2` FOREIGN KEY (`district_id`) REFERENCES `districts` (`district_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- Create syntax for TABLE 'reset_tokens'
 CREATE TABLE `reset_tokens` (

@@ -7,7 +7,6 @@ import java.util.List;
 public class DistrictHydrated extends District {
 
   private List<DistrictOffice> offices;
-  private List<TalkingPoint> script;
   private List<Request> requests;
 
   public DistrictHydrated(ResultSet rs) throws SQLException {
@@ -21,14 +20,6 @@ public class DistrictHydrated extends District {
 
   public void setOffices(List<DistrictOffice> offices) {
     this.offices = offices;
-  }
-
-  public List<TalkingPoint> getScript() {
-    return script;
-  }
-
-  public void setScript(List<TalkingPoint> script) {
-    this.script = script;
   }
 
   public List<Request> getRequests() {

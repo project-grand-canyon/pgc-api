@@ -22,10 +22,8 @@ public class District extends GCBase {
   public static final String REP_IMAGE_URL = "rep_image_url";
   public static final String INFO = "info";
   public static final String SCRIPT_MODIFIED_TIME = "script_modified_time";
-  public static final String LAST_STALE_SCRIPT_NOTIFICATION = "last_stale_script_notification";
   public static final String STATUS = "status";
   public static final String TIME_ZONE = "time_zone";
-  public static final String DELEGATE_SCRIPT = "delegate_script";
 
   private int districtId;
   private String state;
@@ -35,10 +33,8 @@ public class District extends GCBase {
   private String repImageUrl;
   private List<CallTarget> callTargets;
   private Timestamp scriptModifiedTime;
-  private Timestamp lastStaleScriptNotification;
   private Status status;
   private String timezone;
-  private Boolean delegateScript;
 
   private String info;
 
@@ -57,11 +53,9 @@ public class District extends GCBase {
     this.repImageUrl = rs.getString(REP_IMAGE_URL);
     this.info = rs.getString(INFO);
     this.scriptModifiedTime = rs.getTimestamp(SCRIPT_MODIFIED_TIME);
-    this.lastStaleScriptNotification = rs.getTimestamp(LAST_STALE_SCRIPT_NOTIFICATION);
     this.callTargets = new ArrayList<>();
     this.status = Status.valueOf(rs.getString(STATUS));
     this.timezone = rs.getString(TIME_ZONE);
-    this.delegateScript = rs.getBoolean(DELEGATE_SCRIPT);
 
     boolean retrieveCallTargets = false;
     ResultSetMetaData metaData = rs.getMetaData();
@@ -167,14 +161,6 @@ public class District extends GCBase {
     this.scriptModifiedTime = scriptModifiedTime;
   }
 
-  public Timestamp getLastStaleScriptNotification() {
-    return lastStaleScriptNotification;
-  }
-
-  public void setLastStaleScriptNotification(Timestamp lastStaleScriptNotification) {
-    this.lastStaleScriptNotification = lastStaleScriptNotification;
-  }
-
   public Status getStatus() {
     return status;
   }
@@ -189,14 +175,6 @@ public class District extends GCBase {
 
   public void setTimeZone(String timezone) { this.timezone = timezone; }
 
-  public Boolean getDelegateScript() {
-    return delegateScript;
-  }
-
-  public void setDelegateScript(Boolean delegateScript) {
-    this.delegateScript = delegateScript;
-  }
-
   public String readableName() {
     switch (this.getNumber()){
       case 0: return this.getState();
@@ -204,12 +182,6 @@ public class District extends GCBase {
       case -2: return String.format("%s Jr. Senator", this.getState());
       default: return String.format("%s-%s", this.getState(), this.getNumber());
     }
-  }
-
-  public Boolean needsStaleScriptNotification(Timestamp staleTime) {
-    return this.delegateScript == false && // if the script writing is delegated to CCL, then no notification is needed
-            (this.scriptModifiedTime == null || this.scriptModifiedTime.before(staleTime)) &&
-            this.getLastStaleScriptNotification().before(staleTime);
   }
 
   public boolean isSenatorDistrict(){

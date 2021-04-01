@@ -12,7 +12,6 @@ public class Call {
 
   public static final String CALLER_ID = "caller_id";
   public static final String DISTRICT_ID = "district_id";
-  public static final String TALKING_POINT_ID = "talking_point_id";
   public static final String MONTH = "month";
   public static final String YEAR = "year";
   public static final String CREATED = "created";

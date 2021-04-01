@@ -29,9 +29,6 @@ public class ReminderMessageFormatter {
     private String callGuideReminderHTML;
     private String callGuideEmailResource = "callGuideEmail.html";
 
-    private String staleScriptHTML;
-    private String staleScriptEmailResource = "staleScriptEmail.html";
-
     private String applicationBaseUrl;
     private String adminApplicationBaseUrl;
 
@@ -60,12 +57,6 @@ public class ReminderMessageFormatter {
             this.callGuideReminderHTML = FileReader.create().read(callGuideEmailResource);
         } catch (Exception e) {
             throw new RuntimeException("Unable to load call-in guide email template: " + e.getLocalizedMessage());
-        }
-
-        try {
-            this.staleScriptHTML = FileReader.create().read(staleScriptEmailResource);
-        } catch (Exception e) {
-            throw new RuntimeException("Unable to load stale script email template: " + e.getLocalizedMessage());
         }
     }
 
@@ -98,16 +89,6 @@ public class ReminderMessageFormatter {
         }
     }
 
-    public Message getAdminReminderEmail(District district, String date) {
-        Message message = new Message();
-        message.setSubject("Your district call-in script may need updating.");
-        // todo: replace with HTML? Add a link to admin portal?
-        message.setBody(district.getScriptModifiedTime() == null
-                ? String.format("The call in script for %s district %d has not yet been created.", district.getState(),
-                        district.getNumber())
-                : staleScriptHTML.replace("$district$", district.readableName()).replace("$updateDate$", date));
-        return message;
-    }
 
     public Message getSMS(District targetDistrict, Caller caller, District callerDistrict, String trackingId) {
         String trackingPackage = "?t=" + trackingId + "&c=" + caller.getCallerId() + "&d=" + callerDistrict.getNumber();

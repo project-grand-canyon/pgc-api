@@ -30,13 +30,6 @@ public class ReminderSQLFetcher {
             + ", " + ReminderStatus.EMAIL_DELIVERED + ", " + ReminderStatus.SMS_DELIVERED
             + ") VALUES (?, ?, ?, ?, ?, ?, ?)";
 
-    private final static String SQL_STALE_SCRIPT_QUERY = "SELECT d.*, a.admin_id, a.login_enabled, a.email from districts d "
-            + "LEFT JOIN admins_districts as ad ON ad.district_id = d.district_id "
-            + "LEFT JOIN admins as a ON a.admin_id = ad.admin_id";
-
-    private final static String SQL_UPDATE_STALE_SCRIPT_NOTIFICATION = "UPDATE districts SET "
-            + District.LAST_STALE_SCRIPT_NOTIFICATION + " = ? " + "WHERE " + District.DISTRICT_ID + " = ?";
-
     private static final Logger logger = Logger.getLogger(ReminderSQLFetcher.class.getName());
 
     public void createInitialReminder(int callerId) throws SQLException {
@@ -100,33 +93,6 @@ public class ReminderSQLFetcher {
         } catch (Exception e) {
             logger.severe(String.format("Failed to fetch callers from district with id %d: %s", district.getDistrictId(), e.toString()));
             return null;
-        }
-    }
-
-    public List<StaleScriptInfo> getStaleScriptInfo() {
-        List<StaleScriptInfo> staleDistricts = new ArrayList<StaleScriptInfo>();
-        try (Connection conn = SQLHelper.getInstance().getConnection()) {
-            ResultSet rs = conn.createStatement().executeQuery(SQL_STALE_SCRIPT_QUERY);
-            while(rs.next()) {
-                staleDistricts.add(new StaleScriptInfo(new District(rs), rs.getBoolean(Admin.LOGIN_ENABLED), rs.getString(Admin.EMAIL)));
-            }
-        }
-        catch (Exception e){
-            logger.severe("Unexpected error checking for stale scripts: " + e.toString());
-        }
-        return staleDistricts;
-    }
-
-    public void updateStaleScript(District district) {
-        Timestamp now = new Timestamp(System.currentTimeMillis());
-        try (Connection conn = SQLHelper.getInstance().getConnection()) {
-            PreparedStatement update = conn.prepareStatement(SQL_UPDATE_STALE_SCRIPT_NOTIFICATION);
-            int idx = 1;
-            update.setTimestamp(idx++, now);
-            update.setInt(idx, district.getDistrictId());
-            update.executeUpdate();
-        } catch (Exception e) {
-            logger.severe(String.format("Failed to update Stale Script for District with Id %d: %s", district.getDistrictId(), e.toString()));
         }
     }
 

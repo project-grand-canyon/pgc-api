@@ -30,7 +30,6 @@ public class ReminderService {
   private final static String LATEST_REMINDER_TIME = "latestReminderTime";
   private final static String SMS_DELIVERY_SERVICE = "smsDeliveryService";
   private final static String EMAIL_DELIVERY_SERVICE = "emailDeliveryService";
-  private final static String STALE_SCRIPT_WARNING_INTERVAL = "staleScriptWarningInterval";
 
   private static final Logger logger = Logger.getLogger(ReminderService.class.getName());
 
@@ -46,8 +45,6 @@ public class ReminderService {
 
   private DeliveryService smsDeliveryService;
   private DeliveryService emailDeliveryService;
-
-  private long staleScriptWarningInterval;
 
   private HolidayService holidayService;
 
@@ -130,9 +127,7 @@ public class ReminderService {
       this.holidayService = null;
     }
 
-    int staleScriptWarningInDays = Integer.parseInt(config.getProperty(STALE_SCRIPT_WARNING_INTERVAL, "30"));
-    this.staleScriptWarningInterval = TimeUnit.DAYS.toMillis(staleScriptWarningInDays);
-
+  
     if (Boolean.parseBoolean(config.getProperty(REMINDER_SERVICE_ENABLED))) {
       logger.info("Booting up the reminder task");
       // start the background task that will send reminders to callers
@@ -216,29 +211,6 @@ public class ReminderService {
     return emailDeliveryService;
   }
 
-  private boolean sendStaleScriptNotification(District district, String adminEmail) {
-    boolean success = false;
-    if (adminEmail != null) {
-      Message message = ReminderMessageFormatter.getInstance().getAdminReminderEmail(district, district.getScriptModifiedTime() == null ? "null" : dateFormat.format(district.getScriptModifiedTime()));
-      Caller adminAsCaller = new Caller();
-      adminAsCaller.setEmail(adminEmail);
-      try {
-        success = emailDeliveryService.sendTextMessage(adminAsCaller, message);
-      } catch (Exception e) {
-        logger.warning("Failed to deliver stale script message to: " + adminAsCaller.getEmail());
-      }
-    }
-    if (success) {
-      logger.info(String.format("Sent stale script warning to %s for %s district %d", adminEmail, district.getState(),
-          district.getNumber()));
-    } else {
-      logger.warning(String.format(
-          "Could not send stale script warning to Admin for %s district %d.  Possibly invalid email address '%s'.",
-          district.getState(), district.getNumber(), adminEmail));
-    }
-    return success;
-  }
-
   private DistrictHydrated getDistrictToCall(District callerDistrict) {
     List<CallTarget> targets = callerDistrict.getCallTargets();
     assert (targets != null && !targets.isEmpty());
@@ -260,7 +232,6 @@ public class ReminderService {
 
       logger.info("Waking up Reminder Sender");
       try {
-        checkForStaleScripts();
         ReminderSQLFetcher fetcher = new ReminderSQLFetcher();
         List<District> districts = fetcher.getDistricts();
         for(District district : districts) {
@@ -365,26 +336,6 @@ public class ReminderService {
       }
       logger.warning("no matching ReminderDate found for reminder");
       return null;
-    }
-
-    private void checkForStaleScripts() {
-      Timestamp staleTime = new Timestamp(System.currentTimeMillis() - staleScriptWarningInterval);
-      ReminderSQLFetcher fetcher = new ReminderSQLFetcher();
-      List<StaleScriptInfo> info = fetcher.getStaleScriptInfo();
-      for (StaleScriptInfo datum : info){
-        District district = datum.getDistrict();
-        if (district.needsStaleScriptNotification(staleTime)) {
-          if (datum.getAdminLoginEnabled()) {
-            if (sendStaleScriptNotification(district, datum.getAdminEmail())) {
-              fetcher.updateStaleScript(district);
-            }
-          } else {
-          logger.warning(String.format(
-              "Could not send stale script warning to Admin for %s district %d:  Admin account not enabled.",
-              district.getState(), district.getNumber()));
-          }
-        }
-      }
     }
   }
 }

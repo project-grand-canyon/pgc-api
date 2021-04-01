@@ -25,7 +25,6 @@ public class GCApplication extends ResourceConfig {
     register(Callers.class);
     register(Districts.class);
     register(Themes.class);
-    register(TalkingPoints.class);
     register(DistrictOffices.class);
     register(Calls.class);
     register(Admins.class);
