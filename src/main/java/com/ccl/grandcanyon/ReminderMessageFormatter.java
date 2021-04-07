@@ -74,9 +74,9 @@ public class ReminderMessageFormatter {
         String rootPath = "https://" + applicationBaseUrl + "/call/";
         email = email.replaceAll("fieldmocNumberfield", phoneNumber);
         email = email.replaceAll("fieldmocNamefield", (targetDistrict.isSenatorDistrict() ? "Senator " : "Representative ") +  targetDistrict.getRepFirstName() + " " + targetDistrict.getRepLastName());
-        email = email.replaceAll("fieldaskfield", targetDistrict.getRequests().get(0).getContent());
+        email = email.replaceAll("fieldaskfield", targetDistrict.getRequests().get(targetDistrict.getRequests().size() - 1).getContent());
         email = email.replaceAll("fieldthankYouUrlfield", rootPath + "thankyou" + trackingPackage);
-        email = email.replaceAll("fieldcallerNamefield", caller.getFirstName() + " " + caller.getLastName());
+        email = email.replaceAll("fieldcallerNamefield", caller.getFirstName());
         return email;
     }
 
