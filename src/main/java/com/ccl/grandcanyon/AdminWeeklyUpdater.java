@@ -93,6 +93,7 @@ public class AdminWeeklyUpdater {
     }
 
     private AdminWeeklyUpdater(Properties config) {
+        logger.info("Init Admin Weekly Updater");
         try {
             this.weeklyReportHtml = FileReader.create().read(weeklyReportEmailResource);
         } catch (Exception e) {

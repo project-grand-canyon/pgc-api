@@ -71,11 +71,11 @@ public class ReminderMessageFormatter {
 
     private String makeCallInReminderReplacements(DistrictHydrated targetDistrict, String phoneNumber, Caller caller,
             String trackingPackage, String email) {
-        String rootPath = "https://" + applicationBaseUrl + "/call/";
+        String rootPath = "https://" + applicationBaseUrl + "/call/" ;
         email = email.replaceAll("fieldmocNumberfield", phoneNumber);
         email = email.replaceAll("fieldmocNamefield", (targetDistrict.isSenatorDistrict() ? "Senator " : "Representative ") +  targetDistrict.getRepFirstName() + " " + targetDistrict.getRepLastName());
         email = email.replaceAll("fieldaskfield", targetDistrict.getRequests().get(targetDistrict.getRequests().size() - 1).getContent());
-        email = email.replaceAll("fieldthankYouUrlfield", rootPath + "thankyou" + trackingPackage);
+        email = email.replaceAll("fieldthankYouUrlfield", rootPath + "thankyou" + trackingPackage + "&state=" + targetDistrict.getState() + "&district=" + targetDistrict.getNumber());
         email = email.replaceAll("fieldcallerNamefield", caller.getFirstName());
         return email;
     }

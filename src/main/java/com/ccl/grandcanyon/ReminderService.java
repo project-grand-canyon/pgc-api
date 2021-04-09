@@ -4,13 +4,9 @@ package com.ccl.grandcanyon;
 
 import com.ccl.grandcanyon.deliverymethod.DeliveryService;
 import com.ccl.grandcanyon.types.*;
-import com.ccl.grandcanyon.ReminderMessageFormatter;
-import com.ccl.grandcanyon.ReminderSQLFetcher;
-
 import org.apache.commons.lang3.RandomStringUtils;
-import com.google.cloud.Tuple;
 
-import java.sql.*;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.*;
@@ -142,6 +138,7 @@ public class ReminderService {
   }
 
   public void tearDown() {
+    logger.info("Tearing down Reminder Service");
     if (reminderTask != null) {
       reminderTask.cancel(true);
     }
@@ -280,7 +277,7 @@ public class ReminderService {
           + earliestReminder + "-" + latestReminder + ")");
 
       DayOfWeek dayOfWeek = currentDateTime.getDayOfWeek();
-      if (dayOfWeek.equals(DayOfWeek.SATURDAY) /*|| dayOfWeek.equals(DayOfWeek.SUNDAY)*/) {
+      if (dayOfWeek.equals(DayOfWeek.SATURDAY) || dayOfWeek.equals(DayOfWeek.SUNDAY)) {
         logger.info("It's a weekend. Do nothing.");
         return;
       }

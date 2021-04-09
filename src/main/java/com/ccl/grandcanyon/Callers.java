@@ -1,9 +1,6 @@
 package com.ccl.grandcanyon;
 
-import com.ccl.grandcanyon.types.Admin;
-import com.ccl.grandcanyon.types.Caller;
-import com.ccl.grandcanyon.types.ContactMethod;
-import com.ccl.grandcanyon.types.Message;
+import com.ccl.grandcanyon.types.*;
 import org.apache.http.HttpStatus;
 
 import javax.annotation.security.RolesAllowed;
@@ -25,6 +22,9 @@ import java.util.logging.Logger;
  */
 @Path("/callers")
 public class Callers {
+
+  private final static String SQL_INSERT_REMINDER = "INSERT into reminders (" + Reminder.CALLER_ID + ", "
+          + Reminder.DAY_OF_MONTH + ") VALUES (?, ?)";
 
   private static final String SQL_SELECT_CALLER =
       "SELECT c.*, ccm.contact_method, r.day_of_month, r.last_reminder_timestamp, last_call_timestamp, notes FROM callers c " +
@@ -117,8 +117,7 @@ public class Callers {
       }
 
       insertContactMethods(conn, callerId, caller);
-      ReminderSQLFetcher fetcher = new ReminderSQLFetcher();
-      fetcher.createInitialReminder(callerId);
+      createInitialReminder(conn, callerId);
       Caller newCaller = retrieveById(conn, callerId);
       conn.commit();
 
@@ -334,6 +333,13 @@ public class Callers {
 
   }
 
+
+  static void createInitialReminder(Connection conn, int callerId) throws SQLException {
+    PreparedStatement statement = conn.prepareStatement(SQL_INSERT_REMINDER);
+    statement.setInt(1, callerId);
+    statement.setInt(2, ReminderService.getNewDayOfMonth());
+    statement.executeUpdate();
+  }
 
   static Caller retrieveById(
       Connection conn,

@@ -121,6 +121,7 @@ public class GCContextListener implements ServletContextListener {
 
   @Override
   public void contextDestroyed(ServletContextEvent sce) {
+    logger.info("GCContext destroying");
     SQLHelper sqlHelper = SQLHelper.getInstance();
     if (sqlHelper != null) {
       sqlHelper.tearDown();
