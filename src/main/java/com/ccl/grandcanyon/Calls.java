@@ -1,10 +1,6 @@
 package com.ccl.grandcanyon;
 
-import com.ccl.grandcanyon.types.Admin;
-import com.ccl.grandcanyon.types.Call;
-import com.ccl.grandcanyon.types.Caller;
-import com.ccl.grandcanyon.types.District;
-import com.ccl.grandcanyon.types.Reminder;
+import com.ccl.grandcanyon.types.*;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
@@ -13,7 +9,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -55,12 +50,12 @@ public class Calls {
   @RolesAllowed(GCAuth.ANONYMOUS)
   public Response saveCall(Call call) throws SQLException {
 
+    logger.info("Request to log call with caller id " + call.getCallerId() + "tracking id: " + call.getTrackingId());
+
     if (call.getTrackingId() == null) {
       throw new BadRequestException("Missing required tracking Id parameter.");
     }
 
-    Connection conn = SQLHelper.getInstance().getConnection();
-    try {
       // find the caller associated with the tracking Id
       ReminderSQLFetcher fetcher = new ReminderSQLFetcher();
       Reminder reminder = fetcher.getReminderByTrackingId(call.getTrackingId());
@@ -68,26 +63,31 @@ public class Calls {
         throw new BadRequestException("Unknown or expired call tracking Id");
       }
 
+    Connection conn = SQLHelper.getInstance().getConnection();
+
+      try {
       // see if a call was already recorded for this tracking Id and districtId
-      LocalDateTime callDateTime = reminder.getLastReminderTimestamp().toLocalDateTime(); //TODO: should this be OffsetDateTime or Instant?
+//      LocalDateTime reminderDateTime = reminder.getLastReminderTimestamp().toLocalDateTime(); //TODO: should this be OffsetDateTime or Instant?
       PreparedStatement query = conn.prepareStatement(SQL_SEARCH_CALL);
       query.setInt(1, reminder.getCallerId());
-      query.setInt(2, callDateTime.getMonthValue());
-      query.setInt(3, callDateTime.getYear());
+      query.setInt(2, reminder.getReminderMonth()); //reminderDateTime.getMonthValue()
+      query.setInt(3, reminder.getReminderYear()); // reminderDateTime.getYear()
       query.setInt(4, call.getDistrictId());
       ResultSet rs = query.executeQuery();
       if (rs.next()) {
+        logger.info("Not logging. Call already exists for caller " + call.getCallerId() + " month: " + reminder.getReminderMonth() );
         // call already recorded for this ID
         // todo:  treat this call as anonymous?  Or just ignore it?
       }
       else {
+        logger.info("Logging call for caller " + call.getCallerId() + " month: " + reminder.getReminderMonth());
         checkEligibleDistrict(conn, reminder.getCallerId(), call.getDistrictId());
         // save the call record
         PreparedStatement insert = conn.prepareStatement(SQL_CREATE_CALL);
         int idx = 1;
         insert.setInt(idx++, reminder.getCallerId());
-        insert.setInt(idx++, callDateTime.getMonthValue());
-        insert.setInt(idx++, callDateTime.getYear());
+        insert.setInt(idx++, reminder.getReminderMonth()); // was: reminderDateTime.getMonthValue()
+        insert.setInt(idx++, reminder.getReminderYear()); // was: reminderDateTime.getYear()
         if (call.getDistrictId() != null) {
           insert.setInt(idx++, call.getDistrictId());
         }

@@ -71,11 +71,11 @@ public class ReminderMessageFormatter {
 
     private String makeCallInReminderReplacements(DistrictHydrated targetDistrict, String phoneNumber, Caller caller,
             String trackingPackage, String email) {
-        String rootPath = "https://" + applicationBaseUrl + "/call/";
+        String rootPath = "https://" + applicationBaseUrl + "/call/" ;
         email = email.replaceAll("fieldmocNumberfield", phoneNumber);
         email = email.replaceAll("fieldmocNamefield", (targetDistrict.isSenatorDistrict() ? "Senator " : "Representative ") +  targetDistrict.getRepFirstName() + " " + targetDistrict.getRepLastName());
         email = email.replaceAll("fieldaskfield", targetDistrict.getRequests().get(targetDistrict.getRequests().size() - 1).getContent());
-        email = email.replaceAll("fieldthankYouUrlfield", rootPath + "thankyou" + trackingPackage);
+        email = email.replaceAll("fieldthankYouUrlfield", rootPath + "thankyou" + trackingPackage + "&state=" + targetDistrict.getState() + "&district=" + targetDistrict.getNumber());
         email = email.replaceAll("fieldcallerNamefield", caller.getFirstName());
         return email;
     }
@@ -86,7 +86,7 @@ public class ReminderMessageFormatter {
         reminderMessage.setSubject("It's time to call about climate change");
         String phoneNumber = getPhoneNumbersByDistrict(targetDistrict);
         String trackingPackage = "?t=" + trackingId + "&c=" + caller.getCallerId() + "&d=" + callerDistrict.getNumber();
-        if (callFromEmailTestEnabled && callFromEmailDistricts.contains(caller.getDistrictId())) {
+        if (callFromEmailTestEnabled) {
             reminderMessage.setBody(makeCallInReminderReplacements(targetDistrict, phoneNumber, caller, trackingPackage,
                     this.callGuideReminderHTML));
             return reminderMessage;

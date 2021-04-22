@@ -10,9 +10,6 @@ import com.google.cloud.Tuple;
 public class ReminderSQLFetcher {
     private final static String SQL_SELECT_REMINDER = "SELECT * FROM reminders WHERE " + Reminder.TRACKING_ID + " = ?";
 
-    private final static String SQL_INSERT_REMINDER = "INSERT into reminders (" + Reminder.CALLER_ID + ", "
-            + Reminder.DAY_OF_MONTH + ") VALUES (?, ?)";
-
     private final static String SQL_UPDATE_REMINDER = "UPDATE reminders SET " + Reminder.LAST_REMINDER_TIMESTAMP
             + " = ?, " + Reminder.TRACKING_ID + " = ?, " + Reminder.REMINDER_YEAR + " = ?, " + Reminder.REMINDER_MONTH
             + " = ? " + "WHERE " + Reminder.CALLER_ID + " = ?";
@@ -38,17 +35,6 @@ public class ReminderSQLFetcher {
             + District.LAST_STALE_SCRIPT_NOTIFICATION + " = ? " + "WHERE " + District.DISTRICT_ID + " = ?";
 
     private static final Logger logger = Logger.getLogger(ReminderSQLFetcher.class.getName());
-
-    public void createInitialReminder(int callerId) throws SQLException {
-        try (Connection conn = SQLHelper.getInstance().getConnection();
-                PreparedStatement statement = conn.prepareStatement(SQL_INSERT_REMINDER);) {
-            statement.setInt(1, callerId);
-            statement.setInt(2, ReminderService.getNewDayOfMonth());
-            statement.executeUpdate();
-        } catch (Exception e) {
-
-        }
-    }
 
     public Caller getCallerById(int callerId) {
         try (Connection conn = SQLHelper.getInstance().getConnection()) {
@@ -174,6 +160,7 @@ public class ReminderSQLFetcher {
     }
 
     public void updateReminderStatus(ReminderStatus reminderStatus, ReminderDate reminderDate) {
+        logger.info("Updating reminder date for caller " + reminderStatus.getCaller().getCallerId() + " month: " + reminderDate.getMonth() + " day: " + reminderDate.getDay());
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
         try (Connection conn = SQLHelper.getInstance().getConnection()) {
             PreparedStatement update = conn.prepareStatement(SQL_UPDATE_REMINDER);
