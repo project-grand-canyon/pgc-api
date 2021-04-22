@@ -86,7 +86,7 @@ public class ReminderMessageFormatter {
         reminderMessage.setSubject("It's time to call about climate change");
         String phoneNumber = getPhoneNumbersByDistrict(targetDistrict);
         String trackingPackage = "?t=" + trackingId + "&c=" + caller.getCallerId() + "&d=" + callerDistrict.getNumber();
-        if (callFromEmailTestEnabled && callFromEmailDistricts.contains(caller.getDistrictId())) {
+        if (callFromEmailTestEnabled) {
             reminderMessage.setBody(makeCallInReminderReplacements(targetDistrict, phoneNumber, caller, trackingPackage,
                     this.callGuideReminderHTML));
             return reminderMessage;

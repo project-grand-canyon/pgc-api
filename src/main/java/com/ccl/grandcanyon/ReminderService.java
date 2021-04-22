@@ -6,7 +6,6 @@ import com.ccl.grandcanyon.deliverymethod.DeliveryService;
 import com.ccl.grandcanyon.types.*;
 import org.apache.commons.lang3.RandomStringUtils;
 
-import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.*;
@@ -257,7 +256,6 @@ public class ReminderService {
 
       logger.info("Waking up Reminder Sender");
       try {
-        checkForStaleScripts();
         ReminderSQLFetcher fetcher = new ReminderSQLFetcher();
         List<District> districts = fetcher.getDistricts();
         for(District district : districts) {
@@ -362,26 +360,6 @@ public class ReminderService {
       }
       logger.warning("no matching ReminderDate found for reminder");
       return null;
-    }
-
-    private void checkForStaleScripts() {
-      Timestamp staleTime = new Timestamp(System.currentTimeMillis() - staleScriptWarningInterval);
-      ReminderSQLFetcher fetcher = new ReminderSQLFetcher();
-      List<StaleScriptInfo> info = fetcher.getStaleScriptInfo();
-      for (StaleScriptInfo datum : info){
-        District district = datum.getDistrict();
-        if (district.needsStaleScriptNotification(staleTime)) {
-          if (datum.getAdminLoginEnabled()) {
-            if (sendStaleScriptNotification(district, datum.getAdminEmail())) {
-              fetcher.updateStaleScript(district);
-            }
-          } else {
-          logger.warning(String.format(
-              "Could not send stale script warning to Admin for %s district %d:  Admin account not enabled.",
-              district.getState(), district.getNumber()));
-          }
-        }
-      }
     }
   }
 }

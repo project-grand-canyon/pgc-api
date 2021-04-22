@@ -19,7 +19,7 @@
               </mj-section>
         <mj-hero background-color="#ffefba">
           <mj-text font-size="18px" align="center">Welcome to our new call-in guide!</mj-text>
-                      <mj-text></,j-text>To make calling more convenient, we've embedded the script, slimmed down for a quicker conversation, right here in the email. We hope you like it, and thank you for calling!</mj-text>
+                      <mj-text>To make calling more convenient, we've embedded the script, slimmed down for a quicker conversation, right here in the email. Feel welcome to also share your own message, if you'd like. Thank you for calling!</mj-text>
           <mj-text>-The Monthly Calling Campaign Team</mj-text>
     </mj-hero>
 
