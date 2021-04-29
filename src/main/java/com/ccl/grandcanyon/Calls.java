@@ -54,7 +54,9 @@ public class Calls {
   @Produces(MediaType.APPLICATION_JSON)
   @RolesAllowed(GCAuth.ANONYMOUS)
   public Response saveCall(Call call) throws SQLException {
-
+    if (call == null) {
+      throw new BadRequestException("Missing call data.");
+    }
     if (call.getTrackingId() == null) {
       throw new BadRequestException("Missing required tracking Id parameter.");
     }
