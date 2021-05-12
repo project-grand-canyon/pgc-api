@@ -165,7 +165,8 @@ public class Requests {
       throws SQLException {
 
     String whereClause = " WHERE " + Request.DISTRICT_ID + " = ?";
-    PreparedStatement statement = conn.prepareStatement(SQL_SELECT_REQUEST + whereClause);
+    String orderBy = " ORDER BY " + Request.LAST_MODIFIED;
+    PreparedStatement statement = conn.prepareStatement(SQL_SELECT_REQUEST + whereClause + orderBy);
     statement.setInt(1, districtId);
     ResultSet rs = statement.executeQuery();
     List<Request> requests = new ArrayList<>();
