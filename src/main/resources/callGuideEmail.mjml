@@ -17,12 +17,6 @@
                   	<mj-text padding-left="0px" padding-right="0px" padding-bottom="0px" font-weight="700" color="#0081C7" font-size="28px" mj-class="ccl">MONTHLY CALLING CAMPAIGN</mj-text>
                 </mj-column>
               </mj-section>
-        <mj-hero background-color="#ffefba">
-          <mj-text font-size="18px" align="center">Welcome to our new call-in guide!</mj-text>
-                      <mj-text>To make calling more convenient, we've embedded the script, slimmed down for a quicker conversation, right here in the email. Feel welcome to also share your own message, if you'd like. Thank you for calling!</mj-text>
-          <mj-text>-The Monthly Calling Campaign Team</mj-text>
-    </mj-hero>
-
     <mj-hero padding="36px" padding-top="0px">
       <mj-text padding-top="24px" padding-left="0px" padding-right="0px" padding-bottom="0px" align="center" font-weight="700" font-size="36px" font-family="Ubuntu">
         It's time to call Congress
