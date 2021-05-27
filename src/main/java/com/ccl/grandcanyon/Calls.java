@@ -9,10 +9,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.Date;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -31,7 +29,8 @@ public class Calls {
           Call.CALLER_ID + " = ? AND " +
           Call.MONTH + " = ? AND " +
           Call.YEAR + " = ? AND " +
-          Call.DISTRICT_ID + " = ?";
+          Call.DISTRICT_ID + " = ?" +
+          " ORDER BY " + Call.CREATED + " DESC";
 
   private static final String SQL_CREATE_CALL =
       "INSERT INTO calls (" +
@@ -75,27 +74,35 @@ public class Calls {
       query.setInt(4, call.getDistrictId());
       ResultSet rs = query.executeQuery();
       if (rs.next()) {
-        logger.info("Not logging. Call already exists for caller " + call.getCallerId() + " month: " + reminder.getReminderMonth() );
-        // call already recorded for this ID
-        // todo:  treat this call as anonymous?  Or just ignore it?
+        Call oldCall = new Call(rs);
+        logger.info("Call already exists for caller " + call.getCallerId() + " month: " + reminder.getReminderMonth() + ". Made at " + oldCall.getCreated().toString() );
+
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(oldCall.getCreated());
+        cal.add(Calendar.DAY_OF_WEEK, 1);
+        Timestamp ts = new Timestamp(cal.getTime().getTime());
+
+        if (new Date().before(ts)) {
+          logger.info("Previous call was too recent. Not logging this one");
+          return Response.created(null).build();
+        }
+      }
+      logger.info("Logging call for caller " + call.getCallerId() + " month: " + reminder.getReminderMonth());
+      checkEligibleDistrict(conn, reminder.getCallerId(), call.getDistrictId());
+      // save the call record
+      PreparedStatement insert = conn.prepareStatement(SQL_CREATE_CALL);
+      int idx = 1;
+      insert.setInt(idx++, reminder.getCallerId());
+      insert.setInt(idx++, reminder.getReminderMonth()); // was: reminderDateTime.getMonthValue()
+      insert.setInt(idx++, reminder.getReminderYear()); // was: reminderDateTime.getYear()
+      if (call.getDistrictId() != null) {
+        insert.setInt(idx++, call.getDistrictId());
       }
       else {
-        logger.info("Logging call for caller " + call.getCallerId() + " month: " + reminder.getReminderMonth());
-        checkEligibleDistrict(conn, reminder.getCallerId(), call.getDistrictId());
-        // save the call record
-        PreparedStatement insert = conn.prepareStatement(SQL_CREATE_CALL);
-        int idx = 1;
-        insert.setInt(idx++, reminder.getCallerId());
-        insert.setInt(idx++, reminder.getReminderMonth()); // was: reminderDateTime.getMonthValue()
-        insert.setInt(idx++, reminder.getReminderYear()); // was: reminderDateTime.getYear()
-        if (call.getDistrictId() != null) {
-          insert.setInt(idx++, call.getDistrictId());
-        }
-        else {
-          insert.setNull(idx++, Types.INTEGER);
-        }
-        insert.executeUpdate();
+        insert.setNull(idx++, Types.INTEGER);
       }
+      insert.executeUpdate();
+
       return Response.created(null).build();
     }
     finally {
