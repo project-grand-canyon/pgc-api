@@ -47,7 +47,7 @@
         fieldaskfield
       </mj-text>
       <mj-text padding-top="12px" padding-left="0px" padding-right="0px" padding-bottom="0px" align="center" font-family="Ubuntu, Arial" font-size="18px" font-weight="bold">
-        fieldmocNumberfield
+        <a href="tel:fieldmocNumberfield">fieldmocNumberfield</a>
       </mj-text>
       <mj-button padding-top="20px" padding-left="0px" padding-right="0px" padding-bottom="0px" height="42px" font-family="Ubuntu, Arial" font-size="18px" font-weight="500" color="black" border-radius="2px" inner-padding="20px" href="fieldthankYouUrlfield" background-color="#9BC23B">Report Your Call</mj-button>
     </mj-hero>
