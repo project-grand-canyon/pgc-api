@@ -19,10 +19,20 @@ CREATE TABLE `admins` (
   UNIQUE KEY `user_name` (`user_name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=122 DEFAULT CHARSET=utf8;
 
+-- Create syntax for TABLE 'ccl_regions'
+CREATE TABLE `ccl_regions` (
+  `ccl_region_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(120) NOT NULL,
+  `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `last_modified` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`ccl_region_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2822 DEFAULT CHARSET=utf8;
+
 -- Create syntax for TABLE 'districts'
 CREATE TABLE `districts` (
   `district_id` int(11) NOT NULL AUTO_INCREMENT,
   `state` varchar(2) NOT NULL,
+  `ccl_region_id` int(11) DEFAULT NULL,
   `district_number` int(11) NOT NULL,
   `info` varchar(512) DEFAULT NULL,
   `last_modified` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -33,9 +43,11 @@ CREATE TABLE `districts` (
   `script_modified_time` timestamp NULL DEFAULT NULL,
   `last_stale_script_notification` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `status` enum('active','covid_paused') NOT NULL DEFAULT 'active',
+  `time_zone` varchar(128) DEFAULT '"US/Eastern"',
+  `delegate_script` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`district_id`),
   UNIQUE KEY `state` (`state`,`district_number`)
-) ENGINE=InnoDB AUTO_INCREMENT=959 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=962 DEFAULT CHARSET=utf8;
 
 -- Create syntax for TABLE 'admins_districts'
 CREATE TABLE `admins_districts` (
