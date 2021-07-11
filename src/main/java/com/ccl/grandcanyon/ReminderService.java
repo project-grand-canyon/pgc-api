@@ -182,7 +182,7 @@ public class ReminderService {
     }
     if (caller.getContactMethods().contains(ContactMethod.email)) {
       reminderMessage = reminderMessageFormatter.getReminderEmail(targetDistrict, caller, callerDistrict, trackingId);
-      //logger.info(String.format("\n\n\n\n\n SUBJECT: %s \n\n\n\n\n BODY: %s \n\n\n\n\n", reminderMessage.getSubject(), reminderMessage.getBody()));
+//      logger.info(String.format("\n\n\n\n\n SUBJECT: %s \n\n\n\n\n BODY: %s \n\n\n\n\n", reminderMessage.getSubject(), reminderMessage.getBody()));
       try {
         if (emailDeliveryService.sendHtmlMessage(caller, reminderMessage)) {
           logger.info(String.format("Sent email reminder to caller {id: %d, name %s %s}.", caller.getCallerId(),

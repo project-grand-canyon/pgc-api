@@ -77,8 +77,6 @@ public class PostmarkService implements DeliveryService {
                 recipientEmailAddress,
                 message.getSubject(),
                 message.getBody());
-        postmarkMessage.setTrackLinks(Message.TRACK_LINKS.HtmlAndText);
-        postmarkMessage.setTrackOpens(true);
         messageQueue.add(postmarkMessage);
         return true; //TODO: this is misleading b/c it hasn't actually succeeded yet
     }

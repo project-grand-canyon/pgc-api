@@ -1,23 +1,23 @@
 <mjml>
   <mj-head>
     <mj-font name="Ubuntu"
-       href="https://fonts.googleapis.com/css?family=Ubuntu" />
+             href="https://fonts.googleapis.com/css?family=Ubuntu" />
     <mj-attributes>
-        <mj-class name="ccl" font-family="Ubuntu, Arial" />
+      <mj-class name="ccl" font-family="Ubuntu, Arial" />
     </mj-attributes>
   </mj-head>
   <mj-body>
-      <mj-section>
+    <mj-section>
       <mj-column vertical-align="middle">
         <mj-image src="https://cclcalls.org/img/mcc_logo.png" title="monthly calling campaign logo" height="200px" width="200px" />
       </mj-column>
-            <mj-column vertical-align="middle">
-                  <mj-text padding-left="0px" padding-right="0px" padding-bottom="0px" font-size="28px" mj-class="ccl">
-										<span style="font-weight: 700;">Citizens' Climate</span> Lobby
-      						</mj-text>
-                  	<mj-text padding-left="0px" padding-right="0px" padding-bottom="0px" font-weight="700" color="#0081C7" font-size="28px" mj-class="ccl">MONTHLY CALLING CAMPAIGN</mj-text>
-                </mj-column>
-              </mj-section>
+      <mj-column vertical-align="middle">
+        <mj-text padding-left="0px" padding-right="0px" padding-bottom="0px" font-size="28px" mj-class="ccl">
+          <span style="font-weight: 700;">Citizens' Climate</span> Lobby
+        </mj-text>
+        <mj-text padding-left="0px" padding-right="0px" padding-bottom="0px" font-weight="700" color="#0081C7" font-size="28px" mj-class="ccl">MONTHLY CALLING CAMPAIGN</mj-text>
+      </mj-column>
+    </mj-section>
     <mj-hero padding="36px" padding-top="0px">
       <mj-text padding-top="24px" padding-left="0px" padding-right="0px" padding-bottom="0px" align="center" font-weight="700" font-size="36px" font-family="Ubuntu, Arial">
         It's time to call Congress
@@ -47,26 +47,26 @@
         fieldaskfield
       </mj-text>
       <mj-text padding-top="12px" padding-left="0px" padding-right="0px" padding-bottom="0px" align="center" font-family="Ubuntu, Arial" font-size="18px" font-weight="bold">
-        fieldmocNumberfield
+        <a href="tel:fieldmocNumberfield">fieldmocNumberfield</a>
       </mj-text>
       <mj-button padding-top="20px" padding-left="0px" padding-right="0px" padding-bottom="0px" height="42px" font-family="Ubuntu, Arial" font-size="18px" font-weight="500" color="black" border-radius="2px" inner-padding="20px" href="fieldthankYouUrlfield" background-color="#9BC23B">Report Your Call</mj-button>
     </mj-hero>
 
     <mj-wrapper padding="36px">
       <mj-hero padding="10px" background-color="#15527B">
-      <mj-text padding-top="0px" padding-left="0px" padding-right="0px" padding-bottom="0px" font-size="24px" font-family="Ubuntu, Arial" align="center" color="#9BC23B">
-        Why call?
-      </mj-text>
-      <mj-image src="https://cclcalls.org/img/diversity.png" height="144px" width="144px" padding="20px"></mj-image>
-      <mj-text padding-top="0px" padding-left="0px" padding-right="0px" padding-bottom="0px" font-size="16px" font-family="Ubuntu, Arial" color="white" font-weight="700">
-        POWER IN NUMBERS
-      </mj-text>
-      <mj-text padding-top="32px" padding-left="0px" padding-right="0px" padding-bottom="5px" font-size="16px" font-family="Ubuntu, Arial" color="white">
-        Congressional offices tally the number of calls they get about an issue, and pass the information along to representatives to consider. When there's a large volume of calls about an issue, they're forced to take a stand and respond.
-      </mj-text>
-    </mj-hero>
+        <mj-text padding-top="0px" padding-left="0px" padding-right="0px" padding-bottom="0px" font-size="24px" font-family="Ubuntu, Arial" align="center" color="#9BC23B">
+          Why call?
+        </mj-text>
+        <mj-image src="https://cclcalls.org/img/gavel.png" height="144px" width="144px" padding="20px"></mj-image>
+        <mj-text padding-top="0px" padding-left="0px" padding-right="0px" padding-bottom="0px" font-size="16px" font-family="Ubuntu, Arial" color="white" font-weight="700">
+          Advocate for Carbon Pricing
+        </mj-text>
+        <mj-text padding-top="32px" padding-left="0px" padding-right="0px" padding-bottom="5px" font-size="16px" font-family="Ubuntu, Arial" color="white">
+          Citizens' Climate Lobby and its 100,000+ volunteers support carbon pricing legislation as a key tool for slowing climate change. Read more about carbon pricing bills we support on our <a style="color: white" href="https://citizensclimatelobby.org/carbon-pricing-congress/">explainer page</a>.
+        </mj-text>
+      </mj-hero>
     </mj-wrapper>
-        <mj-hero padding="36px">
+    <mj-hero padding="36px">
       <mj-text padding-top="0px" padding-left="0px" padding-right="0px" padding-bottom="0px" font-size="24px" font-family="Ubuntu, Arial">
         Frequently Asked Questions
       </mj-text>
