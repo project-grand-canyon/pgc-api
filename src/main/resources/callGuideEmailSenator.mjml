@@ -18,7 +18,9 @@
         <mj-text padding-left="0px" padding-right="0px" padding-bottom="0px" font-weight="700" color="#0081C7" font-size="28px" mj-class="ccl">MONTHLY CALLING CAMPAIGN</mj-text>
       </mj-column>
     </mj-section>
-    <mj-hero padding="36px" padding-top="0px">
+    <mj-wrapper padding="36px" padding-top="0px">
+    <mj-section>
+    <mj-column>
       <mj-text padding-top="24px" padding-left="0px" padding-right="0px" padding-bottom="0px" align="center" font-weight="700" font-size="36px" font-family="Ubuntu, Arial">
         It's time to call Congress
       </mj-text>
@@ -34,16 +36,26 @@
       <mj-text padding-top="20px" padding-left="0px" padding-right="0px" padding-bottom="0px" font-family="Ubuntu, Arial" font-size="24px">
         Call-In Script:
       </mj-text>
-      <mj-text padding-top="16px" padding-left="34px" padding-right="0px" padding-bottom="0px" font-family="Ubuntu, Arial" font-size="16px" font-weight="bold">
+      </mj-column>
+      </mj-section>
+
+    <mj-hero background-color="#ffefba">
+          <mj-text font-size="18px" align="center">Already called fieldmocNamefield this month?</mj-text>
+          <mj-text>CCL is making a big push for everybody to contact their Senator about carbon pricing. If you already called, click the skip button below.</mj-text>
+    </mj-hero>
+
+<mj-section>
+    <mj-column >
+      <mj-text padding-left="0px" font-family="Ubuntu, Arial" font-size="16px" font-weight="bold">
         Introduction:
       </mj-text>
-      <mj-text padding-top="12px" padding-left="34px" padding-right="0px" padding-bottom="0px" font-family="Ubuntu, Arial" font-size="16px">
+      <mj-text padding-left="0px" font-family="Ubuntu, Arial" font-size="16px">
         My name is fieldcallerNamefield, I'm a constituent and a voter and climate change is a high priority for me.
       </mj-text>
-      <mj-text padding-top="16px" padding-left="34px" padding-right="0px" padding-bottom="0px" font-family="Ubuntu, Arial" font-size="16px" font-weight="bold">
+      <mj-text padding-left="0px" font-family="Ubuntu, Arial" font-size="16px" font-weight="bold">
         Ask:
       </mj-text>
-      <mj-text padding-top="12px" padding-left="34px" padding-right="0px" padding-bottom="0px" font-family="Ubuntu, Arial" font-size="16px">
+      <mj-text padding-left="0px" font-family="Ubuntu, Arial" font-size="16px">
         fieldaskfield
       </mj-text>
       <mj-text padding-top="12px" padding-left="0px" padding-right="0px" padding-bottom="0px" align="center" font-family="Ubuntu, Arial" font-size="18px" font-weight="bold">
@@ -53,9 +65,11 @@
       <mj-text padding-top="12px" padding-left="0px" padding-right="0px" padding-bottom="0px" align="center" font-family="Ubuntu, Arial" font-size="16px">
         <a href="fieldthankYouUrlfieldSkip">Skip this call</a>
       </mj-text>
-    </mj-hero>
+    </mj-column>
+    </mj-section>
+    </mj-wrapper>
 
-    <mj-wrapper padding="36px">
+    <mj-wrapper padding="36px" padding-top="0">
       <mj-hero padding="10px" background-color="#15527B">
         <mj-text padding-top="0px" padding-left="0px" padding-right="0px" padding-bottom="0px" font-size="24px" font-family="Ubuntu, Arial" align="center" color="#9BC23B">
           Why call?
