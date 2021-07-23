@@ -29,6 +29,9 @@ public class ReminderMessageFormatter {
     private String callGuideReminderHTML;
     private String callGuideEmailResource = "callGuideEmail.html";
 
+    private String callGuideReminderHTMLSenate;
+    private String callGuideSenateEmailResource = "callGuideEmailSenator.html";
+
     private String staleScriptHTML;
     private String staleScriptEmailResource = "staleScriptEmail.html";
 
@@ -63,6 +66,12 @@ public class ReminderMessageFormatter {
         }
 
         try {
+            this.callGuideReminderHTMLSenate = FileReader.create().read(callGuideSenateEmailResource);
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to load senator call-in guide email template: " + e.getLocalizedMessage());
+        }
+
+        try {
             this.staleScriptHTML = FileReader.create().read(staleScriptEmailResource);
         } catch (Exception e) {
             throw new RuntimeException("Unable to load stale script email template: " + e.getLocalizedMessage());
@@ -71,11 +80,12 @@ public class ReminderMessageFormatter {
 
     private String makeCallInReminderReplacements(DistrictHydrated targetDistrict, String phoneNumber, Caller caller,
             String trackingPackage, String email) {
-        String rootPath = "https://" + applicationBaseUrl + "/call/" ;
+        String basePath = "https://" + applicationBaseUrl + "/call/thankyou" + trackingPackage + "&state=" + targetDistrict.getState() + "&district=" + targetDistrict.getNumber();
         email = email.replaceAll("fieldmocNumberfield", phoneNumber);
         email = email.replaceAll("fieldmocNamefield", (targetDistrict.isSenatorDistrict() ? "Senator " : "Representative ") +  targetDistrict.getRepFirstName() + " " + targetDistrict.getRepLastName());
         email = email.replaceAll("fieldaskfield", targetDistrict.getRequests().get(targetDistrict.getRequests().size() - 1).getContent());
-        email = email.replaceAll("fieldthankYouUrlfield", rootPath + "thankyou" + trackingPackage + "&state=" + targetDistrict.getState() + "&district=" + targetDistrict.getNumber());
+        email = email.replaceAll("fieldthankYouUrlfieldSkip", basePath + "&s=1");
+        email = email.replaceAll("fieldthankYouUrlfield", basePath);
         email = email.replaceAll("fieldcallerNamefield", caller.getFirstName());
         return email;
     }
@@ -87,8 +97,13 @@ public class ReminderMessageFormatter {
         String phoneNumber = getPhoneNumbersByDistrict(targetDistrict);
         String trackingPackage = "?t=" + trackingId + "&c=" + caller.getCallerId() + "&d=" + callerDistrict.getNumber();
         if (callFromEmailTestEnabled) {
-            reminderMessage.setBody(makeCallInReminderReplacements(targetDistrict, phoneNumber, caller, trackingPackage,
-                    this.callGuideReminderHTML));
+            if (targetDistrict.isSenatorDistrict()) {
+                reminderMessage.setBody(makeCallInReminderReplacements(targetDistrict, phoneNumber, caller, trackingPackage,
+                        this.callGuideReminderHTMLSenate));
+            } else {
+                reminderMessage.setBody(makeCallInReminderReplacements(targetDistrict, phoneNumber, caller, trackingPackage,
+                        this.callGuideReminderHTML));
+            }
             return reminderMessage;
         } else {
             String callInPageUrl = "http://" + applicationBaseUrl + "/call/";
