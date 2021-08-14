@@ -45,6 +45,7 @@ CREATE TABLE `districts` (
   `status` enum('active','covid_paused') NOT NULL DEFAULT 'active',
   `time_zone` varchar(128) DEFAULT '"US/Eastern"',
   `delegate_script` tinyint(1) NOT NULL DEFAULT '0',
+  `party` char(1) DEFAULT NULL,
   PRIMARY KEY (`district_id`),
   UNIQUE KEY `state` (`state`,`district_number`)
 ) ENGINE=InnoDB AUTO_INCREMENT=962 DEFAULT CHARSET=utf8;

@@ -29,12 +29,12 @@ public class Districts {
 
   private static final String SQL_CREATE_DISTRICT = "INSERT INTO districts (" + District.STATE + ", "
       + District.DISTRICT_NUMBER + ", " + District.REP_FIRST_NAME + ", " + District.REP_LAST_NAME + ", "
-      + District.REP_IMAGE_URL + ", " + District.INFO + ") VALUES (?, ?, ?, ?, ?, ?)";
+      + District.REP_IMAGE_URL + ", " + District.INFO + ", " + District.PARTY + ") VALUES (?, ?, ?, ?, ?, ?, ?)";
 
   private static final String SQL_UPDATE_DISTRICT = "UPDATE districts SET " + District.STATE + " = ?, "
       + District.DISTRICT_NUMBER + " = ?, " + District.REP_FIRST_NAME + " = ?, " + District.REP_LAST_NAME + " = ?, "
       + District.REP_IMAGE_URL + " = ?, " + District.INFO + " = ?, " + District.STATUS + " = ?, " + District.TIME_ZONE
-      + " = ?, " + District.DELEGATE_SCRIPT + " = ? " + "WHERE " + District.DISTRICT_ID + " = ?";
+      + " = ?, " + District.DELEGATE_SCRIPT + " = ?, " +  District.PARTY + " = ? " + "WHERE " + District.DISTRICT_ID + " = ?";
 
   private static final String SQL_DELETE_DISTRICT = "DELETE FROM districts " + "WHERE " + District.DISTRICT_ID + " = ?";
 
@@ -81,6 +81,7 @@ public class Districts {
       insertStatement.setString(idx++, district.getRepLastName());
       insertStatement.setString(idx++, district.getRepImageUrl());
       insertStatement.setString(idx++, district.getInfo());
+      insertStatement.setString(idx++, district.getParty().toString());
       insertStatement.executeUpdate();
 
       // fetch the new District and return to client
@@ -143,6 +144,7 @@ public class Districts {
       statement.setString(idx++, status);
       statement.setString(idx++, district.getTimeZone() == null ? oldDistrict.getTimeZone() : district.getTimeZone());
       statement.setBoolean(idx++, delegateScript);
+      statement.setString(idx++, district.getParty().toString());
       statement.setInt(idx, districtId);
       statement.executeUpdate();
 
