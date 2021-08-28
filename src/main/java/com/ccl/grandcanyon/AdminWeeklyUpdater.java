@@ -33,9 +33,9 @@ public class AdminWeeklyUpdater {
             "SELECT a.*, d.district_id FROM admins a " +
                     "LEFT JOIN admins_districts AS d ON a.admin_id = d.admin_id WHERE a." +
                     Admin.EMAIL + " IS NOT NULL AND a." +
-                    Admin.LOGIN_ENABLED + " IS true AND a." +
+                    Admin.LOGIN_ENABLED + " IS true AND (a." +
                     Admin.MOST_RECENT_REPORT_SEND_TIME + " IS NULL OR a." +
-                    Admin.MOST_RECENT_REPORT_SEND_TIME + " < DATE_SUB(NOW(), INTERVAL 1 WEEK)";
+                    Admin.MOST_RECENT_REPORT_SEND_TIME + " < DATE_SUB(NOW(), INTERVAL 1 WEEK))";
 
     private final static String SQL_SELECT_DISTRICTS =
             "SELECT * FROM districts";
