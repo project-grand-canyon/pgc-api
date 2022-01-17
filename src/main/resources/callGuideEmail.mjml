@@ -43,9 +43,15 @@
       <mj-text padding-top="16px" padding-left="34px" padding-right="0px" padding-bottom="0px" font-family="Ubuntu, Arial" font-size="16px" font-weight="bold">
         Ask:
       </mj-text>
-      <mj-text padding-top="12px" padding-left="34px" padding-right="0px" padding-bottom="0px" font-family="Ubuntu, Arial" font-size="16px">
+      <mj-text padding-top="12px" padding-left="34px" padding-right="0px" padding-bottom="12px" font-family="Ubuntu, Arial" font-size="16px">
         fieldaskfield
       </mj-text>
+
+      <mj-text align="left" container-background-color="#0081C7" color="white" font-size="14px">
+        <span>Learn more about the bills we support on our <a style="color: white" href="https://community.citizensclimate.org/resources/item/19/240">supporting asks page</a>.</span>
+      </mj-text>
+
+
       <mj-text padding-top="12px" padding-left="0px" padding-right="0px" padding-bottom="0px" align="center" font-family="Ubuntu, Arial" font-size="18px" font-weight="bold">
         <a href="tel:fieldmocNumberfield">fieldmocNumberfield</a>
       </mj-text>
@@ -56,7 +62,7 @@
     </mj-hero>
 
     <mj-wrapper padding="36px">
-      <mj-hero padding="10px" background-color="#15527B">
+      <mj-hero padding="10px" background-color="#0081C7">
         <mj-text padding-top="0px" padding-left="0px" padding-right="0px" padding-bottom="0px" font-size="24px" font-family="Ubuntu, Arial" align="center" color="#9BC23B">
           Why call?
         </mj-text>
