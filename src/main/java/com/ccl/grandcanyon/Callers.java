@@ -341,6 +341,16 @@ public class Callers {
     statement.executeUpdate();
   }
 
+  public static Caller retrieveById(int callerId) throws SQLException {
+    Connection conn = SQLHelper.getInstance().getConnection();
+    try {
+      return retrieveById(conn, callerId);
+    }
+    finally {
+      conn.close();
+    }
+  }
+
   static Caller retrieveById(
       Connection conn,
       int callerId)

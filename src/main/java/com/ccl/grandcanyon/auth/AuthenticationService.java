@@ -1,7 +1,11 @@
 package com.ccl.grandcanyon.auth;
 
 import com.ccl.grandcanyon.Admins;
+import com.ccl.grandcanyon.Callers;
+import com.ccl.grandcanyon.ReminderSQLFetcher;
 import com.ccl.grandcanyon.types.Admin;
+import com.ccl.grandcanyon.types.Caller;
+import com.ccl.grandcanyon.types.Reminder;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
@@ -131,6 +135,47 @@ public class AuthenticationService {
           WWW_AUTHENTICATE_CHALLENGE);
     }
     return admin;
+  }
+
+  /**
+   * Authenticate a caller user.
+   * @param callerId the id of the caller
+   * @param token the temporary tracking id
+   * @return the authenticated Caller user object, never null
+   * @throws NotAuthorizedException if authentication fails
+   * @throws ServerErrorException on database error.
+   */
+  public Caller authenticate(
+          int callerId,
+          String token)  {
+
+    Caller caller;
+    try {
+      System.out.println("Trying to get caller");
+      caller = Callers.retrieveById(callerId);
+    }
+    catch (SQLException e) {
+      throw new ServerErrorException(e.getMessage(), Response.Status.INTERNAL_SERVER_ERROR);
+    }
+
+    if (caller == null) {
+      System.out.println("caller is null");
+      throw new NotAuthorizedException("Invalid Credentials",
+              WWW_AUTHENTICATE_CHALLENGE);
+    }
+
+    ReminderSQLFetcher fetcher = new ReminderSQLFetcher();
+    Reminder reminder = fetcher.getReminderByTrackingId(token);
+    if (reminder == null || reminder.getCallerId() != caller.getCallerId()) {
+      System.out.println("reminder is null");
+      System.out.println("or caller id doesn't match");
+      throw new NotAuthorizedException("Invalid Credentials",
+              WWW_AUTHENTICATE_CHALLENGE);
+    }
+
+    System.out.println("caller");
+
+    return caller;
   }
 
 

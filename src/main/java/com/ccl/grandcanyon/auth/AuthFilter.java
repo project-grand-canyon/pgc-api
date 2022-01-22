@@ -38,6 +38,8 @@ public class AuthFilter implements ContainerRequestFilter {
         Arrays.asList(rolesAllowed.value());
 
     String authHeader = context.getHeaderString(HttpHeaders.AUTHORIZATION);
+    System.out.println("auth response filter auth HEader");
+    System.out.println(authHeader);
     if (authHeader != null) {
       Admin admin;
       if (authHeader.toLowerCase().startsWith(BASIC_PREFIX)) {
@@ -52,7 +54,6 @@ public class AuthFilter implements ContainerRequestFilter {
         admin = AuthenticationService.getInstance().authenticate(userName, password);
       }
       else if (authHeader.toLowerCase().startsWith(BEARER_PREFIX)) {
-
         // client using JWT token issued from login method
         String token = authHeader.substring(BEARER_PREFIX.length()).trim();
         admin = AuthenticationService.getInstance().validateToken(token);

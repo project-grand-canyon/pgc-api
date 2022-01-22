@@ -31,6 +31,8 @@ public class AuthResponseFilter implements ContainerResponseFilter {
     }
 
     String authHeader = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
+    System.out.println("auth response filter auth HEader");
+    System.out.println(authHeader);
     if (authHeader != null && authHeader.toLowerCase().startsWith(GCAuth.BEARER_PREFIX)) {
 
       Admin admin = (Admin)requestContext.getProperty(GCAuth.CURRENT_PRINCIPAL);
