@@ -151,7 +151,6 @@ public class AuthenticationService {
 
     Caller caller;
     try {
-      System.out.println("Trying to get caller");
       caller = Callers.retrieveById(callerId);
     }
     catch (SQLException e) {
@@ -159,7 +158,6 @@ public class AuthenticationService {
     }
 
     if (caller == null) {
-      System.out.println("caller is null");
       throw new NotAuthorizedException("Invalid Credentials",
               WWW_AUTHENTICATE_CHALLENGE);
     }
@@ -167,14 +165,9 @@ public class AuthenticationService {
     ReminderSQLFetcher fetcher = new ReminderSQLFetcher();
     Reminder reminder = fetcher.getReminderByTrackingId(token);
     if (reminder == null || reminder.getCallerId() != caller.getCallerId()) {
-      System.out.println("reminder is null");
-      System.out.println("or caller id doesn't match");
       throw new NotAuthorizedException("Invalid Credentials",
               WWW_AUTHENTICATE_CHALLENGE);
     }
-
-    System.out.println("caller");
-
     return caller;
   }
 

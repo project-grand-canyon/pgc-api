@@ -66,11 +66,9 @@ public class AuthFilter implements ContainerRequestFilter {
           }
           caller = AuthenticationService.getInstance().authenticate(callerId, password);
           context.setProperty(GCAuth.CURRENT_PRINCIPAL, caller);
-
-          if (!roles.contains(GCAuth.CALLER_ROLE) || !roles.contains(GCAuth.ANONYMOUS)) {
+          if (!roles.contains(GCAuth.CALLER_ROLE) && !roles.contains(GCAuth.ANONYMOUS)) {
             throw new ForbiddenException("Operation requires admin privilege.");
           }
-
           return;
         }
       }

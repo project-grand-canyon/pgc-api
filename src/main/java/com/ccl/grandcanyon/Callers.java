@@ -200,10 +200,21 @@ public class Callers {
   @GET
   @Path("{callerId}")
   @Produces(MediaType.APPLICATION_JSON)
+  @RolesAllowed({GCAuth.CALLER_ROLE, GCAuth.ADMIN_ROLE})
   public Response getById(@PathParam("callerId") int callerId)
       throws SQLException {
 
     // todo: verify identity of caller
+
+     Object currentUser = requestContext.getProperty(GCAuth.CURRENT_PRINCIPAL);
+
+     if (currentUser instanceof Caller) {
+       Caller caller = (Caller) currentUser;
+       if (caller.getCallerId() != callerId) {
+         throw new NotAuthorizedException(
+                 "You are not authorized to query this caller");
+       }
+     }
 
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
