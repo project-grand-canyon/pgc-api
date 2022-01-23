@@ -110,7 +110,7 @@
         You can learn more at <a href="citizensclimatelobby.org">citizensclimatelobby.org</a>
       </mj-text>
       <mj-text padding-top="24px" padding-left="0px" padding-right="0px" padding-bottom="0px" font-size="16px" font-family="Ubuntu, Arial">
-        From your friends at CCL. To unsubscribe, simply reply to this email with "unsubscribe" in the body.
+        From your friends at CCL. To update your preferences, including district change and unsubscribe requests, visit <a href="http://cclcalls.org/my_settings?callerId=fieldcallerCallerIdfield&trackingId=fieldcallerTrackingIdfield">your settings page</a>.
       </mj-text>
     </mj-hero>
   </mj-body>

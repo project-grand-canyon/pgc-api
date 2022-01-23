@@ -7,14 +7,6 @@ import java.util.logging.Logger;
 import java.util.*;
 
 public class ReminderMessageFormatter {
-    private final static boolean callFromEmailTestEnabled = true;
-    private final static List<Integer> callFromEmailDistricts = new ArrayList<Integer>(
-            Arrays.asList(
-                    639, // WA-6
-                    736, // PA-5
-                    549 // MP-0 (useful for testing)
-            )
-    );
 
     private final static String APPLICATION_BASE_URL = "applicationBaseUrl";
     private final static String ADMIN_APPLICATION_BASE_URL = "adminApplicationBaseUrl";
@@ -23,14 +15,8 @@ public class ReminderMessageFormatter {
 
     private static ReminderMessageFormatter instance;
 
-    private String regularCallInReminderHTML;
-    private String callReminderEmailResource = "callNotificationEmail.html";
-
     private String callGuideReminderHTML;
     private String callGuideEmailResource = "callGuideEmail.html";
-
-    private String callGuideReminderHTMLSenate;
-    private String callGuideSenateEmailResource = "callGuideEmailSenator.html";
 
     private String staleScriptHTML;
     private String staleScriptEmailResource = "staleScriptEmail.html";
@@ -52,23 +38,11 @@ public class ReminderMessageFormatter {
         this.applicationBaseUrl = config.getProperty(APPLICATION_BASE_URL);
         this.adminApplicationBaseUrl = config.getProperty(ADMIN_APPLICATION_BASE_URL);
         logger.info("Initializing Reminder Message Formatter");
-        try {
-            this.regularCallInReminderHTML = FileReader.create().read(callReminderEmailResource);
-        } catch (Exception e) {
-            throw new RuntimeException(
-                    "Unable to load regular call-in notification email template: " + e.getLocalizedMessage());
-        }
 
         try {
             this.callGuideReminderHTML = FileReader.create().read(callGuideEmailResource);
         } catch (Exception e) {
             throw new RuntimeException("Unable to load call-in guide email template: " + e.getLocalizedMessage());
-        }
-
-        try {
-            this.callGuideReminderHTMLSenate = FileReader.create().read(callGuideSenateEmailResource);
-        } catch (Exception e) {
-            throw new RuntimeException("Unable to load senator call-in guide email template: " + e.getLocalizedMessage());
         }
 
         try {
@@ -79,7 +53,7 @@ public class ReminderMessageFormatter {
     }
 
     private String makeCallInReminderReplacements(DistrictHydrated targetDistrict, String phoneNumber, Caller caller,
-            String trackingPackage, String email) {
+            String trackingPackage, String trackingId, String email) {
         String basePath = "https://" + applicationBaseUrl + "/call/thankyou" + trackingPackage + "&state=" + targetDistrict.getState() + "&district=" + targetDistrict.getNumber();
         email = email.replaceAll("fieldmocNumberfield", phoneNumber);
         email = email.replaceAll("fieldmocNamefield", (targetDistrict.isSenatorDistrict() ? "Senator " : "Representative ") +  targetDistrict.getRepFirstName() + " " + targetDistrict.getRepLastName());
@@ -87,6 +61,8 @@ public class ReminderMessageFormatter {
         email = email.replaceAll("fieldthankYouUrlfieldSkip", basePath + "&s=1");
         email = email.replaceAll("fieldthankYouUrlfield", basePath);
         email = email.replaceAll("fieldcallerNamefield", caller.getFirstName());
+        email = email.replaceAll("fieldcallerCallerIdfield", caller.getFirstName());
+        email = email.replaceAll("fieldcallerTrackingIdfield", caller.getFirstName());
         return email;
     }
 
@@ -96,21 +72,8 @@ public class ReminderMessageFormatter {
         reminderMessage.setSubject("It's time to call about climate change");
         String phoneNumber = getPhoneNumbersByDistrict(targetDistrict);
         String trackingPackage = "?t=" + trackingId + "&c=" + caller.getCallerId() + "&d=" + callerDistrict.getNumber();
-        if (callFromEmailTestEnabled) {
-            if (targetDistrict.isSenatorDistrict()) {
-                reminderMessage.setBody(makeCallInReminderReplacements(targetDistrict, phoneNumber, caller, trackingPackage,
-                        this.callGuideReminderHTMLSenate));
-            } else {
-                reminderMessage.setBody(makeCallInReminderReplacements(targetDistrict, phoneNumber, caller, trackingPackage,
-                        this.callGuideReminderHTML));
-            }
-            return reminderMessage;
-        } else {
-            String callInPageUrl = "http://" + applicationBaseUrl + "/call/";
-            String URL = callInPageUrl + targetDistrict.getState() + "/" + targetDistrict.getNumber() + trackingPackage;
-            reminderMessage.setBody(this.regularCallInReminderHTML.replaceAll("https://cclcalls.org/call/", URL));
-            return reminderMessage;
-        }
+        reminderMessage.setBody(makeCallInReminderReplacements(targetDistrict, phoneNumber, caller, trackingPackage, trackingId, this.callGuideReminderHTML));
+        return reminderMessage;
     }
 
     public Message getAdminReminderEmail(District district, String date) {
