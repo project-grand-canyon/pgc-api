@@ -256,7 +256,7 @@ public class Callers {
     int numberSent = 0;
     try {
       for (Caller caller : getCallers(conn, null)) {
-        if (!caller.isPaused()) {
+        if (!caller.isPaused() && !caller.isUnsubscribed()) {
           if (sendOneTimeMessage(caller, message)) {
             numberSent++;
           }
@@ -291,7 +291,7 @@ public class Callers {
     int numberSent = 0;
     try {
       for (Caller caller : getCallers(conn, districtId)) {
-        if (!caller.isPaused()) {
+        if (!caller.isPaused() && !caller.isUnsubscribed()) {
           if (sendOneTimeMessage(caller, message)) {
             numberSent++;
           }
