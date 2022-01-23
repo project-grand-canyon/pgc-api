@@ -14,6 +14,7 @@ import com.nimbusds.jwt.SignedJWT;
 
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotAuthorizedException;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
@@ -155,6 +156,9 @@ public class AuthenticationService {
     }
     catch (SQLException e) {
       throw new ServerErrorException(e.getMessage(), Response.Status.INTERNAL_SERVER_ERROR);
+    } catch (NotFoundException e) {
+      throw new NotAuthorizedException("Invalid Credentials",
+              WWW_AUTHENTICATE_CHALLENGE);
     }
 
     if (caller == null) {
