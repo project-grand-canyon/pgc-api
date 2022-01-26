@@ -2,6 +2,7 @@ package com.ccl.grandcanyon.auth;
 
 import com.ccl.grandcanyon.GCAuth;
 import com.ccl.grandcanyon.types.Admin;
+import com.ccl.grandcanyon.types.Caller;
 import org.apache.http.HttpHeaders;
 
 import javax.annotation.security.RolesAllowed;
@@ -12,10 +13,13 @@ import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Context;
 import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.List;
 
-import static com.ccl.grandcanyon.GCAuth.BEARER_PREFIX;
 import static com.ccl.grandcanyon.GCAuth.BASIC_PREFIX;
+import static com.ccl.grandcanyon.GCAuth.BEARER_PREFIX;
 
 public class AuthFilter implements ContainerRequestFilter {
 
@@ -40,6 +44,7 @@ public class AuthFilter implements ContainerRequestFilter {
     String authHeader = context.getHeaderString(HttpHeaders.AUTHORIZATION);
     if (authHeader != null) {
       Admin admin;
+      Caller caller;
       if (authHeader.toLowerCase().startsWith(BASIC_PREFIX)) {
 
         // client using Basic Auth
@@ -49,10 +54,25 @@ public class AuthFilter implements ContainerRequestFilter {
 
         String userName = parts[0];
         String password = parts[1];
-        admin = AuthenticationService.getInstance().authenticate(userName, password);
+        try {
+          admin = AuthenticationService.getInstance().authenticate(userName, password);
+        } catch (NotAuthorizedException e) {
+
+          int callerId;
+          try {
+            callerId = Integer.valueOf(userName);
+          } catch (NumberFormatException nfe) {
+            throw e;
+          }
+          caller = AuthenticationService.getInstance().authenticate(callerId, password);
+          context.setProperty(GCAuth.CURRENT_PRINCIPAL, caller);
+          if (!roles.contains(GCAuth.CALLER_ROLE) && !roles.contains(GCAuth.ANONYMOUS)) {
+            throw new ForbiddenException("Operation requires admin privilege.");
+          }
+          return;
+        }
       }
       else if (authHeader.toLowerCase().startsWith(BEARER_PREFIX)) {
-
         // client using JWT token issued from login method
         String token = authHeader.substring(BEARER_PREFIX.length()).trim();
         admin = AuthenticationService.getInstance().validateToken(token);
@@ -71,7 +91,10 @@ public class AuthFilter implements ContainerRequestFilter {
       if (!admin.isRoot() && roles.contains(GCAuth.SUPER_ADMIN_ROLE)) {
         throw new ForbiddenException("Operation requires super-admin privilege.");
       }
-      context.setProperty(GCAuth.CURRENT_PRINCIPAL, admin);
+
+      if (admin != null) {
+        context.setProperty(GCAuth.CURRENT_PRINCIPAL, admin);
+      }
     }
 
     else {

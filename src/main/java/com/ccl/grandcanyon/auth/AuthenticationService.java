@@ -1,7 +1,11 @@
 package com.ccl.grandcanyon.auth;
 
 import com.ccl.grandcanyon.Admins;
+import com.ccl.grandcanyon.Callers;
+import com.ccl.grandcanyon.ReminderSQLFetcher;
 import com.ccl.grandcanyon.types.Admin;
+import com.ccl.grandcanyon.types.Caller;
+import com.ccl.grandcanyon.types.Reminder;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
@@ -10,6 +14,7 @@ import com.nimbusds.jwt.SignedJWT;
 
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotAuthorizedException;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
@@ -131,6 +136,43 @@ public class AuthenticationService {
           WWW_AUTHENTICATE_CHALLENGE);
     }
     return admin;
+  }
+
+  /**
+   * Authenticate a caller user.
+   * @param callerId the id of the caller
+   * @param token the temporary tracking id
+   * @return the authenticated Caller user object, never null
+   * @throws NotAuthorizedException if authentication fails
+   * @throws ServerErrorException on database error.
+   */
+  public Caller authenticate(
+          int callerId,
+          String token)  {
+
+    Caller caller;
+    try {
+      caller = Callers.retrieveById(callerId);
+    }
+    catch (SQLException e) {
+      throw new ServerErrorException(e.getMessage(), Response.Status.INTERNAL_SERVER_ERROR);
+    } catch (NotFoundException e) {
+      throw new NotAuthorizedException("Invalid Credentials",
+              WWW_AUTHENTICATE_CHALLENGE);
+    }
+
+    if (caller == null) {
+      throw new NotAuthorizedException("Invalid Credentials",
+              WWW_AUTHENTICATE_CHALLENGE);
+    }
+
+    ReminderSQLFetcher fetcher = new ReminderSQLFetcher();
+    Reminder reminder = fetcher.getReminderByTrackingId(token);
+    if (reminder == null || reminder.getCallerId() != caller.getCallerId()) {
+      throw new NotAuthorizedException("Invalid Credentials",
+              WWW_AUTHENTICATE_CHALLENGE);
+    }
+    return caller;
   }
 
 

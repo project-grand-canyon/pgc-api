@@ -27,6 +27,9 @@ public class Caller extends GCBase {
   public static final String LAST_REMINDER_TIMESTAMP = Reminder.LAST_REMINDER_TIMESTAMP;
   public static final String LAST_CALL_TIMESTAMP = "last_call_timestamp";
   public static final String NOTES = "notes";
+  public static final String UNSUBSCRIBED = "unsubscribed";
+  public static final String UNSUBSCRIBED_TIMESTAMP = "unsubscribed_timestamp";
+  public static final String UNSUBSCRIBED_REASON = "unsubscribed_reason";
 
   private int callerId;
   private String firstName;
@@ -43,6 +46,9 @@ public class Caller extends GCBase {
   private Timestamp lastReminderTimestamp;
   private Timestamp lastCallTimestamp;
   private String notes;
+  private boolean unsubscribed;
+  private Timestamp unsubscribedTimestamp;
+  private String unsubscribedReason;
 
 
   /**
@@ -67,6 +73,10 @@ public class Caller extends GCBase {
     cclId = rs.getString(CCL_ID);
     referrer = rs.getString(REFERRER);
     notes = rs.getString(NOTES);
+    unsubscribed = rs.getBoolean(UNSUBSCRIBED);
+    unsubscribedTimestamp = rs.getTimestamp(UNSUBSCRIBED_TIMESTAMP);
+    unsubscribedReason = rs.getString(UNSUBSCRIBED_REASON);
+
     this.contactMethods = new ArrayList<>();
     do {
       String cm = rs.getString(CONTACT_METHOD);
@@ -180,4 +190,32 @@ public class Caller extends GCBase {
   }
 
   public String getNotes() { return notes; }
+
+
+  public boolean isUnsubscribed() {
+    return unsubscribed;
+  }
+
+  public void setUnsubscribed(boolean unsubscribed) {
+    this.unsubscribed = unsubscribed;
+  }
+
+  @JsonSerialize(using = TimestampSerializer.class)
+  public Timestamp getUnsubscribedTimestamp() {
+    return unsubscribedTimestamp;
+  }
+
+  public void setUnsubscribedTimestamp(Timestamp unsubscribedDate) {
+    this.unsubscribedTimestamp = unsubscribedDate;
+  }
+
+  public String getUnsubscribedReason() {
+    return unsubscribedReason;
+  }
+
+  public void setUnsubscribedReason(String unsubscribedReason) {
+    this.unsubscribedReason = unsubscribedReason;
+  }
+
+
 }

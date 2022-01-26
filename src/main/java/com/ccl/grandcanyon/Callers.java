@@ -61,7 +61,10 @@ public class Callers {
           Caller.CCL_ID + " = ?, " +
           Caller.REFERRER + " = ?, " +
           Caller.PAUSED + " = ?, " +
-          Caller.NOTES + " = ? " +
+          Caller.NOTES + " = ?, " +
+          Caller.UNSUBSCRIBED + " = ?, " +
+          Caller.UNSUBSCRIBED_REASON + " = ?, " +
+          Caller.UNSUBSCRIBED_TIMESTAMP + " = ? " +
           "WHERE " + Caller.CALLER_ID + " = ?";
 
   private static final String SQL_DELETE_CALLER_CONTACT_METHODS =
@@ -140,15 +143,18 @@ public class Callers {
   @Path("{callerId}")
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
-  @RolesAllowed(GCAuth.ANONYMOUS)
+  @RolesAllowed({GCAuth.CALLER_ROLE, GCAuth.ADMIN_ROLE})
   public Response updateCaller(
       @PathParam("callerId") int callerId,
       Caller caller)
       throws SQLException {
 
-    // todo: verify identity of caller
-
+    confirmCallerIdentity(requestContext, callerId);
     Connection conn = SQLHelper.getInstance().getConnection();
+    Caller currentCaller = retrieveById(conn, callerId);
+    boolean isUnsubscribing = !currentCaller.isUnsubscribed() && caller.isUnsubscribed();
+    Timestamp timestamp = isUnsubscribing ? new Timestamp(System.currentTimeMillis()) : currentCaller.getUnsubscribedTimestamp();
+
     try {
       // use transaction
       conn.setAutoCommit(false);
@@ -162,8 +168,11 @@ public class Callers {
       statement.setString(idx++, caller.getZipCode());
       statement.setString(idx++, caller.getCclId());
       statement.setString(idx++, caller.getReferrer());
-      statement.setBoolean(idx++, caller.isPaused());
+      statement.setBoolean(idx++, caller.isPaused() || caller.isUnsubscribed());
       statement.setString(idx++, caller.getNotes());
+      statement.setBoolean(idx++, caller.isUnsubscribed());
+      statement.setString(idx++, caller.getUnsubscribedReason());
+      statement.setTimestamp(idx++, timestamp);
       statement.setInt(idx++, callerId);
       statement.executeUpdate();
 
@@ -200,10 +209,11 @@ public class Callers {
   @GET
   @Path("{callerId}")
   @Produces(MediaType.APPLICATION_JSON)
+  @RolesAllowed({GCAuth.CALLER_ROLE, GCAuth.ADMIN_ROLE})
   public Response getById(@PathParam("callerId") int callerId)
       throws SQLException {
 
-    // todo: verify identity of caller
+    confirmCallerIdentity(requestContext, callerId);
 
     Connection conn = SQLHelper.getInstance().getConnection();
     try {
@@ -246,7 +256,7 @@ public class Callers {
     int numberSent = 0;
     try {
       for (Caller caller : getCallers(conn, null)) {
-        if (!caller.isPaused()) {
+        if (!caller.isPaused() && !caller.isUnsubscribed()) {
           if (sendOneTimeMessage(caller, message)) {
             numberSent++;
           }
@@ -281,7 +291,7 @@ public class Callers {
     int numberSent = 0;
     try {
       for (Caller caller : getCallers(conn, districtId)) {
-        if (!caller.isPaused()) {
+        if (!caller.isPaused() && !caller.isUnsubscribed()) {
           if (sendOneTimeMessage(caller, message)) {
             numberSent++;
           }
@@ -339,6 +349,16 @@ public class Callers {
     statement.setInt(1, callerId);
     statement.setInt(2, ReminderService.getNewDayOfMonth());
     statement.executeUpdate();
+  }
+
+  public static Caller retrieveById(int callerId) throws SQLException {
+    Connection conn = SQLHelper.getInstance().getConnection();
+    try {
+      return retrieveById(conn, callerId);
+    }
+    finally {
+      conn.close();
+    }
   }
 
   static Caller retrieveById(
@@ -410,6 +430,17 @@ public class Callers {
     delete.executeUpdate();
   }
 
+  private void confirmCallerIdentity(ContainerRequestContext requestContext, int callerId) {
+    Object currentUser = requestContext.getProperty(GCAuth.CURRENT_PRINCIPAL);
+
+    if (currentUser instanceof Caller) {
+      Caller caller = (Caller) currentUser;
+      if (caller.getCallerId() != callerId) {
+        throw new NotAuthorizedException(
+                "You are not authorized to query this caller");
+      }
+    }
+  }
 
 }
 

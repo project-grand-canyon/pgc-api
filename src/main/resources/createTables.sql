@@ -85,12 +85,16 @@ CREATE TABLE `callers` (
   `paused` tinyint(1) NOT NULL,
   `ccl_id` varchar(48) DEFAULT NULL,
   `referrer` varchar(48) DEFAULT NULL,
+  `notes` varchar(10000) DEFAULT NULL,
+  `unsubscribed` tinyint(1) DEFAULT NULL,
+  `unsubscribed_timestamp` datetime DEFAULT NULL,
+  `unsubscribed_reason` varchar(10000) DEFAULT NULL,
   PRIMARY KEY (`caller_id`),
   UNIQUE KEY `contact_method` (`phone`),
   UNIQUE KEY `contact_method_2` (`email`),
   KEY `district_id` (`district_id`),
   CONSTRAINT `callers_ibfk_1` FOREIGN KEY (`district_id`) REFERENCES `districts` (`district_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1480 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=12888 DEFAULT CHARSET=utf8;
 
 -- Create syntax for TABLE 'callers_contact_methods'
 CREATE TABLE `callers_contact_methods` (

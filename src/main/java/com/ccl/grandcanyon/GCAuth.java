@@ -13,6 +13,9 @@ public abstract class GCAuth
   // role for operations that can be invoked only by root Admins
   public static final String SUPER_ADMIN_ROLE = "SuperAdmin";
 
+  // role for operations against a single caller
+  public static final String CALLER_ROLE = "Caller";
+
   // "role" for operations that can be invoked without authentication
   public static final String ANONYMOUS = "Anonymous";
 

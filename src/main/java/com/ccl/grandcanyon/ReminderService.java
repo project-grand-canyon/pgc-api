@@ -311,7 +311,7 @@ public class ReminderService {
           Reminder reminder = datum.getReminder();
           ReminderDate correspondingReminderDate = getCorrespondingReminderDate(reminder, datesToQuery);
           if (correspondingReminderDate != null && !reminder.hasBeenSent(correspondingReminderDate)) {
-            if (!caller.isPaused()) {
+            if (!caller.isPaused() && !caller.isUnsubscribed()) {
               if (sendReminder(caller, correspondingReminderDate)) {
                 sentCount++;
               }
