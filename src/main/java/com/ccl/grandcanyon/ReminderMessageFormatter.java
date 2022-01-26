@@ -61,8 +61,8 @@ public class ReminderMessageFormatter {
         email = email.replaceAll("fieldthankYouUrlfieldSkip", basePath + "&s=1");
         email = email.replaceAll("fieldthankYouUrlfield", basePath);
         email = email.replaceAll("fieldcallerNamefield", caller.getFirstName());
-        email = email.replaceAll("fieldcallerCallerIdfield", caller.getFirstName());
-        email = email.replaceAll("fieldcallerTrackingIdfield", caller.getFirstName());
+        email = email.replaceAll("fieldcallerCallerIdfield", String.valueOf(caller.getCallerId()));
+        email = email.replaceAll("fieldcallerTrackingIdfield", trackingId);
         return email;
     }
 
