@@ -67,6 +67,11 @@ public class Callers {
           Caller.UNSUBSCRIBED_TIMESTAMP + " = ? " +
           "WHERE " + Caller.CALLER_ID + " = ?";
 
+  private static final String SQL_UPDATE_REMINDER_DAY =
+          "UPDATE reminders SET " +
+                  Reminder.DAY_OF_MONTH + " = ? " +
+                  "WHERE " + Caller.CALLER_ID + " = ?";
+
   private static final String SQL_DELETE_CALLER_CONTACT_METHODS =
       "DELETE from callers_contact_methods " +
           "WHERE " + Caller.CALLER_ID + " = ?";
@@ -178,6 +183,7 @@ public class Callers {
 
       deleteContactMethods(conn, callerId);
       insertContactMethods(conn, callerId, caller);
+      changeCallInDay(conn, callerId, caller.getReminderDayOfMonth());
       conn.commit();
       return Response.ok(retrieveById(conn, callerId)).build();
     }
@@ -399,6 +405,16 @@ public class Callers {
     return callers;
   }
 
+  private void changeCallInDay(Connection conn, int callerId, int dayOfMonth) throws SQLException {
+    if (dayOfMonth < 1 || dayOfMonth > 31) {
+      throw new IllegalArgumentException("day of month must be 1-31");
+    }
+    PreparedStatement statement = conn.prepareStatement(SQL_UPDATE_REMINDER_DAY);
+    int idx = 1;
+    statement.setInt(idx++, dayOfMonth);
+    statement.setInt(idx++, callerId);
+    statement.executeUpdate();
+  }
 
 
   private void insertContactMethods(

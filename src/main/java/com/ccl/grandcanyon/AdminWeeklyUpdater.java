@@ -56,15 +56,17 @@ public class AdminWeeklyUpdater {
             "SELECT d.*, COUNT(cr." + Caller.CALLER_ID +
                     ") AS caller_count FROM callers cr JOIN districts d ON d.district_id = cr.district_id WHERE cr." +
                     Caller.DISTRICT_ID + " IN (?) AND cr." +
-                    Caller.PAUSED + " = false AND cr." +
-                    Caller.UNSUBSCRIBED + " = false GROUP BY d." +
+                    Caller.PAUSED + " = false AND (cr." +
+                    Caller.UNSUBSCRIBED + " is null OR cr." +
+                    Caller.UNSUBSCRIBED + " != true) GROUP BY d." +
                     District.DISTRICT_ID;
 
     private final static String SQL_SELECT_NEW_CALLER_COUNT =
             "SELECT d.*, COUNT(cr." + Caller.CALLER_ID +
                     ") AS caller_count FROM callers cr JOIN districts d ON d.district_id = cr.district_id WHERE cr." +
-                    Caller.DISTRICT_ID + " IN (?) AND cr." +
-                    Caller.UNSUBSCRIBED + " = false AND cr." +
+                    Caller.DISTRICT_ID + " IN (?) AND (cr." +
+                    Caller.UNSUBSCRIBED + " is null OR cr." +
+                    Caller.UNSUBSCRIBED + " != true) AND cr." +
                     Caller.PAUSED + " = false AND cr." +
                     Caller.CREATED + " > DATE_SUB(NOW(), INTERVAL 1 WEEK) GROUP BY d." +
                     District.DISTRICT_ID;
